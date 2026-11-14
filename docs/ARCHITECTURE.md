@@ -24,6 +24,18 @@ Each product has its own Supabase project (Lyra Pet: Sydney region in production
 - **Audit log** records privileged and settings actions per business, never customer details.
 - In the app, every page under `/b/<slug>` resolves the tenant with `requireBusiness(slug)`: RLS returns nothing for non-members, so another tenant's URL is a 404.
 
+## Core grooming data (Phase 2)
+
+- **customers** (name, preferred contact and groomer, notes, VIP, marketing consent with the date it was given) and **customer_contacts** (email, mobile, address) are separate tables so groomers can work with names and pets without seeing contact details: contacts are readable only by owners, managers and reception.
+- **pets** carry grooming preferences and care information (allergies, medical notes, handling precautions). All staff can read and update them; nobody can delete customers, contacts, pets or grooming records from the app (history is kept).
+- **services** and **service_price_rules** (size, breed, coat condition). Price resolution lives in `apps/pet/src/features/services/pricing.ts`: breed beats size beats base price; coat-condition surcharges add on top. Prices are in cents, GST-inclusive AUD.
+- **grooming_records** (date, groomer, services and a snapshot of their names, notes, feedback) and **grooming_photos** (before/after).
+- **customer_directory(business, query)** (security invoker) powers the customer list: pets, groom count, last groom and next due date in one call; search covers name, pet name, email and mobile digits, and contact matches respect RLS.
+
+### Photos
+
+Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths start with the business id: `<business>/grooming/<record>/<uuid>.<ext>` and `<business>/pets/<pet>/<uuid>.<ext>`. Storage policies use `media_business(path)` so only members can read or upload, and only owners and managers delete. The browser uploads directly (avoiding the server request-size limit), then a server action validates each path against the business and record before saving the photo rows. Pages show photos with one-hour signed URLs.
+
 ## Request flow
 
 `UI (Server Components / Server Actions) → feature actions (Zod validation, permission check) → user-scoped Supabase client (RLS) → Postgres`. Elevated operations use security-definer functions that check `auth.uid()` themselves.
@@ -38,8 +50,8 @@ Each product has its own Supabase project (Lyra Pet: Sydney region in production
 
 | Phase | Scope |
 |---|---|
-| 1 | Foundation: monorepo, tenancy, auth, business registration, settings (this phase) |
-| 2 | Core grooming: dashboard, customers, pets, grooming history (before/after photos), services and pricing |
+| 1 | Foundation: monorepo, tenancy, auth, business registration, settings ✓ |
+| 2 | Core grooming: dashboard, customers, pets, grooming history (before/after photos), services and pricing ✓ |
 | 3 | Scheduling: calendars, booking engine with database-level overlap prevention, public booking portal, recurring bookings, cancellations, waitlist |
 | 4 | Operations: staff and rosters, invitations, payments (Stripe Connect), email/SMS notifications |
 | 5 | AI and growth: grooming assistant, retention, loyalty, marketing, business intelligence |

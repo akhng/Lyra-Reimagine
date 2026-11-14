@@ -1,5 +1,5 @@
 "use client";
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import { Button, FormField, Input, Select } from "@lyra/ui";
 import { saveLocationAction, updateBusinessAction, type FormState } from "@/features/business/actions";
 import { AU_TIMEZONES } from "@/features/business/schemas";
@@ -21,9 +21,9 @@ function Status({ state, saved }: { state: FormState; saved: string }) {
 type Business = { name: string; timezone: string; abn: string | null; gstRegistered: boolean; phone: string | null; email: string | null };
 
 export function BusinessDetailsForm({ slug, business, canEdit }: { slug: string; business: Business; canEdit: boolean }) {
-  const [state, action, pending] = useActionState(updateBusinessAction.bind(null, slug), undefined);
+  const [state, action, pending] = useFormAction(updateBusinessAction.bind(null, slug));
   return (
-    <form action={action} className="grid gap-4 sm:grid-cols-2" noValidate>
+    <form onSubmit={action} className="grid gap-4 sm:grid-cols-2" noValidate>
       <fieldset disabled={!canEdit} className="contents">
         <FormField id="name" label="Business name" error={state?.fields?.name}>
           {(p) => <Input {...p} name="name" defaultValue={business.name} required />}
@@ -70,10 +70,10 @@ type Location = { id?: string; name: string; addressLine: string | null; suburb:
 const STATES = ["", "NSW", "VIC", "QLD", "SA", "WA", "TAS", "NT", "ACT"];
 
 export function LocationForm({ slug, location, idPrefix }: { slug: string; location?: Location; idPrefix: string }) {
-  const [state, action, pending] = useActionState(saveLocationAction.bind(null, slug), undefined);
+  const [state, action, pending] = useFormAction(saveLocationAction.bind(null, slug), { resetOnSuccess: !location?.id });
   const f = (n: string) => `${idPrefix}-${n}`;
   return (
-    <form action={action} className="grid gap-3 sm:grid-cols-6" noValidate>
+    <form onSubmit={action} className="grid gap-3 sm:grid-cols-6" noValidate>
       {location?.id ? <input type="hidden" name="id" value={location.id} /> : null}
       <div className="sm:col-span-2">
         <FormField id={f("name")} label="Name" error={state?.fields?.name}>

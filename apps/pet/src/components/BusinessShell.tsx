@@ -1,5 +1,5 @@
 "use client";
-import { LayoutDashboard, LogOut, Menu, Settings, X, type LucideIcon } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -9,7 +9,7 @@ import { Brand } from "./Brand";
 
 /**
  * Staff navigation for one business. Sections appear as each phase ships
- * (Appointments, Customers, Pets… next); nothing links to an unfinished page.
+ * (Appointments next); nothing links to an unfinished page.
  */
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 
@@ -18,6 +18,10 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
   const [open, setOpen] = useState(false);
   const items: Item[] = [
     { href: `/b/${slug}`, label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { href: `/b/${slug}/customers`, label: "Customers", icon: Users },
+    { href: `/b/${slug}/pets`, label: "Pets", icon: PawPrint },
+    { href: `/b/${slug}/grooming`, label: "Grooming records", icon: Scissors },
+    { href: `/b/${slug}/services`, label: "Services & pricing", icon: Tags },
     { href: `/b/${slug}/settings`, label: "Settings", icon: Settings },
   ];
   const active = (i: Item) => (i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(`${i.href}/`));

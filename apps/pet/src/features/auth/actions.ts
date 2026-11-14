@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { serverEnv } from "@lyra/platform/env";
 import { safeNextPath } from "@lyra/platform/auth/safe-redirect";
+import { logger } from "@lyra/platform/logger";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
+import { signInMessage, signUpMessage } from "./messages";
 
 export type AuthState = { error?: string; fields?: Record<string, string> } | undefined;
 
@@ -22,8 +24,12 @@ export async function signUpAction(_prev: AuthState, form: FormData): Promise<Au
     password: parsed.data.password,
     options: { data: { full_name: parsed.data.fullName }, emailRedirectTo: `${serverEnv().APP_URL}/auth/callback?next=/home` },
   });
-  // Same response whether or not the address is already registered (no account enumeration).
-  if (error && !/already registered/i.test(error.message)) return { error: "We couldn't create your account. Please try again." };
+  if (error) {
+    // Codes and statuses only — never the email address.
+    logger.warn({ code: error.code, status: error.status }, "sign-up failed");
+    const message = signUpMessage(error);
+    if (message) return { error: message };
+  }
   redirect(`/verify-email?email=${encodeURIComponent(parsed.data.email)}`);
 }
 
@@ -34,7 +40,10 @@ export async function signInAction(_prev: AuthState, form: FormData): Promise<Au
   if (!parsed.success) return { fields: Object.fromEntries(parsed.error.issues.map((i) => [String(i.path[0]), i.message])) };
   const db = await createSupabaseServerClient();
   const { error } = await db.auth.signInWithPassword(parsed.data);
-  if (error) return { error: /confirm/i.test(error.message) ? "Please confirm your email first — check your inbox for the link." : "That email and password don't match." };
+  if (error) {
+    logger.warn({ code: error.code, status: error.status }, "sign-in failed");
+    return { error: signInMessage(error) };
+  }
   redirect(safeNextPath(String(form.get("next") ?? "")));
 }
 

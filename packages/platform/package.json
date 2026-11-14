@@ -1,0 +1,20 @@
+{
+  "name": "@lyra/platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./env": "./src/env.ts",
+    "./errors": "./src/errors.ts",
+    "./logger": "./src/logger.ts",
+    "./database": "./src/database.ts",
+    "./supabase/server": "./src/supabase/server.ts",
+    "./supabase/browser": "./src/supabase/browser.ts",
+    "./supabase/admin": "./src/supabase/admin.ts",
+    "./auth/session": "./src/auth/session.ts",
+    "./auth/safe-redirect": "./src/auth/safe-redirect.ts",
+    "./tenancy/roles": "./src/tenancy/roles.ts",
+    "./tenancy/slug": "./src/tenancy/slug.ts",
+    "./tenancy/context": "./src/tenancy/context.ts"
+  }
+}

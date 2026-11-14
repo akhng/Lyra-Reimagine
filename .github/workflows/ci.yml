@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint, types, unit tests
+        run: |
+          pnpm lint
+          pnpm typecheck
+          pnpm test
+
+      - name: Start local Supabase (applies migrations + seed)
+        run: |
+          pnpm exec supabase start
+          # The local stack's keys are the fixed demo keys documented in .env.example.
+          cp .env.example .env.local
+          cp .env.example apps/pet/.env.local
+
+      - name: Database / tenant isolation tests
+        run: pnpm db:test
+
+      - name: Generated types are up to date
+        run: |
+          pnpm db:types
+          git diff --exit-code packages/platform/src/database.ts
+
+      - name: Build
+        run: pnpm build
+
+      - name: Playwright (desktop, tablet, mobile)
+        working-directory: apps/pet
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm test:e2e
+        env:
+          CI: "1"
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/pet/playwright-report
+          retention-days: 7

@@ -8,4 +8,6 @@ AI-powered business software ecosystem. Independent, industry-specific products 
 | Lyra Life OS — personal discovery and social life | Separate repository |
 | Lyra Salon, Lyra Trade, Lyra Clean | Future |
 
-See `docs/ARCHITECTURE.md` once the foundation lands.
+See `CLAUDE.md` and `docs/ARCHITECTURE.md`.
+
+

@@ -1,0 +1,85 @@
+@import "tailwindcss";
+@source "../../../../packages/ui/src";
+
+/*
+ * Lyra Pet design tokens (ADR 0002): navy, teal and warm neutrals.
+ * Components use tokens only, never hex values. Contrast (AA) is noted where it matters.
+ */
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --surface-2: #f1ece4;
+  --border: #e5ddd1;
+  --text: #1b2430;
+  --muted: #5b6573; /* 5.4:1 on --bg */
+  --navy: #0f2a44;
+  --navy-text: #b8c4d3; /* 8.3:1 on --navy */
+  --navy-accent: #8fe3dc;
+  --primary: #0b7a75; /* white text 5.2:1 */
+  --primary-hover: #096560;
+  --primary-contrast: #ffffff;
+  --primary-text: #0b7a75; /* 4.7:1 on --bg */
+  --primary-tint: #e3f3f1;
+  --success: #0b6b4f;
+  --success-tint: #e6f4ee;
+  --warning: #8a5a00;
+  --warning-tint: #fdf3e1;
+  --danger: #b42318;
+  --danger-tint: #fdecea;
+  --focus: #0b7a75;
+  --shadow-card: 0 1px 2px rgb(15 42 68 / 0.06), 0 4px 16px -8px rgb(15 42 68 / 0.12);
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-navy: var(--navy);
+  --color-navy-text: var(--navy-text);
+  --color-navy-accent: var(--navy-accent);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-contrast: var(--primary-contrast);
+  --color-primary-text: var(--primary-text);
+  --color-primary-tint: var(--primary-tint);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-warning: var(--warning);
+  --color-warning-tint: var(--warning-tint);
+  --color-danger: var(--danger);
+  --color-danger-tint: var(--danger-tint);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-jakarta), var(--font-inter), system-ui, sans-serif;
+  --radius-card: 16px;
+  --radius-control: 10px;
+}
+
+@layer base {
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

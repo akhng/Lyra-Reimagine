@@ -1,0 +1,63 @@
+import { z } from "zod";
+
+/**
+ * Environment validation, parsed lazily on first use so tooling that imports
+ * modules without a full environment (type generation, unit tests) works,
+ * while the first real request fails fast with a readable error.
+ * Only NEXT_PUBLIC_* values may reach the browser.
+ */
+const optional = z
+  .string()
+  .optional()
+  .transform((v) => (v === "" ? undefined : v));
+
+const supabaseUrl = z.string().superRefine((value, ctx) => {
+  let url: URL;
+  try {
+    url = new URL(value);
+  } catch {
+    ctx.addIssue({ code: "custom", message: `is not a valid URL ("${value}")` });
+    return;
+  }
+  if (url.pathname !== "/" || value.endsWith("/")) ctx.addIssue({ code: "custom", message: `must be only the project address (${url.origin})` });
+  const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+  if (url.protocol !== "https:" && !local) ctx.addIssue({ code: "custom", message: "must start with https://" });
+});
+
+const clientSchema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
+});
+
+const serverSchema = clientSchema.extend({
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
+  APP_URL: z.url().default("http://localhost:3200"),
+  ANTHROPIC_API_KEY: optional,
+  LYRA_MODEL_PRIMARY: optional,
+  LYRA_MODEL_FAST: optional,
+  PLATFORM_ADMIN_EMAILS: z.string().default(""),
+});
+
+export type ClientEnv = z.infer<typeof clientSchema>;
+export type ServerEnv = z.infer<typeof serverSchema>;
+
+function format(error: z.ZodError): string {
+  return error.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("; ");
+}
+
+let client: ClientEnv | undefined;
+export function clientEnv(): ClientEnv {
+  if (client) return client;
+  // Direct references so Next.js inlines the public values into browser bundles.
+  const parsed = clientSchema.safeParse({ NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY });
+  if (!parsed.success) throw new Error(`Invalid public environment: ${format(parsed.error)}`);
+  return (client = parsed.data);
+}
+
+let server: ServerEnv | undefined;
+export function serverEnv(): ServerEnv {
+  if (server) return server;
+  const parsed = serverSchema.safeParse(process.env);
+  if (!parsed.success) throw new Error(`Invalid server environment: ${format(parsed.error)}`);
+  return (server = parsed.data);
+}

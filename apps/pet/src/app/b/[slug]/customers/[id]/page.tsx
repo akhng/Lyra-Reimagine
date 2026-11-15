@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Crown, Mail, MapPin, Pencil, Phone, Plus } from "lucide-react";
+import { CalendarPlus, Crown, Mail, MapPin, Pencil, Phone, Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Card, CardTitle, EmptyState, buttonVariants } from "@lyra/ui";
@@ -34,7 +34,12 @@ export default async function CustomerProfile({ params }: { params: Promise<{ sl
         back={{ href: `/b/${slug}/customers`, label: "Customers" }}
         title={<span className="flex items-center gap-2">{c.first_name} {c.last_name ?? ""}{c.is_vip ? <Badge tone="warning"><Crown className="size-3.5" aria-hidden /> VIP</Badge> : null}</span>}
         description={`Customer since ${formatDay(c.created_at.slice(0, 10))}`}
-        actions={seeContact ? <Link href={`/b/${slug}/customers/${c.id}/edit`} className={buttonVariants({ variant: "secondary" })}><Pencil className="size-4" aria-hidden /> Edit</Link> : null}
+        actions={
+          <>
+            {seeContact && pets.length ? <Link href={`/b/${slug}/appointments/new?customer=${c.id}${pets.length === 1 ? `&pet=${pets[0]?.id ?? ""}` : ""}`} className={buttonVariants()}><CalendarPlus className="size-4" aria-hidden /> Book</Link> : null}
+            {seeContact ? <Link href={`/b/${slug}/customers/${c.id}/edit`} className={buttonVariants({ variant: "secondary" })}><Pencil className="size-4" aria-hidden /> Edit</Link> : null}
+          </>
+        }
       />
       <div className="grid gap-5 lg:grid-cols-[1fr_20rem]">
         <section aria-labelledby="pets-title" className="flex flex-col gap-3">

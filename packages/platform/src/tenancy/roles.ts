@@ -19,6 +19,10 @@ export const PERMISSIONS = {
   "customers.contact": ["owner", "manager", "receptionist"],
   /** Pet care information needed to groom safely. */
   "pets.care": ["owner", "manager", "receptionist", "groomer"],
+  /** Book, move and cancel appointments; manage the waitlist. Groomers update the status of their own appointments only. */
+  "appointments.manage": ["owner", "manager", "receptionist"],
+  /** Opening hours, staff hours, time off, closures and the online booking policy. */
+  "hours.manage": ["owner", "manager"],
   /** Payments, refunds and outstanding balances. */
   "payments.manage": ["owner", "manager", "receptionist"],
   /** Business-wide reports and analytics. */

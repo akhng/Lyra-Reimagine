@@ -20,3 +20,17 @@ insert into public.business_members (business_id, user_id, role, display_name) v
 insert into public.locations (business_id, name, timezone) values
   ('a0000000-0000-4000-8000-000000000001', 'Main location', 'Australia/Melbourne'),
   ('b0000000-0000-4000-8000-000000000002', 'Main location', 'Australia/Sydney');
+
+-- Phase 3 (scheduling): opening hours, staff hours and online booking for the test salon. LOCAL TEST DATA ONLY.
+insert into public.booking_policies (business_id, online_enabled, min_notice_minutes, max_days_ahead, slot_step_minutes, cancellation_hours, policy_text)
+values ('a0000000-0000-4000-8000-000000000001', true, 60, 60, 15, 24, 'Please arrive 5 minutes early. Cancel at least 24 hours ahead.')
+on conflict (business_id) do nothing;
+insert into public.location_hours (business_id, location_id, weekday, opens, closes)
+select l.business_id, l.id, d, '08:00', '17:00' from public.locations l, generate_series(1, 6) d
+where l.business_id = 'a0000000-0000-4000-8000-000000000001' and not l.is_mobile
+on conflict do nothing;
+insert into public.staff_hours (business_id, member_id, location_id, weekday, starts, ends)
+select m.business_id, m.id, l.id, d, '08:00', '17:00'
+from public.business_members m join public.locations l on l.business_id = m.business_id and not l.is_mobile, generate_series(1, 6) d
+where m.business_id = 'a0000000-0000-4000-8000-000000000001'
+on conflict do nothing;

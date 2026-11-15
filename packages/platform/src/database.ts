@@ -291,6 +291,26 @@ isOneToOne: false
       referencedColumns: ["id","business_id"]
     }
                   ]
+                },"dashboard_layouts": {
+                  Row: {
+                    "business_id": string,"layout": NonNullable<Json>,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"layout"?: NonNullable<Json>,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "business_id"?: string,"layout"?: NonNullable<Json>,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dashboard_layouts_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"grooming_photos": {
                   Row: {
                     "business_id": string,"created_at": string,"id": string,"kind": Database["public"]['Enums']["photo_kind"],"record_id": string,"storage_path": string,"uploaded_by": string | null

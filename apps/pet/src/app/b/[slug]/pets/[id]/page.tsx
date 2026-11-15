@@ -16,6 +16,7 @@ import { ageLabel } from "@/features/pets/schemas";
 import { listTeam } from "@/features/team/queries";
 import { daysBetween, formatDay, localDate } from "@/lib/dates";
 import { param, uuidOr404 } from "@/lib/params";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Pet" };
 
@@ -97,7 +98,7 @@ export default async function PetProfile({ params, searchParams }: { params: Pro
       </div>
       {upcoming.length ? (
         <section aria-labelledby="upcoming-title" className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)]">
-          <h2 id="upcoming-title" className="font-display text-lg font-semibold text-navy">Upcoming appointments</h2>
+          <h2 id="upcoming-title" className="font-display text-lg font-semibold text-ink">Upcoming appointments</h2>
           <ul className="mt-2 flex flex-col gap-1 text-sm">
             {upcoming.map((a) => {
               const st = toLocal(Date.parse(a.startsAt), business.timezone);
@@ -108,9 +109,9 @@ export default async function PetProfile({ params, searchParams }: { params: Pro
       ) : null}
       <GroomComparison petName={pet.name} records={records} />
       <section aria-labelledby="history-title" className="flex flex-col gap-3">
-        <h2 id="history-title" className="font-display text-xl font-semibold text-navy">Grooming history</h2>
+        <h2 id="history-title" className="font-display text-xl font-semibold text-ink">Grooming history</h2>
         {records.length === 0 ? (
-          <EmptyState icon={<Scissors />} title="No grooms recorded yet" description="Record each groom with notes and before/after photos so the next groomer knows exactly what was done." action={<Link href={`/b/${slug}/pets/${id}/groom`} className={buttonVariants()}>Record a groom</Link>} />
+          <EmptyState art={<Mascot name="mochi" mood="curious" className="w-28" />} icon={<Scissors />} title="No grooms recorded yet" description="Record each groom with notes and before/after photos so the next groomer knows exactly what was done." action={<Link href={`/b/${slug}/pets/${id}/groom`} className={buttonVariants()}>Record a groom</Link>} />
         ) : (
           <GroomHistory petName={pet.name} records={records} groomerName={groomerName} />
         )}

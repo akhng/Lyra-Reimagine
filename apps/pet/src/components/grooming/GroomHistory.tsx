@@ -25,7 +25,7 @@ export function GroomComparison({ petName, records }: { petName: string; records
     : [{ title: `Before · ${formatDay(latest.groomed_on)}`, photo: before }, { title: `After · ${formatDay(latest.groomed_on)}`, photo: after(latest) }];
   return (
     <section aria-labelledby="compare-title" className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)]">
-      <h2 id="compare-title" className="font-display text-lg font-semibold text-navy">{previous ? "Last time vs this time" : "Before and after"}</h2>
+      <h2 id="compare-title" className="font-display text-lg font-semibold text-ink">{previous ? "Last time vs this time" : "Before and after"}</h2>
       <div className="mt-3 grid max-w-xl grid-cols-2 gap-3">
         {pair.map(({ title, photo }) => (
           <figure key={title} className="flex flex-col gap-2">

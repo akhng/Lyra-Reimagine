@@ -10,6 +10,7 @@ import { localToday } from "@/features/scheduling/time";
 import { listServices } from "@/features/services/queries";
 import { listTeam } from "@/features/team/queries";
 import { param } from "@/lib/params";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "New appointment" };
 
@@ -18,7 +19,7 @@ export default async function NewAppointment({ params, searchParams }: { params:
   const sp = await searchParams;
   const { business, role } = await requireBusiness(slug);
   const back = { href: `/b/${slug}/calendar`, label: "Calendar" };
-  if (!can(role, "appointments.manage")) return <div className="mx-auto max-w-3xl"><PageHeader title="New appointment" back={back} /><EmptyState title="Ask reception to book" description="Only owners, managers and reception can book appointments." /></div>;
+  if (!can(role, "appointments.manage")) return <div className="mx-auto max-w-3xl"><PageHeader title="New appointment" back={back} /><EmptyState art={<Mascot name="coco" mood="curious" className="w-28" />} title="Ask reception to book" description="Only owners, managers and reception can book appointments." /></div>;
   const db = await createSupabaseServerClient();
   const [{ data: rows }, services, team, setup] = await Promise.all([
     db.from("customers").select("id, first_name, last_name, pets(id, name, size, breed, archived_at)").eq("business_id", business.id).is("archived_at", null).order("first_name").limit(1000),

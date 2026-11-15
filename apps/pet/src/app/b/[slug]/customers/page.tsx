@@ -9,6 +9,7 @@ import { searchCustomers } from "@/features/customers/queries";
 import { SEGMENTS, segmentsFor, type Segment } from "@/features/customers/schemas";
 import { formatDay, localDate } from "@/lib/dates";
 import { param } from "@/lib/params";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Customers" };
 
@@ -48,7 +49,7 @@ export default async function Customers({ params, searchParams }: { params: Prom
         ))}
       </nav>
       {rows.length === 0 ? (
-        <EmptyState
+        <EmptyState art={<Mascot name="coco" mood="happy" className="w-28" />}
           icon={<Users />}
           title={all.length === 0 && !q ? "No customers yet" : "No matching customers"}
           description={all.length === 0 && !q ? "Add your first customer and their pets to start keeping grooming history." : "Try a different search or segment."}

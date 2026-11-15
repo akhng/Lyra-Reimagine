@@ -5,6 +5,7 @@ import { can } from "@lyra/platform/tenancy/roles";
 import { CustomerForm } from "@/components/customers/CustomerForm";
 import { PageHeader } from "@/components/PageHeader";
 import { listTeam } from "@/features/team/queries";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Add customer" };
 
@@ -16,7 +17,7 @@ export default async function NewCustomer({ params }: { params: Promise<{ slug: 
     return (
       <div className="mx-auto flex max-w-3xl flex-col gap-5">
         <PageHeader title="Add customer" back={back} />
-        <EmptyState title="Ask reception to add customers" description="Only owners, managers and reception can add customers, because it involves contact details." />
+        <EmptyState art={<Mascot name="coco" mood="curious" className="w-28" />} title="Ask reception to add customers" description="Only owners, managers and reception can add customers, because it involves contact details." />
       </div>
     );
   const team = await listTeam(business.id);

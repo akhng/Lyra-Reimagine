@@ -29,7 +29,7 @@ export default async function ManagePage({ params, searchParams }: { params: Pro
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-primary-text">{b.business.name}</p>
-          <h1 className="font-display text-3xl font-bold text-navy">{cancelled ? "Cancelled booking" : "Your booking"}</h1>
+          <h1 className="font-display text-3xl font-bold text-ink">{cancelled ? "Cancelled booking" : "Your booking"}</h1>
         </div>
         <Badge tone={cancelled ? "danger" : "success"}>{cancelled ? "Cancelled" : "Booked"}</Badge>
       </header>

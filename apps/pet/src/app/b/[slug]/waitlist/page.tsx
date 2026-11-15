@@ -12,6 +12,7 @@ import { appointmentsBetween, schedulingSetup, waitlist } from "@/features/sched
 import { addDays, fromLocal, localToday, minutesToHhmm } from "@/features/scheduling/time";
 import { listServices } from "@/features/services/queries";
 import { listTeam } from "@/features/team/queries";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Waitlist" };
 
@@ -56,7 +57,7 @@ export default async function WaitlistPage({ params }: { params: Promise<{ slug:
     <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <PageHeader title="Waitlist" description="Customers who want an earlier or specific slot. Openings are worked out from today's hours and bookings." />
       {entries.length === 0 ? (
-        <EmptyState icon={<ListPlus />} title="Nobody is waiting" description="Add a customer when they'd like an earlier slot than you can offer. Lyra Pet shows openings as soon as they appear." />
+        <EmptyState art={<Mascot name="luna" mood="sleepy" className="w-28" />} icon={<ListPlus />} title="Nobody is waiting" description="Add a customer when they'd like an earlier slot than you can offer. Lyra Pet shows openings as soon as they appear." />
       ) : (
         <ul className="flex flex-col gap-3">
           {entries.map((e) => {

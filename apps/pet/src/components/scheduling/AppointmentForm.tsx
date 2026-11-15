@@ -57,7 +57,7 @@ export function AppointmentForm({ slug, customers, services, groomers, locations
     <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
       <fieldset className="grid gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] sm:grid-cols-2">
         <legend className="sr-only">Customer and pet</legend>
-        <h2 className="font-display text-lg font-semibold text-navy sm:col-span-2">Customer and pet</h2>
+        <h2 className="font-display text-lg font-semibold text-ink sm:col-span-2">Customer and pet</h2>
         <FormField id="a-search" label="Find a customer" hint="Search by owner or pet name">
           {(p) => <Input {...p} type="search" value={query} onChange={(e) => setQuery(e.target.value)} />}
         </FormField>
@@ -81,7 +81,7 @@ export function AppointmentForm({ slug, customers, services, groomers, locations
 
       <fieldset className="flex flex-col gap-3 rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)]">
         <legend className="sr-only">Services</legend>
-        <h2 className="font-display text-lg font-semibold text-navy">Services</h2>
+        <h2 className="font-display text-lg font-semibold text-ink">Services</h2>
         {services.length ? (
           <div className="flex flex-wrap gap-2">
             {services.map((s) => (
@@ -112,7 +112,7 @@ export function AppointmentForm({ slug, customers, services, groomers, locations
 
       <fieldset className="grid gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] sm:grid-cols-2">
         <legend className="sr-only">When</legend>
-        <h2 className="font-display text-lg font-semibold text-navy sm:col-span-2">When and who</h2>
+        <h2 className="font-display text-lg font-semibold text-ink sm:col-span-2">When and who</h2>
         {locations.length > 1 ? (
           <FormField id="a-location" label="Location" error={err("locationId")}>
             {(p) => <Select {...p} value={f.locationId} onChange={(e) => setF({ ...f, locationId: e.target.value })}>{locations.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}</Select>}

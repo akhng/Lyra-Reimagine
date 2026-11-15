@@ -55,7 +55,7 @@ export function CalendarGrid({ slug, timeZone, columns, appointments, startMin, 
         <div className="grid min-w-[40rem]" style={{ gridTemplateColumns: `4rem repeat(${columns.length}, minmax(9rem, 1fr))` }}>
           <div className="sticky left-0 z-10 border-b border-border bg-surface" />
           {columns.map((c) => (
-            <div key={c.key} className="border-b border-l border-border px-2 py-2 text-sm font-semibold text-navy">
+            <div key={c.key} className="border-b border-l border-border px-2 py-2 text-sm font-semibold text-ink">
               {c.label}
             </div>
           ))}

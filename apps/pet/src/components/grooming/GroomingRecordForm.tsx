@@ -23,7 +23,7 @@ function PhotoPicker({ kind, picks, onAdd, onRemove, disabled }: { kind: Kind; p
             {/* Local preview (blob URL) of a file not yet uploaded. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={p.preview} alt={`${label} ${i + 1}`} className="size-24 rounded-[var(--radius-control)] object-cover" />
-            <button type="button" onClick={() => onRemove(i)} disabled={disabled} className="absolute -top-2 -right-2 grid size-8 place-items-center rounded-full bg-navy text-white" aria-label={`Remove ${label.toLowerCase()} ${i + 1}`}>
+            <button type="button" onClick={() => onRemove(i)} disabled={disabled} className="absolute -top-2 -right-2 grid size-8 place-items-center rounded-full bg-ink text-white" aria-label={`Remove ${label.toLowerCase()} ${i + 1}`}>
               <X className="size-4" aria-hidden />
             </button>
           </li>

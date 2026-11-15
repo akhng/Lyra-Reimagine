@@ -71,11 +71,11 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <header>
         <p className="text-sm text-muted">{business.name} · {today}</p>
-        <h1 className="font-display text-3xl font-bold text-navy">{greeting(business.timezone)}</h1>
+        <h1 className="font-display text-3xl font-bold text-ink">{greeting(business.timezone)}</h1>
       </header>
       <section aria-labelledby="today-title" className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)]">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="today-title" className="font-display text-lg font-semibold text-navy">Today</h2>
+          <h2 id="today-title" className="font-display text-lg font-semibold text-ink">Today</h2>
           <Link href={`/b/${slug}/calendar`} className="text-sm font-medium text-primary-text hover:underline">Open calendar</Link>
         </div>
         {todays.length ? (

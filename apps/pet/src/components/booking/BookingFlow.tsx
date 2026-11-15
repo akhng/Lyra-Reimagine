@@ -46,7 +46,7 @@ export function BookingFlow({ ctx, nowMs }: { ctx: OnlineContext; nowMs: number 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5" noValidate>
       <section aria-labelledby="s-services" className={step}>
-        <h2 id="s-services" className="font-display text-lg font-semibold text-navy">1. Choose services</h2>
+        <h2 id="s-services" className="font-display text-lg font-semibold text-ink">1. Choose services</h2>
         {ctx.services.length ? (
           <ul className="grid gap-2 sm:grid-cols-2">
             {ctx.services.map((s) => (
@@ -67,7 +67,7 @@ export function BookingFlow({ ctx, nowMs }: { ctx: OnlineContext; nowMs: number 
       </section>
 
       <section aria-labelledby="s-when" className={step}>
-        <h2 id="s-when" className="font-display text-lg font-semibold text-navy">2. Pick a time</h2>
+        <h2 id="s-when" className="font-display text-lg font-semibold text-ink">2. Pick a time</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {ctx.locations.length > 1 ? (
             <FormField id="b-location" label="Location">{(p) => <Select {...p} value={locationId} onChange={(e) => { setLocationId(e.target.value); reset(); }}>{ctx.locations.map((l) => <option key={l.id} value={l.id}>{l.name}{l.suburb ? `, ${l.suburb}` : ""}</option>)}</Select>}</FormField>
@@ -81,7 +81,7 @@ export function BookingFlow({ ctx, nowMs }: { ctx: OnlineContext; nowMs: number 
       </section>
 
       <section aria-labelledby="s-details" className={step}>
-        <h2 id="s-details" className="font-display text-lg font-semibold text-navy">3. Your details</h2>
+        <h2 id="s-details" className="font-display text-lg font-semibold text-ink">3. Your details</h2>
         <div className="grid gap-3 sm:grid-cols-2">
           <FormField id="b-first" label="First name" error={err("firstName")}>{(p) => <Input {...p} autoComplete="given-name" value={d.firstName} onChange={(e) => setD({ ...d, firstName: e.target.value })} />}</FormField>
           <FormField id="b-last" label="Last name" error={err("lastName")}>{(p) => <Input {...p} autoComplete="family-name" value={d.lastName} onChange={(e) => setD({ ...d, lastName: e.target.value })} />}</FormField>
@@ -98,7 +98,7 @@ export function BookingFlow({ ctx, nowMs }: { ctx: OnlineContext; nowMs: number 
       </section>
 
       <section aria-labelledby="s-confirm" className={step}>
-        <h2 id="s-confirm" className="font-display text-lg font-semibold text-navy">4. Confirm</h2>
+        <h2 id="s-confirm" className="font-display text-lg font-semibold text-ink">4. Confirm</h2>
         {startsAt && chosen.length ? (
           <p className="text-sm">
             <strong>{chosen.map((s) => s.name).join(", ")}</strong> on {new Intl.DateTimeFormat("en-AU", { weekday: "long", day: "numeric", month: "long", timeZone: tz }).format(new Date(startsAt))} at {minutesToHhmm(toLocal(Date.parse(startsAt), tz).minutes)} · {block.durationMinutes} min · estimate {prices.some((p) => p.from) || !d.size ? "from " : ""}<span className="tabular">{formatAud(total)}</span>. Final price depends on your pet&apos;s coat and size on the day.

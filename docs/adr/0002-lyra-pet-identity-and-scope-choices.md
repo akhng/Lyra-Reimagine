@@ -1,6 +1,6 @@
 # ADR 0002 — Lyra Pet identity and early scope choices
 
-**Status:** Accepted (2026-11-15)
+**Status:** Accepted (2026-11-15) · Identity superseded by ADR 0003
 
 ## Decisions
 

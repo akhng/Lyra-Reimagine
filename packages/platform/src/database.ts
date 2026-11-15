@@ -179,6 +179,114 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"booking_request_events": {
+                  Row: {
+                    "actor_id": string | null,"business_id": string,"created_at": string,"from_status": Database["public"]['Enums']["booking_request_status"] | null,"id": number,"note": string | null,"request_id": string,"to_status": Database["public"]['Enums']["booking_request_status"]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"business_id": string,"created_at"?: string,"from_status"?: Database["public"]['Enums']["booking_request_status"] | null,"id"?: never,"note"?: string | null,"request_id": string,"to_status": Database["public"]['Enums']["booking_request_status"]
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"business_id"?: string,"created_at"?: string,"from_status"?: Database["public"]['Enums']["booking_request_status"] | null,"id"?: never,"note"?: string | null,"request_id"?: string,"to_status"?: Database["public"]['Enums']["booking_request_status"]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "booking_request_events_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "booking_request_events_request_id_business_id_fkey"
+      columns: ["request_id","business_id"]
+isOneToOne: false
+      referencedRelation: "booking_requests"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"booking_request_services": {
+                  Row: {
+                    "business_id": string,"duration_minutes": number,"id": string,"name": string,"position": number,"price_cents": number,"request_id": string,"service_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"duration_minutes": number,"id"?: string,"name": string,"position"?: number,"price_cents": number,"request_id": string,"service_id"?: string | null
+                  }
+                  Update: {
+                    "business_id"?: string,"duration_minutes"?: number,"id"?: string,"name"?: string,"position"?: number,"price_cents"?: number,"request_id"?: string,"service_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "booking_request_services_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "booking_request_services_request_id_business_id_fkey"
+      columns: ["request_id","business_id"]
+isOneToOne: false
+      referencedRelation: "booking_requests"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "booking_request_services_service_id_business_id_fkey"
+      columns: ["service_id","business_id"]
+isOneToOne: false
+      referencedRelation: "services"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"booking_requests": {
+                  Row: {
+                    "accept_deadline": string | null,"appointment_id": string | null,"block_minutes": number,"business_id": string,"created_at": string,"customer_id": string,"decided_at": string | null,"decided_by": string | null,"decision_reason": string | null,"estimate_cents": number | null,"estimate_from": boolean,"estimate_minutes": number,"id": string,"location_id": string,"notes": string | null,"pet_id": string,"preferred_start": string | null,"requester_id": string,"status": Database["public"]['Enums']["booking_request_status"],"updated_at": string,"windows": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accept_deadline"?: string | null,"appointment_id"?: string | null,"block_minutes": number,"business_id": string,"created_at"?: string,"customer_id": string,"decided_at"?: string | null,"decided_by"?: string | null,"decision_reason"?: string | null,"estimate_cents"?: number | null,"estimate_from"?: boolean,"estimate_minutes": number,"id"?: string,"location_id": string,"notes"?: string | null,"pet_id": string,"preferred_start"?: string | null,"requester_id": string,"status"?: Database["public"]['Enums']["booking_request_status"],"updated_at"?: string,"windows"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "accept_deadline"?: string | null,"appointment_id"?: string | null,"block_minutes"?: number,"business_id"?: string,"created_at"?: string,"customer_id"?: string,"decided_at"?: string | null,"decided_by"?: string | null,"decision_reason"?: string | null,"estimate_cents"?: number | null,"estimate_from"?: boolean,"estimate_minutes"?: number,"id"?: string,"location_id"?: string,"notes"?: string | null,"pet_id"?: string,"preferred_start"?: string | null,"requester_id"?: string,"status"?: Database["public"]['Enums']["booking_request_status"],"updated_at"?: string,"windows"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "booking_requests_appointment_id_business_id_fkey"
+      columns: ["appointment_id","business_id"]
+isOneToOne: false
+      referencedRelation: "appointments"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "booking_requests_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "booking_requests_customer_id_business_id_fkey"
+      columns: ["customer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "booking_requests_location_id_business_id_fkey"
+      columns: ["location_id","business_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "booking_requests_pet_id_business_id_fkey"
+      columns: ["pet_id","business_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "booking_requests_pet_id_customer_id_fkey"
+      columns: ["pet_id","customer_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id","customer_id"]
+    }
+                  ]
                 },"business_closures": {
                   Row: {
                     "business_id": string,"created_at": string,"ends_on": string,"id": string,"location_id": string | null,"reason": string | null,"starts_on": string
@@ -267,14 +375,14 @@ isOneToOne: false
                   ]
                 },"customers": {
                   Row: {
-                    "archived_at": string | null,"business_id": string,"created_at": string,"created_by": string | null,"first_name": string,"id": string,"is_vip": boolean,"last_name": string | null,"marketing_consent": boolean,"marketing_consent_at": string | null,"notes": string | null,"photo_path": string | null,"preferred_contact": Database["public"]['Enums']["contact_method"],"preferred_groomer_id": string | null,"updated_at": string
+                    "account_user_id": string | null,"archived_at": string | null,"business_id": string,"created_at": string,"created_by": string | null,"first_name": string,"id": string,"is_vip": boolean,"last_name": string | null,"marketing_consent": boolean,"marketing_consent_at": string | null,"notes": string | null,"photo_path": string | null,"preferred_contact": Database["public"]['Enums']["contact_method"],"preferred_groomer_id": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived_at"?: string | null,"business_id": string,"created_at"?: string,"created_by"?: string | null,"first_name": string,"id"?: string,"is_vip"?: boolean,"last_name"?: string | null,"marketing_consent"?: boolean,"marketing_consent_at"?: string | null,"notes"?: string | null,"photo_path"?: string | null,"preferred_contact"?: Database["public"]['Enums']["contact_method"],"preferred_groomer_id"?: string | null,"updated_at"?: string
+                    "account_user_id"?: string | null,"archived_at"?: string | null,"business_id": string,"created_at"?: string,"created_by"?: string | null,"first_name": string,"id"?: string,"is_vip"?: boolean,"last_name"?: string | null,"marketing_consent"?: boolean,"marketing_consent_at"?: string | null,"notes"?: string | null,"photo_path"?: string | null,"preferred_contact"?: Database["public"]['Enums']["contact_method"],"preferred_groomer_id"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "archived_at"?: string | null,"business_id"?: string,"created_at"?: string,"created_by"?: string | null,"first_name"?: string,"id"?: string,"is_vip"?: boolean,"last_name"?: string | null,"marketing_consent"?: boolean,"marketing_consent_at"?: string | null,"notes"?: string | null,"photo_path"?: string | null,"preferred_contact"?: Database["public"]['Enums']["contact_method"],"preferred_groomer_id"?: string | null,"updated_at"?: string
+                    "account_user_id"?: string | null,"archived_at"?: string | null,"business_id"?: string,"created_at"?: string,"created_by"?: string | null,"first_name"?: string,"id"?: string,"is_vip"?: boolean,"last_name"?: string | null,"marketing_consent"?: boolean,"marketing_consent_at"?: string | null,"notes"?: string | null,"photo_path"?: string | null,"preferred_contact"?: Database["public"]['Enums']["contact_method"],"preferred_groomer_id"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -305,6 +413,26 @@ isOneToOne: false
                   Relationships: [
                     {
       foreignKeyName: "dashboard_layouts_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"favourite_businesses": {
+                  Row: {
+                    "business_id": string,"created_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "favourite_businesses_business_id_fkey"
       columns: ["business_id"]
 isOneToOne: false
       referencedRelation: "businesses"
@@ -415,16 +543,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"pets": {
+                },"marketplace_profiles": {
                   Row: {
-                    "allergies": string | null,"archived_at": string | null,"behaviour": string | null,"breed": string | null,"business_id": string,"coat_colour": string | null,"coat_length": string | null,"coat_type": string | null,"created_at": string,"customer_id": string,"date_of_birth": string | null,"desexed": boolean | null,"ear_cleaning": string | null,"emergency_contact": string | null,"estimated_age_years": number | null,"finishing_products": string | null,"groom_interval_weeks": number | null,"grooming_style": string | null,"handling_precautions": string | null,"handling_preferences": string | null,"id": string,"medical_notes": string | null,"microchip": string | null,"nail_preferences": string | null,"name": string,"noise_sensitivity": string | null,"photo_path": string | null,"preferred_cut": string | null,"sensitivities": string | null,"sex": Database["public"]['Enums']["pet_sex"],"shampoo": string | null,"size": Database["public"]['Enums']["pet_size"] | null,"skin_coat_concerns": string | null,"species": Database["public"]['Enums']["pet_species"],"updated_at": string,"weight_kg": number | null
+                    "about": string | null,"accepting_requests": boolean,"business_id": string,"headline": string | null,"listed": boolean,"mascot": string,"suburb": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "allergies"?: string | null,"archived_at"?: string | null,"behaviour"?: string | null,"breed"?: string | null,"business_id": string,"coat_colour"?: string | null,"coat_length"?: string | null,"coat_type"?: string | null,"created_at"?: string,"customer_id": string,"date_of_birth"?: string | null,"desexed"?: boolean | null,"ear_cleaning"?: string | null,"emergency_contact"?: string | null,"estimated_age_years"?: number | null,"finishing_products"?: string | null,"groom_interval_weeks"?: number | null,"grooming_style"?: string | null,"handling_precautions"?: string | null,"handling_preferences"?: string | null,"id"?: string,"medical_notes"?: string | null,"microchip"?: string | null,"nail_preferences"?: string | null,"name": string,"noise_sensitivity"?: string | null,"photo_path"?: string | null,"preferred_cut"?: string | null,"sensitivities"?: string | null,"sex"?: Database["public"]['Enums']["pet_sex"],"shampoo"?: string | null,"size"?: Database["public"]['Enums']["pet_size"] | null,"skin_coat_concerns"?: string | null,"species"?: Database["public"]['Enums']["pet_species"],"updated_at"?: string,"weight_kg"?: number | null
+                    "about"?: string | null,"accepting_requests"?: boolean,"business_id": string,"headline"?: string | null,"listed"?: boolean,"mascot"?: string,"suburb"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "allergies"?: string | null,"archived_at"?: string | null,"behaviour"?: string | null,"breed"?: string | null,"business_id"?: string,"coat_colour"?: string | null,"coat_length"?: string | null,"coat_type"?: string | null,"created_at"?: string,"customer_id"?: string,"date_of_birth"?: string | null,"desexed"?: boolean | null,"ear_cleaning"?: string | null,"emergency_contact"?: string | null,"estimated_age_years"?: number | null,"finishing_products"?: string | null,"groom_interval_weeks"?: number | null,"grooming_style"?: string | null,"handling_precautions"?: string | null,"handling_preferences"?: string | null,"id"?: string,"medical_notes"?: string | null,"microchip"?: string | null,"nail_preferences"?: string | null,"name"?: string,"noise_sensitivity"?: string | null,"photo_path"?: string | null,"preferred_cut"?: string | null,"sensitivities"?: string | null,"sex"?: Database["public"]['Enums']["pet_sex"],"shampoo"?: string | null,"size"?: Database["public"]['Enums']["pet_size"] | null,"skin_coat_concerns"?: string | null,"species"?: Database["public"]['Enums']["pet_species"],"updated_at"?: string,"weight_kg"?: number | null
+                    "about"?: string | null,"accepting_requests"?: boolean,"business_id"?: string,"headline"?: string | null,"listed"?: boolean,"mascot"?: string,"suburb"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "marketplace_profiles_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: true
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"owner_pets": {
+                  Row: {
+                    "breed": string | null,"care_notes": string | null,"coat_type": string | null,"created_at": string,"date_of_birth": string | null,"estimated_age_years": number | null,"grooming_preferences": string | null,"id": string,"name": string,"photo_path": string | null,"size": Database["public"]['Enums']["pet_size"] | null,"species": Database["public"]['Enums']["pet_species"],"updated_at": string,"user_id": string,"weight_kg": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "breed"?: string | null,"care_notes"?: string | null,"coat_type"?: string | null,"created_at"?: string,"date_of_birth"?: string | null,"estimated_age_years"?: number | null,"grooming_preferences"?: string | null,"id"?: string,"name": string,"photo_path"?: string | null,"size"?: Database["public"]['Enums']["pet_size"] | null,"species"?: Database["public"]['Enums']["pet_species"],"updated_at"?: string,"user_id": string,"weight_kg"?: number | null
+                  }
+                  Update: {
+                    "breed"?: string | null,"care_notes"?: string | null,"coat_type"?: string | null,"created_at"?: string,"date_of_birth"?: string | null,"estimated_age_years"?: number | null,"grooming_preferences"?: string | null,"id"?: string,"name"?: string,"photo_path"?: string | null,"size"?: Database["public"]['Enums']["pet_size"] | null,"species"?: Database["public"]['Enums']["pet_species"],"updated_at"?: string,"user_id"?: string,"weight_kg"?: number | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"pets": {
+                  Row: {
+                    "allergies": string | null,"archived_at": string | null,"behaviour": string | null,"breed": string | null,"business_id": string,"coat_colour": string | null,"coat_length": string | null,"coat_type": string | null,"created_at": string,"customer_id": string,"date_of_birth": string | null,"desexed": boolean | null,"ear_cleaning": string | null,"emergency_contact": string | null,"estimated_age_years": number | null,"finishing_products": string | null,"groom_interval_weeks": number | null,"grooming_style": string | null,"handling_precautions": string | null,"handling_preferences": string | null,"id": string,"medical_notes": string | null,"microchip": string | null,"nail_preferences": string | null,"name": string,"noise_sensitivity": string | null,"owner_notes": string | null,"owner_pet_id": string | null,"photo_path": string | null,"preferred_cut": string | null,"sensitivities": string | null,"sex": Database["public"]['Enums']["pet_sex"],"shampoo": string | null,"size": Database["public"]['Enums']["pet_size"] | null,"skin_coat_concerns": string | null,"species": Database["public"]['Enums']["pet_species"],"updated_at": string,"weight_kg": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "allergies"?: string | null,"archived_at"?: string | null,"behaviour"?: string | null,"breed"?: string | null,"business_id": string,"coat_colour"?: string | null,"coat_length"?: string | null,"coat_type"?: string | null,"created_at"?: string,"customer_id": string,"date_of_birth"?: string | null,"desexed"?: boolean | null,"ear_cleaning"?: string | null,"emergency_contact"?: string | null,"estimated_age_years"?: number | null,"finishing_products"?: string | null,"groom_interval_weeks"?: number | null,"grooming_style"?: string | null,"handling_precautions"?: string | null,"handling_preferences"?: string | null,"id"?: string,"medical_notes"?: string | null,"microchip"?: string | null,"nail_preferences"?: string | null,"name": string,"noise_sensitivity"?: string | null,"owner_notes"?: string | null,"owner_pet_id"?: string | null,"photo_path"?: string | null,"preferred_cut"?: string | null,"sensitivities"?: string | null,"sex"?: Database["public"]['Enums']["pet_sex"],"shampoo"?: string | null,"size"?: Database["public"]['Enums']["pet_size"] | null,"skin_coat_concerns"?: string | null,"species"?: Database["public"]['Enums']["pet_species"],"updated_at"?: string,"weight_kg"?: number | null
+                  }
+                  Update: {
+                    "allergies"?: string | null,"archived_at"?: string | null,"behaviour"?: string | null,"breed"?: string | null,"business_id"?: string,"coat_colour"?: string | null,"coat_length"?: string | null,"coat_type"?: string | null,"created_at"?: string,"customer_id"?: string,"date_of_birth"?: string | null,"desexed"?: boolean | null,"ear_cleaning"?: string | null,"emergency_contact"?: string | null,"estimated_age_years"?: number | null,"finishing_products"?: string | null,"groom_interval_weeks"?: number | null,"grooming_style"?: string | null,"handling_precautions"?: string | null,"handling_preferences"?: string | null,"id"?: string,"medical_notes"?: string | null,"microchip"?: string | null,"nail_preferences"?: string | null,"name"?: string,"noise_sensitivity"?: string | null,"owner_notes"?: string | null,"owner_pet_id"?: string | null,"photo_path"?: string | null,"preferred_cut"?: string | null,"sensitivities"?: string | null,"sex"?: Database["public"]['Enums']["pet_sex"],"shampoo"?: string | null,"size"?: Database["public"]['Enums']["pet_size"] | null,"skin_coat_concerns"?: string | null,"species"?: Database["public"]['Enums']["pet_species"],"updated_at"?: string,"weight_kg"?: number | null
                   }
                   Relationships: [
                     {
@@ -439,6 +601,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "customers"
       referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "pets_owner_pet_id_fkey"
+      columns: ["owner_pet_id"]
+isOneToOne: false
+      referencedRelation: "owner_pets"
+      referencedColumns: ["id"]
     }
                   ]
                 },"profiles": {
@@ -618,6 +786,12 @@ isOneToOne: false
 "cancel_booking_by_token":
 { Args: { "p_token": string }; Returns: undefined
                            },
+"cancel_booking_request":
+{ Args: { "p_id": string,"p_reason": string }; Returns: undefined
+                           },
+"claim_customer_records":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
 "create_business":
 { Args: { "p_location_name"?: string,"p_name": string,"p_slug": string,"p_timezone": string }; Returns: string
                            },
@@ -638,14 +812,35 @@ isOneToOne: false
 "is_business_member":
 { Args: { "p_business": string }; Returns: boolean
                            },
+"log_request_event":
+{ Args: { "p_business": string,"p_from": Database["public"]['Enums']["booking_request_status"],"p_note": string,"p_request": string,"p_to": Database["public"]['Enums']["booking_request_status"] }; Returns: undefined
+                           },
+"marketplace_listing":
+{ Args: { "p_slug": string }; Returns: Json
+                           },
+"marketplace_listings":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "media_business":
 { Args: { "p_name": string }; Returns: string
+                           },
+"my_bookings":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"owner_media_visible":
+{ Args: { "p_name": string }; Returns: boolean
+                           },
+"owner_notes_text":
+{ Args: { "p_care": string,"p_prefs": string }; Returns: string
                            },
 "pick_groomer":
 { Args: { "p_business": string,"p_ends": string,"p_exclude"?: string,"p_groomer": string,"p_location": string,"p_starts": string }; Returns: string
                            },
 "reschedule_booking_by_token":
 { Args: { "p_groomer"?: string,"p_starts_at": string,"p_token": string }; Returns: Json
+                           },
+"review_booking_request":
+{ Args: { "p_action": string,"p_groomer": string,"p_id": string,"p_reason": string,"p_starts_at": string }; Returns: string
                            },
 "service_price_for":
 { Args: { "p_breed": string,"p_service": string,"p_size": string }; Returns: number
@@ -655,10 +850,13 @@ isOneToOne: false
                            },
 "slot_fits_hours":
 { Args: { "p_ends": string,"p_groomer": string,"p_location": string,"p_starts": string }; Returns: boolean
+                           },
+"submit_booking_request":
+{ Args: { "p_notes": string,"p_owner_pet": string,"p_preferred_start": string,"p_service_ids": (string)[],"p_slug": string,"p_windows": Json }; Returns: string
                            }
           }
           Enums: {
-            "appointment_status": "booked"|"confirmed"|"checked_in"|"in_progress"|"completed"|"cancelled"|"no_show","business_role": "owner"|"manager"|"receptionist"|"groomer","business_status": "active"|"suspended"|"closed","contact_method": "email"|"sms"|"phone","member_status": "active"|"invited"|"suspended","pet_sex": "male"|"female"|"unknown","pet_size": "toy"|"small"|"medium"|"large"|"giant","pet_species": "dog"|"cat"|"other","photo_kind": "before"|"after","plan_tier": "starter"|"growth"|"pro","price_rule_kind": "size"|"breed"|"coat_condition"
+            "appointment_status": "booked"|"confirmed"|"checked_in"|"in_progress"|"completed"|"cancelled"|"no_show","booking_request_status": "draft"|"submitted"|"awaiting_review"|"open"|"accepted"|"confirmed"|"in_progress"|"completed"|"cancelled"|"rejected"|"expired","business_role": "owner"|"manager"|"receptionist"|"groomer","business_status": "active"|"suspended"|"closed","contact_method": "email"|"sms"|"phone","member_status": "active"|"invited"|"suspended","pet_sex": "male"|"female"|"unknown","pet_size": "toy"|"small"|"medium"|"large"|"giant","pet_species": "dog"|"cat"|"other","photo_kind": "before"|"after","plan_tier": "starter"|"growth"|"pro","price_rule_kind": "size"|"breed"|"coat_condition"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -774,7 +972,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "appointment_status": ["booked", "confirmed", "checked_in", "in_progress", "completed", "cancelled", "no_show"],"business_role": ["owner", "manager", "receptionist", "groomer"],"business_status": ["active", "suspended", "closed"],"contact_method": ["email", "sms", "phone"],"member_status": ["active", "invited", "suspended"],"pet_sex": ["male", "female", "unknown"],"pet_size": ["toy", "small", "medium", "large", "giant"],"pet_species": ["dog", "cat", "other"],"photo_kind": ["before", "after"],"plan_tier": ["starter", "growth", "pro"],"price_rule_kind": ["size", "breed", "coat_condition"]
+            "appointment_status": ["booked", "confirmed", "checked_in", "in_progress", "completed", "cancelled", "no_show"],"booking_request_status": ["draft", "submitted", "awaiting_review", "open", "accepted", "confirmed", "in_progress", "completed", "cancelled", "rejected", "expired"],"business_role": ["owner", "manager", "receptionist", "groomer"],"business_status": ["active", "suspended", "closed"],"contact_method": ["email", "sms", "phone"],"member_status": ["active", "invited", "suspended"],"pet_sex": ["male", "female", "unknown"],"pet_size": ["toy", "small", "medium", "large", "giant"],"pet_species": ["dog", "cat", "other"],"photo_kind": ["before", "after"],"plan_tier": ["starter", "growth", "pro"],"price_rule_kind": ["size", "breed", "coat_condition"]
           }
         }
 } as const

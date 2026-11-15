@@ -21,7 +21,9 @@ alter table public.customers add column account_user_id uuid references auth.use
 create unique index customers_business_account_uidx on public.customers (business_id, account_user_id) where account_user_id is not null;
 create index customers_account_idx on public.customers (account_user_id) where account_user_id is not null;
 -- Staff may not re-point a customer record at someone else's account: only the claim/submit functions set it.
-revoke update (account_user_id) on public.customers from authenticated;
+-- (A table-level grant would override a column revoke, so the editable columns are granted one by one.)
+revoke update on public.customers from authenticated;
+grant update (first_name, last_name, preferred_contact, preferred_groomer_id, notes, is_vip, marketing_consent, marketing_consent_at, photo_path, archived_at, updated_at) on public.customers to authenticated;
 
 -- ---------------------------------------------------------------------
 -- Owner pet profiles (the pet owner's own data)
@@ -53,12 +55,13 @@ create trigger owner_pets_touch before update on public.owner_pets for each row 
 alter table public.pets add column owner_pet_id uuid references public.owner_pets on delete set null;
 alter table public.pets add column owner_notes text check (owner_notes is null or char_length(owner_notes) <= 2100);
 create unique index pets_business_owner_pet_uidx on public.pets (business_id, owner_pet_id) where owner_pet_id is not null;
--- Owner notes come only from the owner's profile (trigger below); staff can't edit them.
-revoke update (owner_pet_id, owner_notes) on public.pets from authenticated;
+-- Owner notes come only from the owner's profile (trigger below); staff can't edit them or the link.
+revoke update on public.pets from authenticated;
+grant update (customer_id, name, species, breed, size, date_of_birth, estimated_age_years, sex, desexed, weight_kg, coat_type, coat_colour, microchip, photo_path, groom_interval_weeks, preferred_cut, coat_length, grooming_style, shampoo, finishing_products, nail_preferences, ear_cleaning, behaviour, noise_sensitivity, handling_preferences, allergies, sensitivities, medical_notes, skin_coat_concerns, handling_precautions, emergency_contact, archived_at, updated_at) on public.pets to authenticated;
 
-create or replace function public.owner_notes_text(p public.owner_pets)
+create or replace function public.owner_notes_text(p_prefs text, p_care text)
 returns text language sql immutable set search_path = '' as $$
-  select nullif(concat_ws(E'\n', case when p.grooming_preferences is not null then 'Grooming preferences: ' || p.grooming_preferences end, case when p.care_notes is not null then 'Care and handling: ' || p.care_notes end), '');
+  select nullif(concat_ws(E'\n', case when p_prefs is not null then 'Grooming preferences: ' || p_prefs end, case when p_care is not null then 'Care and handling: ' || p_care end), '');
 $$;
 
 -- Owner edits flow to every linked business pet (identity fields and the owner's notes only).
@@ -67,7 +70,7 @@ returns trigger language plpgsql security definer set search_path = '' as $$
 begin
   update public.pets set name = new.name, species = new.species, breed = new.breed, size = coalesce(new.size, size),
     date_of_birth = new.date_of_birth, estimated_age_years = new.estimated_age_years, weight_kg = new.weight_kg,
-    coat_type = coalesce(new.coat_type, coat_type), owner_notes = public.owner_notes_text(new), updated_at = now()
+    coat_type = coalesce(new.coat_type, coat_type), owner_notes = public.owner_notes_text(new.grooming_preferences, new.care_notes), updated_at = now()
   where owner_pet_id = new.id;
   return new;
 end;
@@ -334,11 +337,11 @@ begin
   select id into pet from public.pets where business_id = b.id and owner_pet_id = op.id;
   if pet is null then
     select id into pet from public.pets where business_id = b.id and customer_id = cust and owner_pet_id is null and lower(name) = lower(op.name) and archived_at is null limit 1;
-    if pet is not null then update public.pets set owner_pet_id = op.id, owner_notes = public.owner_notes_text(op) where id = pet; end if;
+    if pet is not null then update public.pets set owner_pet_id = op.id, owner_notes = public.owner_notes_text(op.grooming_preferences, op.care_notes) where id = pet; end if;
   end if;
   if pet is null then
     insert into public.pets (business_id, customer_id, name, species, breed, size, date_of_birth, estimated_age_years, weight_kg, coat_type, owner_pet_id, owner_notes)
-    values (b.id, cust, op.name, op.species, op.breed, op.size, op.date_of_birth, op.estimated_age_years, op.weight_kg, op.coat_type, op.id, public.owner_notes_text(op)) returning id into pet;
+    values (b.id, cust, op.name, op.species, op.breed, op.size, op.date_of_birth, op.estimated_age_years, op.weight_kg, op.coat_type, op.id, public.owner_notes_text(op.grooming_preferences, op.care_notes)) returning id into pet;
   end if;
   if (select customer_id from public.pets where id = pet) <> cust then raise exception 'invalid_pet' using errcode = '22023'; end if;
 

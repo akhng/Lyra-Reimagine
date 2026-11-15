@@ -2,32 +2,66 @@
 @source "../../../../packages/ui/src";
 
 /*
- * Lyra Pet design tokens (ADR 0002): navy, teal and warm neutrals.
- * Components use tokens only, never hex values. Contrast (AA) is noted where it matters.
+ * Lyra Pet design tokens (ADR 0003): warm cream, deep plum ink, lavender,
+ * coral, mint, sky and butter. Components use tokens only, never hex values.
+ * Contrast (AA) is noted where text sits on a colour.
  */
 :root {
-  --bg: #f7f4ef;
+  --bg: #fff8f0;
   --surface: #ffffff;
-  --surface-2: #f1ece4;
-  --border: #e5ddd1;
-  --text: #1b2430;
-  --muted: #5b6573; /* 5.4:1 on --bg */
-  --navy: #0f2a44;
-  --navy-text: #b8c4d3; /* 8.3:1 on --navy */
-  --navy-accent: #8fe3dc;
-  --primary: #0b7a75; /* white text 5.2:1 */
-  --primary-hover: #096560;
+  --surface-2: #fbf1e6;
+  --border: #f0e2d2;
+  --text: #2b2140; /* 14:1 on --bg */
+  --muted: #655a7a; /* 5.6:1 on --bg */
+  --ink: #2e1f4f; /* plum brand surface */
+  --ink-text: #d6cdee; /* 9.8:1 on --ink */
+  --ink-accent: #ffc4b5; /* 10:1 on --ink */
+  --primary: #6a45dd; /* white text 6.1:1 */
+  --primary-hover: #5835c4;
   --primary-contrast: #ffffff;
-  --primary-text: #0b7a75; /* 4.7:1 on --bg */
-  --primary-tint: #e3f3f1;
-  --success: #0b6b4f;
-  --success-tint: #e6f4ee;
+  --primary-text: #5835c4; /* 6.9:1 on --bg */
+  --primary-tint: #efe9ff;
+  --coral: #ff8573;
+  --coral-text: #b23a2c; /* 5.6:1 on --bg */
+  --coral-tint: #ffe9e4;
+  --mint: #6fd8b2;
+  --mint-tint: #e1f7ee;
+  --sky: #86c9f4;
+  --sky-tint: #e5f4fd;
+  --butter: #ffd36e;
+  --butter-tint: #fff5d6;
+  --lavender-tint: #f3eeff;
+  --success: #12795a; /* 5.2:1 on white */
+  --success-tint: #e1f7ee;
   --warning: #8a5a00;
-  --warning-tint: #fdf3e1;
+  --warning-tint: #fff5d6;
   --danger: #b42318;
   --danger-tint: #fdecea;
-  --focus: #0b7a75;
-  --shadow-card: 0 1px 2px rgb(15 42 68 / 0.06), 0 4px 16px -8px rgb(15 42 68 / 0.12);
+  --focus: #6a45dd;
+  --shadow-card: 0 1px 2px rgb(46 31 79 / 0.05), 0 8px 24px -12px rgb(46 31 79 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(46 31 79 / 0.06), 0 18px 36px -14px rgb(106 69 221 / 0.32);
+
+  /* Mascot palette (Coco, Mochi, Biscuit, Luna): illustration colours, never used for text. */
+  --m-line: #3a2d55;
+  --m-eye: #2b2140;
+  --m-shine: #ffffff;
+  --m-blush: #ff9fb0;
+  --m-inner-ear: #ffb9c4;
+  --m-tongue: #ff7f8f;
+  --m-coco: #f2a25a;
+  --m-coco-deep: #d9823a;
+  --m-cream: #fff4e4;
+  --m-mochi: #ffffff;
+  --m-mochi-shade: #ece6f5;
+  --m-biscuit: #eab866;
+  --m-biscuit-deep: #cf9543;
+  --m-luna: #a2a7bd;
+  --m-luna-deep: #7d8299;
+  --m-luna-light: #dfe1ea;
+  --m-bandana: #ff8573;
+  --m-bow: #a98bff;
+  --m-collar: #5fb4ec;
+  --m-gold: #ffcf5a;
   color-scheme: light;
 }
 
@@ -38,24 +72,34 @@
   --color-border: var(--border);
   --color-text: var(--text);
   --color-muted: var(--muted);
-  --color-navy: var(--navy);
-  --color-navy-text: var(--navy-text);
-  --color-navy-accent: var(--navy-accent);
+  --color-ink: var(--ink);
+  --color-ink-text: var(--ink-text);
+  --color-ink-accent: var(--ink-accent);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-contrast: var(--primary-contrast);
   --color-primary-text: var(--primary-text);
   --color-primary-tint: var(--primary-tint);
+  --color-coral: var(--coral);
+  --color-coral-text: var(--coral-text);
+  --color-coral-tint: var(--coral-tint);
+  --color-mint: var(--mint);
+  --color-mint-tint: var(--mint-tint);
+  --color-sky: var(--sky);
+  --color-sky-tint: var(--sky-tint);
+  --color-butter: var(--butter);
+  --color-butter-tint: var(--butter-tint);
+  --color-lavender-tint: var(--lavender-tint);
   --color-success: var(--success);
   --color-success-tint: var(--success-tint);
   --color-warning: var(--warning);
   --color-warning-tint: var(--warning-tint);
   --color-danger: var(--danger);
   --color-danger-tint: var(--danger-tint);
-  --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-jakarta), var(--font-inter), system-ui, sans-serif;
-  --radius-card: 16px;
-  --radius-control: 10px;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+  --font-display: var(--font-baloo), var(--font-nunito), system-ui, sans-serif;
+  --radius-card: 24px;
+  --radius-control: 14px;
 }
 
 @layer base {
@@ -73,6 +117,63 @@
 
 @utility tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Soft pastel glows behind illustrated panels. */
+@utility bg-glow {
+  background:
+    radial-gradient(900px 500px at 10% 10%, var(--primary-tint), transparent 60%),
+    radial-gradient(700px 500px at 90% 90%, var(--coral-tint), transparent 60%),
+    var(--butter-tint);
+}
+
+/* Motion (ADR 0003): short, soft and switched off under reduced motion. */
+@utility lift {
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+  &:hover,
+  &:focus-within {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+@keyframes pet-wave {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-22deg); }
+  40% { transform: rotate(10deg); }
+  60% { transform: rotate(-18deg); }
+  80% { transform: rotate(6deg); }
+}
+@keyframes pet-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes pet-pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes pet-confetti {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--drift, 0), 105vh, 0) rotate(720deg); opacity: 0.9; }
+}
+@keyframes pet-fill {
+  from { transform: scaleX(0); }
+}
+@utility animate-wave {
+  animation: pet-wave 1.6s ease-in-out 0.3s 2;
+  transform-box: fill-box;
+  transform-origin: 30% 90%;
+}
+@utility animate-bob {
+  animation: pet-bob 3.2s ease-in-out infinite;
+}
+@utility animate-pop {
+  animation: pet-pop 320ms ease-out both;
+}
+@utility animate-fill {
+  animation: pet-fill 900ms ease-out both;
+  transform-origin: left;
 }
 
 @media (prefers-reduced-motion: reduce) {

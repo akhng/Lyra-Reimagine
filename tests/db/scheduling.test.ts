@@ -208,9 +208,10 @@ describe("public booking functions", () => {
 
   it("rate-limits repeated bookings from the same email", async () => {
     const spam = { ...customer, email: "spam@example.test" };
+    // One booking every other day so a date moved off a Sunday never meets the next one, and back-to-back services never overlap.
     const results = [];
-    for (let i = 0; i < 6; i++) results.push((await book(melbourne(14, `${String(9 + i).padStart(2, "0")}:00`), { p_customer: spam, p_client_hash: null })).error?.message ?? "ok");
-    expect(results.slice(0, 5).every((r) => r === "ok")).toBe(true);
+    for (let i = 0; i < 6; i++) results.push((await book(melbourne(20 + 2 * i, "10:00"), { p_customer: spam, p_client_hash: null })).error?.message ?? "ok");
+    expect(results.slice(0, 5)).toEqual(["ok", "ok", "ok", "ok", "ok"]);
     expect(results[5]).toBe("rate_limited");
   });
 

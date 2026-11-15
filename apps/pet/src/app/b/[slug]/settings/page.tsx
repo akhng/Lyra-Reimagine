@@ -20,7 +20,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
   const canLocations = can(role, "locations.manage");
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
-      <h1 className="font-display text-3xl font-bold text-navy">Settings</h1>
+      <h1 className="font-display text-3xl font-bold text-ink">Settings</h1>
 
       <Card id="details" aria-labelledby="details-title">
         <CardTitle id="details-title">Business details</CardTitle>

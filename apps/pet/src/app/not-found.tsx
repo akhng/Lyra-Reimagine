@@ -5,7 +5,7 @@ import { buttonVariants } from "@lyra/ui";
 export default function NotFound() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-4 px-4 text-center">
-      <h1 className="font-display text-3xl font-bold text-navy">Page not found</h1>
+      <h1 className="font-display text-3xl font-bold text-ink">Page not found</h1>
       <p className="text-muted">This page doesn&apos;t exist, or you don&apos;t have access to it.</p>
       <Link href="/home" className={buttonVariants()}>
         Go to your businesses

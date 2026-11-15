@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { ServiceForm } from "@/components/services/ServiceForm";
 import { formatAud } from "@/features/services/pricing";
 import { listServices } from "@/features/services/queries";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Services & pricing" };
 
@@ -20,7 +21,7 @@ export default async function Services({ params }: { params: Promise<{ slug: str
     <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <PageHeader title="Services & pricing" description="Prices include GST. Size and breed prices replace the base price; coat surcharges are added on top." />
       {services.length === 0 ? (
-        <EmptyState icon={<Tags />} title="No services yet" description={canEdit ? "Add your first service below — for example a full groom, a bath and tidy, or nail clipping." : "An owner or manager can add services."} />
+        <EmptyState art={<Mascot name="biscuit" mood="curious" className="w-28" />} icon={<Tags />} title="No services yet" description={canEdit ? "Add your first service below — for example a full groom, a bath and tidy, or nail clipping." : "An owner or manager can add services."} />
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {services.map((s) => {

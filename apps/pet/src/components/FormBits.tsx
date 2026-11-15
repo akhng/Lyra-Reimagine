@@ -58,7 +58,7 @@ export function Section({ title, description, children }: { title: string; descr
     <fieldset className="grid gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)] sm:grid-cols-2">
       <legend className="sr-only">{title}</legend>
       <div className="sm:col-span-2">
-        <h2 className="font-display text-lg font-semibold text-navy">{title}</h2>
+        <h2 className="font-display text-lg font-semibold text-ink">{title}</h2>
         {description ? <p className="text-sm text-muted">{description}</p> : null}
       </div>
       {children}

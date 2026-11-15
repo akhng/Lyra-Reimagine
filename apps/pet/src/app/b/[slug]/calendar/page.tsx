@@ -12,6 +12,7 @@ import { STATUS_LABEL } from "@/features/scheduling/schemas";
 import { addDays, fromLocal, hhmmToMinutes, isoWeekday, localToday, minutesToHhmm, toLocal } from "@/features/scheduling/time";
 import { listTeam } from "@/features/team/queries";
 import { param } from "@/lib/params";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Calendar" };
 
@@ -110,9 +111,9 @@ export default async function CalendarPage({ params, searchParams }: { params: P
       </div>
 
       {!location ? (
-        <EmptyState title="Add a location first" description="The calendar is per location." action={<Link href={`/b/${slug}/settings#locations`} className={buttonVariants()}>Settings</Link>} />
+        <EmptyState art={<Mascot name="biscuit" mood="sleepy" className="w-28" />} title="Add a location first" description="The calendar is per location." action={<Link href={`/b/${slug}/settings#locations`} className={buttonVariants()}>Settings</Link>} />
       ) : columns.length === 0 ? (
-        <EmptyState title="Nobody is rostered" description={setup.staffHours.length ? "No one works at this location on this day." : "Set your team's working hours so the calendar knows who's on."} action={can(role, "hours.manage") ? <Link href={`/b/${slug}/settings/hours`} className={buttonVariants()}>Set hours</Link> : undefined} />
+        <EmptyState art={<Mascot name="biscuit" mood="sleepy" className="w-28" />} title="Nobody is rostered" description={setup.staffHours.length ? "No one works at this location on this day." : "Set your team's working hours so the calendar knows who's on."} action={can(role, "hours.manage") ? <Link href={`/b/${slug}/settings/hours`} className={buttonVariants()}>Set hours</Link> : undefined} />
       ) : (
         <>
           <div className="hidden md:block">

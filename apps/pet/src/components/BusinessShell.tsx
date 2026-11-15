@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@lyra/ui";
 import { signOutAction } from "@/features/auth/actions";
 import { Brand } from "./Brand";
+import { Mascot } from "./mascots/Mascot";
 
 /**
  * Staff navigation for one business. Sections appear as each phase ships
@@ -35,7 +36,7 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
           href={i.href}
           onClick={() => setOpen(false)}
           aria-current={active(i) ? "page" : undefined}
-          className={cn("flex h-11 items-center gap-3 rounded-[var(--radius-control)] px-3 text-sm font-medium transition-colors", active(i) ? "bg-white/10 text-white" : "text-navy-text hover:bg-white/5 hover:text-white")}
+          className={cn("flex h-11 items-center gap-3 rounded-full px-4 text-sm font-semibold transition-[background-color,transform] duration-200 hover:translate-x-0.5", active(i) ? "bg-primary text-white shadow-[0_8px_20px_-10px_var(--primary)]" : "text-ink-text hover:bg-white/8 hover:text-white")}
         >
           <i.icon className="size-5 shrink-0" aria-hidden /> {i.label}
         </Link>
@@ -45,13 +46,13 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
   const footer = (
     <div className="border-t border-white/10 pt-4">
       <p className="truncate text-sm font-semibold text-white">{businessName}</p>
-      <p className="text-xs text-navy-text capitalize">{role}</p>
+      <p className="text-xs text-ink-text capitalize">{role}</p>
       <div className="mt-3 flex items-center gap-3 text-sm">
-        <Link href="/home" className="text-navy-accent hover:underline">
+        <Link href="/home" className="text-ink-accent hover:underline">
           Switch business
         </Link>
         <form action={signOutAction}>
-          <button type="submit" className="inline-flex items-center gap-1 text-navy-text hover:text-white">
+          <button type="submit" className="inline-flex items-center gap-1 text-ink-text hover:text-white">
             <LogOut className="size-4" aria-hidden /> Sign out
           </button>
         </form>
@@ -63,19 +64,22 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-[var(--radius-control)] focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-contrast">
         Skip to content
       </a>
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-6 bg-navy p-5 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-68 shrink-0 flex-col gap-6 rounded-r-[32px] bg-ink p-5 lg:flex">
         <Brand href={`/b/${slug}`} inverted />
         <div className="flex-1">{nav}</div>
+        <div aria-hidden className="relative -mb-2 flex justify-center">
+          <Mascot name="mochi" mood="sleepy" pose="peek" className="w-24 animate-bob" />
+        </div>
         {footer}
       </aside>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-navy px-4 lg:hidden">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-ink px-4 lg:hidden">
         <Brand href={`/b/${slug}`} inverted />
         <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" className="grid size-11 place-items-center text-white" aria-label={open ? "Close menu" : "Open menu"}>
           {open ? <X className="size-6" aria-hidden /> : <Menu className="size-6" aria-hidden />}
         </button>
       </header>
       {open ? (
-        <div id="mobile-nav" className="fixed inset-x-0 top-14 z-30 flex flex-col gap-6 bg-navy p-5 pb-8 lg:hidden">
+        <div id="mobile-nav" className="fixed inset-x-0 top-14 z-30 flex flex-col gap-6 bg-ink p-5 pb-8 lg:hidden">
           {nav}
           {footer}
         </div>

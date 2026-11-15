@@ -4,7 +4,7 @@
 
 ## 1. What this repository is
 
-**Lyra Reimagine** is a family of independent, industry-specific SaaS products on shared platform infrastructure. Current product: **Lyra Pet** — pet grooming business management for independent groomers, small salons and multi-location businesses in Australia (`apps/pet`). Future: Lyra Salon, Lyra Trade, Lyra Clean (each its own app). **Lyra Life OS lives in a separate repository** and shares no database with these products.
+**Lyra Reimagine** is a family of independent, industry-specific SaaS products on shared platform infrastructure. Current product: **Lyra Pet** — a gamified pet care platform and on-demand grooming marketplace: a business portal for owners and staff, a customer portal for pet owners, and request-based booking that eligible groomers accept (`apps/pet`, ADR 0003, plan in `docs/phases/transformation-plan.md`). Future: Lyra Salon, Lyra Trade, Lyra Clean (each its own app). **Lyra Life OS lives in a separate repository** and shares no database with these products.
 
 Lyra Pet's promise: *Spend less time managing your business and more time caring for pets.* It must be simple for a sole trader and powerful for a multi-staff salon.
 
@@ -80,7 +80,7 @@ TypeScript strict, no `any`, no non-null assertions without a comment. Component
 
 ## 10. Design
 
-Lyra Pet: navy, teal and warm neutrals; Plus Jakarta Sans for display, Inter for UI; rounded cards with subtle shadows; calm, premium, friendly — not childish, not a generic admin dashboard. Tokens in `apps/pet/src/app/globals.css`, never hex in components. WCAG AA contrast, visible focus, keyboard navigation, labelled controls, ≥ 44px tap targets. Staff screens work on phones and tablets; administration is desktop-first. Verify at 390, 820 and 1440px.
+Lyra Pet (ADR 0003): warm cream, deep plum ink, lavender primary, coral, mint, sky and butter accents; Baloo 2 for display, Nunito for UI; 24px cards, pill buttons, soft layered shadows. Original mascots Coco (corgi), Mochi (white cat), Biscuit (golden retriever) and Luna (grey cat) come from `components/mascots/Mascot.tsx` (moods and poses); no emoji as artwork. Motion via `lift`, `animate-wave`, `animate-bob`, `animate-pop`, `animate-fill`, all off under reduced motion. Playful but commercially credible — never childish, never a generic admin template. Tokens in `apps/pet/src/app/globals.css`, never hex in components. Design gallery: `/design`. WCAG AA contrast, visible focus, keyboard navigation, labelled controls, ≥ 44px tap targets. Staff screens work on phones and tablets; administration is desktop-first. Verify at 390, 820 and 1440px.
 
 ## 11. Definition of done
 

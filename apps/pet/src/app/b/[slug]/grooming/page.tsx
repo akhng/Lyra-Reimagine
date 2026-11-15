@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { recentGrooms } from "@/features/grooming/queries";
 import { listTeam } from "@/features/team/queries";
 import { formatDay } from "@/lib/dates";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Grooming records" };
 
@@ -19,7 +20,7 @@ export default async function GroomingRecords({ params }: { params: Promise<{ sl
     <div className="mx-auto flex max-w-5xl flex-col gap-5">
       <PageHeader title="Grooming records" description="The latest 50 grooms. Record a groom from the pet's page." />
       {rows.length === 0 ? (
-        <EmptyState icon={<Scissors />} title="No grooms recorded yet" description="Open a pet and choose “Record a groom” to save notes and before/after photos." action={<Link href={`/b/${slug}/pets`} className={buttonVariants()}>Go to pets</Link>} />
+        <EmptyState art={<Mascot name="mochi" mood="curious" className="w-28" />} icon={<Scissors />} title="No grooms recorded yet" description="Open a pet and choose “Record a groom” to save notes and before/after photos." action={<Link href={`/b/${slug}/pets`} className={buttonVariants()}>Go to pets</Link>} />
       ) : (
         <ul className="flex flex-col divide-y divide-border overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface">
           {rows.map((r) => (

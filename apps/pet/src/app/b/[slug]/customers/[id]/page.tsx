@@ -12,6 +12,7 @@ import { signPaths } from "@/features/grooming/queries";
 import { listTeam } from "@/features/team/queries";
 import { formatDay } from "@/lib/dates";
 import { uuidOr404 } from "@/lib/params";
+import { Mascot } from "@/components/mascots/Mascot";
 
 export const metadata: Metadata = { title: "Customer" };
 
@@ -44,11 +45,11 @@ export default async function CustomerProfile({ params }: { params: Promise<{ sl
       <div className="grid gap-5 lg:grid-cols-[1fr_20rem]">
         <section aria-labelledby="pets-title" className="flex flex-col gap-3">
           <div className="flex items-center justify-between">
-            <h2 id="pets-title" className="font-display text-xl font-semibold text-navy">Pets</h2>
+            <h2 id="pets-title" className="font-display text-xl font-semibold text-ink">Pets</h2>
             <Link href={`/b/${slug}/pets/new?customer=${c.id}`} className={buttonVariants({ variant: "secondary" })}><Plus className="size-4" aria-hidden /> Add pet</Link>
           </div>
           {pets.length === 0 ? (
-            <EmptyState title="No pets yet" description="Add a pet to record their grooming preferences, care information and history." />
+            <EmptyState art={<Mascot name="coco" mood="curious" className="w-28" />} title="No pets yet" description="Add a pet to record their grooming preferences, care information and history." />
           ) : (
             <ul className="grid gap-3 sm:grid-cols-2">
               {pets.map((p) => (

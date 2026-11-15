@@ -25,11 +25,10 @@ export async function acceptRequestAction(slug: string, requestId: string, start
   const { error } = await db.rpc("accept_booking_request", { p_id: requestId, p_starts_at: startsAt } as never);
   if (error) {
     if (!ACCEPT_ERRORS[error.message]) logger.warn({ businessId: ctx.business.id, code: error.code }, "accept failed");
-    revalidatePath(`/b/${slug}/shifts`);
     return { ok: false, error: ACCEPT_ERRORS[error.message] ?? "We couldn't accept that. Please try again." };
   }
-  revalidatePath(`/b/${slug}/shifts`);
-  revalidatePath(`/b/${slug}`);
+  // No revalidation: it would refresh the board and remove the card before it shows its result.
+  // Every page renders on request, so the next visit is fresh anyway.
   return { ok: true };
 }
 

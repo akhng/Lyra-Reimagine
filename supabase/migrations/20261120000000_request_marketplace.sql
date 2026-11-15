@@ -455,7 +455,7 @@ begin
       'id', r.id, 'petName', p.name, 'species', p.species, 'breed', p.breed, 'size', p.size, 'petId', p.id, 'photoPath', coalesce(p.photo_path, op.photo_path), 'photoBucket', case when p.photo_path is not null then 'media' else 'owner-media' end,
       'ownerNotes', p.owner_notes, 'notes', r.notes, 'preferredStart', r.preferred_start, 'windows', r.windows, 'minutes', r.estimate_minutes, 'estimateCents', r.estimate_cents, 'estimateFrom', r.estimate_from,
       'commissionCents', case when pol.groomer_commission_percent is null or r.estimate_cents is null then null else (r.estimate_cents * pol.groomer_commission_percent / 100) end,
-      'deadline', r.accept_deadline, 'assignedToMe', r.assigned_groomer_id = me.id,
+      'deadline', r.accept_deadline, 'assignedToMe', coalesce(r.assigned_groomer_id = me.id, false),
       'services', (select coalesce(jsonb_agg(s.name order by s.position), '[]') from public.booking_request_services s where s.request_id = r.id),
       'starts', (select coalesce(jsonb_agg(s order by s), '[]') from public.request_candidate_starts(r.id) s where s > now() and public.slot_fits_hours(r.location_id, me.id, s, s + make_interval(mins => r.block_minutes)))
     ) order by coalesce(r.preferred_start, r.created_at)), '[]')

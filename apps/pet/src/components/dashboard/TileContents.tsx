@@ -53,22 +53,26 @@ export function TodayTile({ d, slug, tz }: { d: DashboardData; slug: string; tz:
 }
 
 export function RequestsTile({ d, slug, tz }: { d: DashboardData; slug: string; tz: string }) {
-  const list = d.awaitingConfirmation.slice(0, 3);
+  const total = d.pendingRequests.length + d.awaitingConfirmation.length;
+  const rows = [
+    ...d.pendingRequests.slice(0, 3).map((r) => ({ key: r.id, href: `/b/${slug}/requests`, label: r.petName, sub: "New request" })),
+    ...d.awaitingConfirmation.slice(0, 3).map((a) => ({ key: a.id, href: `/b/${slug}/appointments/${a.id}`, label: a.petName, sub: `Online booking · ${day(a.startsAt, tz)}, ${time(a.startsAt, tz)}` })),
+  ].slice(0, 3);
   return (
     <>
-      <Stat value={d.awaitingConfirmation.length} label="online bookings to confirm" mascot="luna" mood={list.length ? "curious" : "happy"} />
-      {list.length ? (
+      <Stat value={total} label={total === 1 ? "request waiting for you" : "requests waiting for you"} mascot="luna" mood={total ? "curious" : "happy"} />
+      {rows.length ? (
         <ul className="relative z-10 flex flex-col gap-1.5">
-          {list.map((a) => (
-            <li key={a.id}>
-              <Link href={`/b/${slug}/appointments/${a.id}`} className="block rounded-2xl bg-surface/80 px-3 py-2 text-sm transition-colors hover:bg-surface">
-                <span className="font-semibold text-ink">{a.petName}</span> <span className="text-muted">· {day(a.startsAt, tz)}, {time(a.startsAt, tz)}</span>
+          {rows.map((r) => (
+            <li key={r.key}>
+              <Link href={r.href} className="block rounded-2xl bg-surface/80 px-3 py-2 text-sm transition-colors hover:bg-surface">
+                <span className="font-semibold text-ink">{r.label}</span> <span className="text-muted">· {r.sub}</span>
               </Link>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-ink/80">All caught up. New online bookings that need a confirmation land here.</p>
+        <p className="text-sm text-ink/80">All caught up. New booking requests and online bookings that need a confirmation land here.</p>
       )}
     </>
   );

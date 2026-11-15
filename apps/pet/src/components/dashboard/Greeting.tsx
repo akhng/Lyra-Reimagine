@@ -16,7 +16,7 @@ export function Greeting({ businessName, tz, visitsToday, toConfirm, now = new D
     visitsToday > 0
       ? `${who} says you have ${visitsToday} furry ${visitsToday === 1 ? "friend" : "friends"} visiting today!`
       : toConfirm > 0
-        ? `${who} spotted ${toConfirm} online ${toConfirm === 1 ? "booking" : "bookings"} waiting for your OK.`
+        ? `${who} spotted ${toConfirm} ${toConfirm === 1 ? "request" : "requests"} waiting for your OK.`
         : `${who} says it's a calm one today. Perfect for planning ahead.`;
   const date = new Intl.DateTimeFormat("en-AU", { weekday: "long", day: "numeric", month: "long", timeZone: tz }).format(now);
   return (

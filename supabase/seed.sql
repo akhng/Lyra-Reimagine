@@ -137,3 +137,33 @@ begin
     insert into public.appointment_services (business_id, appointment_id, service_id, name, duration_minutes, price_cents) values (biz, appt, svc.id, svc.name, svc.duration_minutes, svc.base_price_cents);
   end loop;
 end $$;
+
+-- Customer portal demo (transformation R3). LOCAL TEST DATA ONLY.
+--   sarah.nguyen@example.test (password-123) — pet owner; her account links to the
+--   existing customer record at Fluff & Fold, with Mochi and Biscuit as her own pet profiles.
+insert into auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, recovery_token, email_change_token_new, email_change)
+values ('00000000-0000-0000-0000-000000000000', 'eeeeeeee-0000-4000-8000-000000000001', 'authenticated', 'authenticated', 'sarah.nguyen@example.test', crypt('password-123', gen_salt('bf')), now(), '{"provider":"email","providers":["email"]}', '{"full_name":"Sarah Nguyen","intent":"owner"}', now(), now(), '', '', '', '')
+on conflict (id) do nothing;
+insert into auth.identities (id, user_id, provider_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
+select gen_random_uuid(), u.id, u.id::text, jsonb_build_object('sub', u.id::text, 'email', u.email), 'email', now(), now(), now()
+from auth.users u where u.email = 'sarah.nguyen@example.test' and not exists (select 1 from auth.identities i where i.user_id = u.id);
+
+do $$
+declare
+  biz constant uuid := 'd0000000-0000-4000-8000-0000000000d1';
+  sarah constant uuid := 'eeeeeeee-0000-4000-8000-000000000001';
+  cust uuid; p record; op uuid;
+begin
+  if exists (select 1 from public.owner_pets where user_id = sarah) then return; end if;
+  insert into public.marketplace_profiles (business_id, listed, headline, about, suburb, mascot)
+  values (biz, true, 'Gentle, fear-free grooming in Fitzroy', 'A small team of groomers who take their time. Cats and dogs welcome, with quiet appointments for nervous pets.', 'Fitzroy', 'coco')
+  on conflict (business_id) do nothing;
+  select c.id into cust from public.customers c join public.customer_contacts cc on cc.customer_id = c.id where c.business_id = biz and cc.email = 'sarah.nguyen@example.test';
+  update public.customers set account_user_id = sarah where id = cust;
+  for p in select * from public.pets where customer_id = cust loop
+    insert into public.owner_pets (user_id, name, species, breed, size, coat_type, grooming_preferences, care_notes, date_of_birth)
+    values (sarah, p.name, p.species, p.breed, p.size, p.coat_type, case when p.species = 'cat' then 'Teddy-bear face, short tidy' else 'Brush out and tidy feathers' end, p.behaviour, case when p.species = 'cat' then date '2021-04-12' else date '2019-09-03' end)
+    returning id into op;
+    update public.pets set owner_pet_id = op, owner_notes = public.owner_notes_text(case when p.species = 'cat' then 'Teddy-bear face, short tidy' else 'Brush out and tidy feathers' end, p.behaviour) where id = p.id;
+  end loop;
+end $$;

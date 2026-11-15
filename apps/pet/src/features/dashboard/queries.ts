@@ -15,6 +15,7 @@ export type DashboardData = {
   layout: Layout;
   today: CalendarAppointment[];
   awaitingConfirmation: CalendarAppointment[];
+  pendingRequests: Array<{ id: string; petName: string; createdAt: string }>;
   groomers: Array<{ id: string; name: string; until: string | null; off: boolean }>;
   customers: { total: number; newThisMonth: number; due: number; pets: number };
   services: { active: number; top: Array<{ name: string; count: number }> };
@@ -34,7 +35,8 @@ export async function getDashboard(ctx: BusinessContext): Promise<DashboardData>
   const weekday = isoWeekday(today);
   const nowIso = new Date().toISOString();
 
-  const [layoutRow, todays, upcoming, team, hours, timeOff, directory, pets, services, bookedServices, completedRows, onlineCount, groomCount] = await Promise.all([
+  const [pending, layoutRow, todays, upcoming, team, hours, timeOff, directory, pets, services, bookedServices, completedRows, onlineCount, groomCount] = await Promise.all([
+    db.from("booking_requests").select("id, created_at, pets!booking_requests_pet_id_business_id_fkey(name)").eq("business_id", business.id).in("status", ["awaiting_review", "open"]).order("created_at").limit(50),
     db.from("dashboard_layouts").select("layout").eq("business_id", business.id).eq("user_id", userId).maybeSingle(),
     appointmentsBetween(business.id, startOf(today, tz), startOf(addDays(today, 1), tz)),
     appointmentsBetween(business.id, nowIso, startOf(addDays(today, 30), tz)),
@@ -78,6 +80,7 @@ export async function getDashboard(ctx: BusinessContext): Promise<DashboardData>
   return {
     layout: normaliseLayout(layoutRow.data?.layout),
     today: todays,
+    pendingRequests: (pending.data ?? []).map((r) => ({ id: r.id, createdAt: r.created_at, petName: (r.pets as unknown as { name: string } | null)?.name ?? "A pet" })),
     awaitingConfirmation: upcoming.filter((a) => a.status === "booked" && a.source === "online"),
     groomers,
     customers: { total: directory.length, newThisMonth: directory.filter((c) => c.created_at.slice(0, 10) >= monthStart).length, due: segments.filter((s) => s.includes("due")).length, pets: pets.count ?? 0 },

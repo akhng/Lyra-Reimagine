@@ -35,6 +35,11 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
         <CardDescription>Opening hours, team hours, time off, closures and your public booking page.</CardDescription>
         <Link href={`/b/${slug}/settings/hours`} className={`${buttonVariants({ variant: "secondary" })} mt-4`}>Manage hours &amp; online booking</Link>
       </Card>
+      <Card aria-labelledby="listing-title">
+        <CardTitle id="listing-title">Lyra Pet listing</CardTitle>
+        <CardDescription>Let pet owners find your salon and send booking requests you confirm.</CardDescription>
+        <Link href={`/b/${slug}/settings/listing`} className={`${buttonVariants({ variant: "secondary" })} mt-4`}>Manage your listing</Link>
+      </Card>
       <Card id="locations" aria-labelledby="locations-title">
         <CardTitle id="locations-title">Locations</CardTitle>
         <CardDescription>Salons, shopfronts or a mobile van. Calendars and reports can be split by location.</CardDescription>

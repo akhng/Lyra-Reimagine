@@ -17,8 +17,8 @@ export function photoProblem(file: File): string | null {
  * server body-size limit). Storage RLS only accepts paths under a business
  * the user belongs to. Returns the stored path, or null on failure.
  */
-export async function uploadPhoto(folder: string, file: File): Promise<string | null> {
+export async function uploadPhoto(folder: string, file: File, bucket: "media" | "owner-media" = "media"): Promise<string | null> {
   const path = `${folder}/${crypto.randomUUID()}.${EXT[file.type] ?? "jpg"}`;
-  const { error } = await createSupabaseBrowserClient().storage.from("media").upload(path, file, { contentType: file.type, upsert: false });
+  const { error } = await createSupabaseBrowserClient().storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
   return error ? null : path;
 }

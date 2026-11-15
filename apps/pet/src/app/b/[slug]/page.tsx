@@ -31,7 +31,7 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
   const tz = business.timezone;
   const all: Record<TileId, TileView> = {
     today: { title: "Today's appointments", href: `/b/${slug}/calendar`, action: "Open calendar", tint: "bg-primary-tint", node: <TodayTile d={d} slug={slug} tz={tz} /> },
-    requests: { title: "Booking requests", href: d.awaitingConfirmation[0] ? `/b/${slug}/appointments/${d.awaitingConfirmation[0].id}` : `/b/${slug}/calendar`, action: d.awaitingConfirmation.length ? "Review the first" : "Open calendar", tint: "bg-coral-tint", node: <RequestsTile d={d} slug={slug} tz={tz} /> },
+    requests: { title: "Booking requests", href: `/b/${slug}/requests`, action: d.pendingRequests.length ? "Review requests" : "Open requests", tint: "bg-coral-tint", node: <RequestsTile d={d} slug={slug} tz={tz} /> },
     groomers: { title: "Available groomers", href: `/b/${slug}/settings/hours`, action: "Team hours", tint: "bg-sky-tint", node: <GroomersTile d={d} /> },
     customers: { title: "Customers & pets", href: `/b/${slug}/customers`, action: "Open customers", tint: "bg-mint-tint", node: <CustomersTile d={d} /> },
     services: { title: "Grooming services", href: `/b/${slug}/services`, action: "Services & prices", tint: "bg-butter-tint", node: <ServicesTile d={d} /> },
@@ -51,7 +51,7 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
   ];
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8">
-      <Greeting businessName={business.name} tz={tz} visitsToday={d.today.length} toConfirm={d.awaitingConfirmation.length} />
+      <Greeting businessName={business.name} tz={tz} visitsToday={d.today.length} toConfirm={d.awaitingConfirmation.length + d.pendingRequests.length} />
       {(role !== "owner" && role !== "manager") || steps.every((x) => x.done) ? null : (
       <Card aria-labelledby="setup-title">
         <CardTitle id="setup-title">Get set up</CardTitle>

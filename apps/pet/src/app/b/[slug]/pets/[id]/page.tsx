@@ -86,6 +86,13 @@ export default async function PetProfile({ params, searchParams }: { params: Pro
           <Facts items={careAlerts} />
         </section>
       ) : null}
+      {pet.owner_notes ? (
+        <section aria-labelledby="owner-notes-title" className="rounded-[var(--radius-card)] bg-sky-tint p-5">
+          <h2 id="owner-notes-title" className="font-display text-lg font-semibold text-ink">From the owner&apos;s pet profile</h2>
+          <p className="mt-1 text-sm whitespace-pre-line text-ink">{pet.owner_notes}</p>
+          <p className="mt-2 text-xs text-muted">Written by the owner in their Lyra Pet account and kept up to date by them.</p>
+        </section>
+      ) : null}
       <div className="grid gap-5 lg:grid-cols-2">
         <Card aria-labelledby="prefs-title">
           <CardTitle id="prefs-title">Grooming preferences</CardTitle>

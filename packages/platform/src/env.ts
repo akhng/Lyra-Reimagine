@@ -11,7 +11,11 @@ const optional = z
   .optional()
   .transform((v) => (v === "" ? undefined : v));
 
-const supabaseUrl = z.string().superRefine((value, ctx) => {
+/** Values pasted into hosting dashboards often carry spaces, newlines or quotes. */
+const cleaned = z.string().transform((v) => v.trim().replace(/^["']|["']$/g, "").trim());
+const key = cleaned.pipe(z.string().min(20));
+
+const supabaseUrl = cleaned.transform((v) => v.replace(/\/+$/, "")).pipe(z.string()).superRefine((value, ctx) => {
   let url: URL;
   try {
     url = new URL(value);
@@ -19,19 +23,21 @@ const supabaseUrl = z.string().superRefine((value, ctx) => {
     ctx.addIssue({ code: "custom", message: `is not a valid URL ("${value}")` });
     return;
   }
-  if (url.pathname !== "/" || value.endsWith("/")) ctx.addIssue({ code: "custom", message: `must be only the project address (${url.origin})` });
+  if (url.pathname !== "/") ctx.addIssue({ code: "custom", message: `must be only the project address (${url.origin})` });
   const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
   if (url.protocol !== "https:" && !local) ctx.addIssue({ code: "custom", message: "must start with https://" });
 });
 
 const clientSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: supabaseUrl,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(20),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: key,
 });
 
-const serverSchema = clientSchema.extend({
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
-  APP_URL: z.url().default("http://localhost:3200"),
+/** Exported for tests. */
+export const serverSchema = clientSchema.extend({
+  SUPABASE_SERVICE_ROLE_KEY: key,
+  // No trailing slash, so links like `${APP_URL}/auth/callback` never get "//".
+  APP_URL: cleaned.pipe(z.url()).transform((v) => v.replace(/\/+$/, "")).default("http://localhost:3200"),
   ANTHROPIC_API_KEY: optional,
   LYRA_MODEL_PRIMARY: optional,
   LYRA_MODEL_FAST: optional,

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { requestWhen } from "@/components/portal/when";
 import { myBookings } from "@/features/portal/queries";
 import { ACTIVE_REQUEST, STATUS_TEXT } from "@/features/portal/schemas";
+import { nowMs } from "@/features/scheduling/time";
 
 export const metadata: Metadata = { title: "Bookings" };
 const fmt = (iso: string, tz: string) => new Intl.DateTimeFormat("en-AU", { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: tz }).format(new Date(iso));
@@ -13,7 +14,7 @@ const fmt = (iso: string, tz: string) => new Intl.DateTimeFormat("en-AU", { week
 /** Requests waiting for a reply, upcoming appointments and grooming history, across every salon. */
 export default async function Bookings() {
   const { requests, appointments } = await myBookings();
-  const now = Date.now();
+  const now = nowMs();
   const waiting = requests.filter((r) => ACTIVE_REQUEST.includes(r.status));
   const upcoming = appointments.filter((a) => Date.parse(a.startsAt) > now && !["cancelled", "no_show", "completed"].includes(a.status)).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   const history = appointments.filter((a) => a.status === "completed");

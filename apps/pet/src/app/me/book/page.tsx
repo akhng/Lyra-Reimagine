@@ -52,7 +52,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ p
         <EmptyState art={<Mascot name="coco" mood="curious" className="w-28" />} title="Add a pet first" description="Requests are for one of your pets, so the salon knows who's coming." action={<Link href="/me/pets/new" className={buttonVariants()}>Add a pet</Link>} />
       ) : !pet ? (
         <section aria-labelledby="choose-pet" className="flex flex-col gap-3">
-          <h2 id="choose-pet" className="font-display text-xl font-semibold text-ink">1. Who's getting groomed?</h2>
+          <h2 id="choose-pet" className="font-display text-xl font-semibold text-ink">1. Who&apos;s getting groomed?</h2>
           <ul className="grid gap-3 sm:grid-cols-2">
             {pets.map((p) => (
               <li key={p.id}>

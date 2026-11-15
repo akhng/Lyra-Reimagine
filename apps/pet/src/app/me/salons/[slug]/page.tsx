@@ -23,7 +23,7 @@ export default async function Salon({ params }: { params: Promise<{ slug: string
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card>
           <h2 className="font-display text-xl font-semibold text-ink">Services and prices</h2>
-          <p className="text-sm text-muted">Estimates. Size prices apply when your pet's size is known.</p>
+          <p className="text-sm text-muted">Estimates. Size prices apply when your pet&apos;s size is known.</p>
           <ul className="mt-4 flex flex-col divide-y divide-border">
             {s.services.map((v) => (
               <li key={v.id} className="flex items-start justify-between gap-4 py-3">

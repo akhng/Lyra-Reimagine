@@ -11,6 +11,7 @@ test("a new groomer signs up, confirms their email, creates a business and fills
     await page.goto("/");
     await noSeriousViolations(page);
     await page.getByRole("link", { name: "Start your free trial" }).click();
+    await page.getByText("A grooming business", { exact: true }).click();
     await page.getByLabel("Your name").fill("Pat Groomer");
     await page.getByLabel("Email").fill(email);
     await page.getByLabel("Password").fill("a-strong-passphrase-42");

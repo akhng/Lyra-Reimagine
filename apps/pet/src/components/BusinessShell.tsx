@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, LayoutDashboard, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
+import { CalendarDays, Inbox, LayoutDashboard, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -20,6 +20,7 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
   const items: Item[] = [
     { href: `/b/${slug}`, label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: `/b/${slug}/calendar`, label: "Calendar", icon: CalendarDays },
+    { href: `/b/${slug}/requests`, label: "Requests", icon: Inbox },
     { href: `/b/${slug}/customers`, label: "Customers", icon: Users },
     { href: `/b/${slug}/pets`, label: "Pets", icon: PawPrint },
     { href: `/b/${slug}/grooming`, label: "Grooming records", icon: Scissors },

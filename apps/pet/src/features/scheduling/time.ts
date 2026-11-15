@@ -55,3 +55,6 @@ export function localToday(tz: string, now: Date = new Date()): string {
 export function isoFromNow(days: number): string {
   return new Date(Date.now() + days * 86_400_000).toISOString();
 }
+
+/** The current time in milliseconds, for server-rendered comparisons ("upcoming", "can still cancel"). */
+export const nowMs = (): number => Date.now();

@@ -120,7 +120,8 @@ test("a customer books online, adds it to their calendar, changes the time and c
     const main = page.getByRole("main");
     await expect(main.getByRole("heading", { name: "Sudsy Paws" })).toBeVisible();
     await main.getByRole("checkbox", { name: /Full groom/ }).check();
-    const day = main.getByRole("group", { name: "Day" }).getByRole("button").nth(1);
+    // Two days out, so the booking stays outside the 24-hour change/cancel window whatever the time of day.
+    const day = main.getByRole("group", { name: "Day" }).getByRole("button").nth(2);
     await day.click();
     await main.getByRole("group", { name: /^Times on/ }).getByRole("button").first().click();
     await main.getByLabel("First name").fill("Casey");
@@ -150,7 +151,7 @@ test("a customer books online, adds it to their calendar, changes the time and c
     expect(appt?.source).toBe("online");
 
     await main.getByRole("button", { name: "Change time" }).click();
-    await main.getByRole("group", { name: "Day" }).getByRole("button").nth(2).click();
+    await main.getByRole("group", { name: "Day" }).getByRole("button").nth(3).click();
     await main.getByRole("group", { name: /^Times on/ }).getByRole("button").first().click();
     await main.getByRole("button", { name: "Move to this time" }).click();
     await expect(main.getByText("Your appointment has been moved.")).toBeVisible();

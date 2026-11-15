@@ -10,6 +10,7 @@ import { requestWhen } from "@/components/portal/when";
 import { myBookings } from "@/features/portal/queries";
 import { STATUS_TEXT } from "@/features/portal/schemas";
 import { formatAud } from "@/features/services/pricing";
+import { nowMs } from "@/features/scheduling/time";
 
 export const metadata: Metadata = { title: "Your request" };
 
@@ -29,7 +30,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
   const reached = new Set(r.events.map((e) => e.status));
   const closed = ["cancelled", "rejected", "expired"].includes(r.status);
   const fresh = sp.new === "1" && r.status === "awaiting_review";
-  const canCancel = ["submitted", "awaiting_review", "open", "accepted"].includes(r.status) || (r.status === "confirmed" && !!r.appointmentStart && Date.parse(r.appointmentStart) - (r.cancellationHours ?? 0) * 3_600_000 > Date.now());
+  const canCancel = ["submitted", "awaiting_review", "open", "accepted"].includes(r.status) || (r.status === "confirmed" && !!r.appointmentStart && Date.parse(r.appointmentStart) - (r.cancellationHours ?? 0) * 3_600_000 > nowMs());
   const fmt = (iso: string) => new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: r.timezone }).format(new Date(iso));
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">

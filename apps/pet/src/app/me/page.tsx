@@ -8,6 +8,7 @@ import { mascotFor } from "@/components/PetAvatar";
 import { PetCard } from "@/components/portal/PetCard";
 import { myBookings, myFavourites, myOwnerPets } from "@/features/portal/queries";
 import { ACTIVE_REQUEST } from "@/features/portal/schemas";
+import { nowMs } from "@/features/scheduling/time";
 
 export const metadata: Metadata = { title: "My pets" };
 
@@ -18,7 +19,7 @@ export default async function MeHome() {
   const db = await createSupabaseServerClient();
   const [{ data: auth }, pets, bookings, favourites] = await Promise.all([db.auth.getUser(), myOwnerPets(), myBookings(), myFavourites()]);
   const firstName = String(auth.user?.user_metadata?.full_name ?? "").split(" ")[0] || "there";
-  const now = Date.now();
+  const now = nowMs();
   const upcoming = bookings.appointments.filter((a) => Date.parse(a.startsAt) > now && !["cancelled", "no_show", "completed"].includes(a.status)).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   const done = bookings.appointments.filter((a) => a.status === "completed");
   const openRequests = bookings.requests.filter((r) => ACTIVE_REQUEST.includes(r.status));

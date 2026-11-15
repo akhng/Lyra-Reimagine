@@ -29,7 +29,7 @@ export function CustomerShell({ children, staff }: { children: ReactNode; staff:
           <Brand href="/me" />
           <nav aria-label="Main" className="hidden items-center gap-1 sm:flex">
             {ITEMS.map((i) => (
-              <Link key={i.href} href={i.href} aria-current={active(i) ? "page" : undefined} className={cn("inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors", active(i) ? "bg-primary text-white" : "text-ink hover:bg-surface-2")}>
+              <Link key={i.href} href={i.href} aria-current={active(i) ? "page" : undefined} className={cn("inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold", active(i) ? "bg-primary text-white" : "text-ink hover:bg-surface-2")}>
                 <i.icon className="size-4" aria-hidden /> {i.label}
               </Link>
             ))}

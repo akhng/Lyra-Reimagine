@@ -26,7 +26,7 @@ export type CalendarAppointment = {
   cancellationReason: string | null;
 };
 
-const SELECT = "id, location_id, groomer_id, starts_at, service_ends_at, ends_at, status, source, customer_id, pet_id, notes, customer_notes, price_estimate_cents, price_from, series_id, grooming_record_id, cancellation_reason, customers!inner(first_name, last_name), pets!inner(name), appointment_services(name, position)";
+const SELECT = "id, location_id, groomer_id, starts_at, service_ends_at, ends_at, status, source, customer_id, pet_id, notes, customer_notes, price_estimate_cents, price_from, series_id, grooming_record_id, cancellation_reason, customers!inner(first_name, last_name), pets!appointments_pet_id_business_id_fkey!inner(name), appointment_services(name, position)";
 
 type Row = {
   id: string; location_id: string; groomer_id: string; starts_at: string; service_ends_at: string; ends_at: string; status: AppointmentStatus; source: string; customer_id: string; pet_id: string;

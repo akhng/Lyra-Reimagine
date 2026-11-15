@@ -16,10 +16,23 @@ export function SignUpForm() {
   const [state, action, pending] = useActionState(signUpAction, undefined);
   return (
     <Card className="p-8">
-      <h1 className="font-display text-2xl font-bold">Start your free trial</h1>
-      <p className="mt-1 text-sm text-muted">Set up your grooming business in a few minutes.</p>
+      <h1 className="font-display text-2xl font-bold">Create your account</h1>
+      <p className="mt-1 text-sm text-muted">For pet owners booking grooms, and for grooming businesses.</p>
       <form action={action} className="mt-6 flex flex-col gap-4" noValidate>
         <FormError state={state} />
+        <fieldset className="grid grid-cols-2 gap-2">
+          <legend className="mb-1.5 text-sm font-medium text-text">I am…</legend>
+          {[
+            { value: "owner", title: "A pet owner", body: "Book grooms and keep pet profiles" },
+            { value: "business", title: "A grooming business", body: "Run bookings, team and customers" },
+          ].map((o, i) => (
+            <label key={o.value} className="flex cursor-pointer flex-col gap-0.5 rounded-[var(--radius-control)] border-2 border-border bg-surface p-3 text-sm has-[:checked]:border-primary has-[:checked]:bg-primary-tint has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-primary/40">
+              <input type="radio" name="intent" value={o.value} defaultChecked={i === 0} className="sr-only" />
+              <span className="font-bold text-ink">{o.title}</span>
+              <span className="text-xs text-muted">{o.body}</span>
+            </label>
+          ))}
+        </fieldset>
         <FormField id="fullName" label="Your name" error={state?.fields?.fullName}>
           {(p) => <Input {...p} name="fullName" autoComplete="name" required />}
         </FormField>

@@ -468,3 +468,24 @@ returns jsonb language sql stable security definer set search_path = '' as $$
 $$;
 revoke all on function public.my_bookings() from public, anon;
 grant execute on function public.my_bookings() to authenticated;
+
+-- Favourites by slug (pet owners can't read the businesses table itself).
+create or replace function public.toggle_favourite_business(p_slug text)
+returns boolean language plpgsql security definer set search_path = '' as $$
+declare uid uuid := auth.uid(); biz uuid;
+begin
+  if uid is null then raise exception 'not_authenticated' using errcode = '28000'; end if;
+  select b.id into biz from public.businesses b join public.marketplace_profiles mp on mp.business_id = b.id and mp.listed where b.slug = lower(btrim(p_slug)) and b.status = 'active';
+  if biz is null then raise exception 'not_found' using errcode = 'P0002'; end if;
+  delete from public.favourite_businesses where user_id = uid and business_id = biz;
+  if found then return false; end if;
+  insert into public.favourite_businesses (user_id, business_id) values (uid, biz);
+  return true;
+end;
+$$;
+create or replace function public.my_favourite_slugs()
+returns text[] language sql stable security definer set search_path = '' as $$
+  select coalesce(array_agg(b.slug order by f.created_at), '{}') from public.favourite_businesses f join public.businesses b on b.id = f.business_id where f.user_id = auth.uid();
+$$;
+revoke all on function public.toggle_favourite_business(text), public.my_favourite_slugs() from public, anon;
+grant execute on function public.toggle_favourite_business(text), public.my_favourite_slugs() to authenticated;

@@ -19,10 +19,11 @@ export async function signUpAction(_prev: AuthState, form: FormData): Promise<Au
   const parsed = signUpSchema.safeParse({ fullName: form.get("fullName"), email: form.get("email"), password: form.get("password") });
   if (!parsed.success) return { fields: Object.fromEntries(parsed.error.issues.map((i) => [String(i.path[0]), i.message])) };
   const db = await createSupabaseServerClient();
+  const intent = form.get("intent") === "business" ? "business" : "owner";
   const { error } = await db.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
-    options: { data: { full_name: parsed.data.fullName }, emailRedirectTo: `${serverEnv().APP_URL}/auth/callback?next=/home` },
+    options: { data: { full_name: parsed.data.fullName, intent }, emailRedirectTo: `${serverEnv().APP_URL}/auth/callback?next=/home` },
   });
   if (error) {
     // Codes and statuses only — never the email address.

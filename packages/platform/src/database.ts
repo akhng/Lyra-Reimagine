@@ -827,6 +827,9 @@ isOneToOne: false
 "my_bookings":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"my_favourite_slugs":
+{ Args: Record<PropertyKey, never>; Returns: (string)[]
+                           },
 "owner_media_visible":
 { Args: { "p_name": string }; Returns: boolean
                            },
@@ -853,6 +856,9 @@ isOneToOne: false
                            },
 "submit_booking_request":
 { Args: { "p_notes": string,"p_owner_pet": string,"p_preferred_start": string,"p_service_ids": (string)[],"p_slug": string,"p_windows": Json }; Returns: string
+                           },
+"toggle_favourite_business":
+{ Args: { "p_slug": string }; Returns: boolean
                            }
           }
           Enums: {

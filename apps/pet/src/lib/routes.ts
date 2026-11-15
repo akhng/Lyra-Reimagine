@@ -1,6 +1,6 @@
 /** Pages that need a signed-in user. Everything else (landing, auth, public booking) is open. */
 export function isProtectedRoute(pathname: string): boolean {
-  return pathname === "/home" || pathname === "/onboarding" || pathname.startsWith("/onboarding/") || pathname.startsWith("/b/");
+  return pathname === "/home" || pathname === "/onboarding" || pathname.startsWith("/onboarding/") || pathname.startsWith("/b/") || pathname === "/me" || pathname.startsWith("/me/");
 }
 
 /** Auth pages a signed-in user should skip. */

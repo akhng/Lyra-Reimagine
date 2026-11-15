@@ -43,7 +43,7 @@ test("owner sets up a service, adds a customer with two pets, records a groom wi
   try {
     await login(page, b.owner.email, b.slug);
     const main = page.getByRole("main");
-    await expect(main.getByText("Customers", { exact: true })).toBeVisible();
+    await expect(main.getByRole("link", { name: "Customers & pets", exact: true })).toBeVisible();
     await noSeriousViolations(page);
 
     // Services & pricing: base price plus size prices and a matting surcharge.
@@ -166,10 +166,11 @@ test("owner sets up a service, adds a customer with two pets, records a groom wi
     // Dashboard counts real records.
     await navigate(page, "Dashboard");
     await expect(page).toHaveURL(new RegExp(`/b/${b.slug}$`));
-    const kpis = main.getByRole("list", { name: "Key numbers" });
-    await expect(kpis.getByRole("link", { name: /Customers/ })).toContainText("1");
-    await expect(kpis.getByRole("link", { name: /^2\s*Pets/ })).toBeVisible();
-    await expect(kpis.getByRole("link", { name: /Grooms this month/ })).toContainText("1");
+    // The dashboard tiles count the real records: two pets for one customer, and one recorded groom.
+    const customersTile = main.locator("li").filter({ has: page.getByRole("link", { name: "Customers & pets", exact: true }) });
+    await expect(customersTile).toContainText("pets · 1 customers");
+    await expect(customersTile.getByText("2", { exact: true }).first()).toBeVisible();
+    await expect(main.getByRole("progressbar", { name: "History Keeper" })).toHaveAttribute("aria-valuenow", "1");
     await noSeriousViolations(page);
   } finally {
     await b.cleanup();

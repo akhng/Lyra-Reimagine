@@ -44,6 +44,12 @@ Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths s
 - **Availability** (`features/scheduling/availability.ts`) is a pure function: opening ∩ staff hours, minus time off, closures and busy blocks, then notice, horizon and slot step. It is for display; the database re-checks every booking.
 - **Public booking** (`/book/<slug>`, no customer accounts): anonymous visitors never read tables. Security-definer functions expose only what booking needs: `booking_context` (no customer data), `create_online_booking` (re-checks policy, hours, notice and overlap; finds or creates the customer and pet; rate limited per business, email and client via `booking_attempts`), and `get/cancel/reschedule_booking_by_token`. The customer gets a private manage link; only the SHA-256 hash of its token is stored, and staff can't read the hash. A honeypot field and a minimum fill time block simple bots. Confirmation is the manage page plus an `.ics` file until email/SMS arrive in Phase 4.
 
+## Business dashboard (transformation R2, ADR 0003)
+
+- A greeting from the day's mascot with a message from real counts, then a personal **board** of tiles: today's appointments, booking requests (online bookings awaiting confirmation until the R4 request queue), available groomers (staff hours and time off now), customers and pets, services (most booked in 30 days), revenue (rolling 7 days of completed appointment estimates, labelled as estimates) and achievements (progress from real records; awards arrive with R5). Customer reviews and loyalty tiles arrive with R5, when that data exists.
+- Tiles depend on role (`allowedTiles`): money for owners and managers, booking requests for the front desk.
+- `@dnd-kit` handles dragging (pointer, short-press touch, keyboard on the handle); Customise mode adds pin, widen, hide/show and move earlier/later buttons. Every tile is also a link. Layouts are saved per person and business in `dashboard_layouts` (RLS: own row, member only, 4 KB cap) and normalised by pure functions in `features/dashboard/layout.ts`.
+
 ## Request flow
 
 `UI (Server Components / Server Actions) → feature actions (Zod validation, permission check) → user-scoped Supabase client (RLS) → Postgres`. Elevated operations use security-definer functions that check `auth.uid()` themselves.

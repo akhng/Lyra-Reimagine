@@ -46,7 +46,7 @@ function PhotoPicker({ kind, picks, onAdd, onRemove, disabled }: { kind: Kind; p
  * storage under it, then register them. If photo upload fails the record
  * is kept and the user is told, so notes are never lost.
  */
-export function GroomingRecordForm({ slug, businessId, petId, today, groomers, defaultGroomerId, services }: { slug: string; businessId: string; petId: string; today: string; groomers: Array<{ id: string; name: string }>; defaultGroomerId: string | null; services: Array<{ id: string; name: string }> }) {
+export function GroomingRecordForm({ slug, businessId, petId, today, groomers, defaultGroomerId, services, appointmentId = null, preselectedServiceIds = [], defaultDate }: { slug: string; businessId: string; petId: string; today: string; groomers: Array<{ id: string; name: string }>; defaultGroomerId: string | null; services: Array<{ id: string; name: string }>; appointmentId?: string | null; preselectedServiceIds?: string[]; defaultDate?: string }) {
   const router = useRouter();
   const [state, setState] = useState<FormState>(undefined);
   const [busy, setBusy] = useState<string | null>(null);
@@ -71,6 +71,7 @@ export function GroomingRecordForm({ slug, businessId, petId, today, groomers, d
     const result = await createGroomingRecordAction(slug, {
       petId, groomedOn: get("groomedOn"), groomerId: get("groomerId"), serviceIds: form.getAll("serviceIds").map(String), durationMinutes: get("durationMinutes"),
       haircut: get("haircut"), shampoo: get("shampoo"), customerInstructions: get("customerInstructions"), observations: get("observations"), customerFeedback: get("customerFeedback"),
+      appointmentId,
     });
     if (!result?.ok || !result.id) {
       setState(result);
@@ -96,7 +97,7 @@ export function GroomingRecordForm({ slug, businessId, petId, today, groomers, d
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
       <Section title="The groom">
-        <TextField name="groomedOn" label="Date" type="date" state={state} defaultValue={today} max={today} required />
+        <TextField name="groomedOn" label="Date" type="date" state={state} defaultValue={defaultDate ?? today} max={today} required />
         <FormField id="f-groomerId" label="Groomer" error={state?.fields?.groomerId}>
           {(p) => (
             <Select {...p} name="groomerId" defaultValue={defaultGroomerId ?? ""}>
@@ -115,7 +116,7 @@ export function GroomingRecordForm({ slug, businessId, petId, today, groomers, d
             <div className="mt-2 flex flex-wrap gap-2">
               {services.map((s) => (
                 <label key={s.id} className="flex min-h-11 items-center gap-2 rounded-full border border-border px-4 text-sm has-checked:border-primary has-checked:bg-primary-tint">
-                  <input type="checkbox" name="serviceIds" value={s.id} className="size-4 accent-[var(--primary)]" /> {s.name}
+                  <input type="checkbox" name="serviceIds" value={s.id} defaultChecked={preselectedServiceIds.includes(s.id)} className="size-4 accent-[var(--primary)]" /> {s.name}
                 </label>
               ))}
             </div>

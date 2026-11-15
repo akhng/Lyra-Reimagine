@@ -36,6 +36,14 @@ Each product has its own Supabase project (Lyra Pet: Sydney region in production
 
 Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths start with the business id: `<business>/grooming/<record>/<uuid>.<ext>` and `<business>/pets/<pet>/<uuid>.<ext>`. Storage policies use `media_business(path)` so only members can read or upload, and only owners and managers delete. The browser uploads directly (avoiding the server request-size limit), then a server action validates each path against the business and record before saving the photo rows. Pages show photos with one-hour signed URLs.
 
+## Scheduling and online booking (Phase 3)
+
+- **Hours:** `location_hours` (opening hours, split shifts allowed), `staff_hours`, `staff_time_off` and `business_closures`. Times are local wall-clock times with ISO weekdays (1 = Monday); conversion to UTC happens only in `apps/pet/src/features/scheduling/time.ts` (Intl-based, tested across daylight-saving changes).
+- **Appointments** store the start, the service end and the block end (service plus clean-up buffer), with `appointment_services` keeping a snapshot of each service's name, duration and price. **No double-booking is enforced by an exclusion constraint** (`btree_gist`) on (groomer, block) for every appointment that isn't cancelled or a no-show, so two simultaneous bookings can't both succeed. Recurring bookings are `appointment_series` plus ordinary appointments; clashing repeats are skipped and listed.
+- **Permissions:** all staff read the calendar; owners, managers and reception create and change appointments; owners and managers set hours and the booking policy. Groomers change the status of their own appointments only, through `set_appointment_status()`. Nothing is deleted (cancellations are recorded).
+- **Availability** (`features/scheduling/availability.ts`) is a pure function: opening ∩ staff hours, minus time off, closures and busy blocks, then notice, horizon and slot step. It is for display; the database re-checks every booking.
+- **Public booking** (`/book/<slug>`, no customer accounts): anonymous visitors never read tables. Security-definer functions expose only what booking needs: `booking_context` (no customer data), `create_online_booking` (re-checks policy, hours, notice and overlap; finds or creates the customer and pet; rate limited per business, email and client via `booking_attempts`), and `get/cancel/reschedule_booking_by_token`. The customer gets a private manage link; only the SHA-256 hash of its token is stored, and staff can't read the hash. A honeypot field and a minimum fill time block simple bots. Confirmation is the manage page plus an `.ics` file until email/SMS arrive in Phase 4.
+
 ## Request flow
 
 `UI (Server Components / Server Actions) → feature actions (Zod validation, permission check) → user-scoped Supabase client (RLS) → Postgres`. Elevated operations use security-definer functions that check `auth.uid()` themselves.
@@ -52,7 +60,7 @@ Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths s
 |---|---|
 | 1 | Foundation: monorepo, tenancy, auth, business registration, settings ✓ |
 | 2 | Core grooming: dashboard, customers, pets, grooming history (before/after photos), services and pricing ✓ |
-| 3 | Scheduling: calendars, booking engine with database-level overlap prevention, public booking portal, recurring bookings, cancellations, waitlist |
+| 3 | Scheduling: calendars, booking engine with database-level overlap prevention, public booking portal, recurring bookings, cancellations, waitlist ✓ |
 | 4 | Operations: staff and rosters, invitations, payments (Stripe Connect), email/SMS notifications |
 | 5 | AI and growth: grooming assistant, retention, loyalty, marketing, business intelligence |
 | 6 | SaaS commercialisation: plans and entitlements, Stripe Billing, platform administration, usage |

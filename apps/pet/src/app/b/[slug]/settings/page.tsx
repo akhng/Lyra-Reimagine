@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Badge, Card, CardDescription, CardTitle } from "@lyra/ui";
+import Link from "next/link";
+import { Badge, Card, CardDescription, CardTitle, buttonVariants } from "@lyra/ui";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { requireBusiness } from "@lyra/platform/tenancy/context";
 import { can } from "@lyra/platform/tenancy/roles";
@@ -29,6 +30,11 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
         </div>
       </Card>
 
+      <Card aria-labelledby="hours-title">
+        <CardTitle id="hours-title">Hours &amp; online booking</CardTitle>
+        <CardDescription>Opening hours, team hours, time off, closures and your public booking page.</CardDescription>
+        <Link href={`/b/${slug}/settings/hours`} className={`${buttonVariants({ variant: "secondary" })} mt-4`}>Manage hours &amp; online booking</Link>
+      </Card>
       <Card id="locations" aria-labelledby="locations-title">
         <CardTitle id="locations-title">Locations</CardTitle>
         <CardDescription>Salons, shopfronts or a mobile van. Calendars and reports can be split by location.</CardDescription>

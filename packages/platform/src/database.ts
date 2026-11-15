@@ -5,7 +5,121 @@ export type Database = {
   
   "public": {
           Tables: {
-            "audit_log": {
+            "appointment_series": {
+                  Row: {
+                    "business_id": string,"created_at": string,"created_by": string | null,"id": string,"interval_weeks": number,"occurrences": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"interval_weeks": number,"occurrences": number
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"interval_weeks"?: number,"occurrences"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "appointment_series_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"appointment_services": {
+                  Row: {
+                    "appointment_id": string,"business_id": string,"duration_minutes": number,"id": string,"name": string,"position": number,"price_cents": number,"service_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "appointment_id": string,"business_id": string,"duration_minutes": number,"id"?: string,"name": string,"position"?: number,"price_cents": number,"service_id"?: string | null
+                  }
+                  Update: {
+                    "appointment_id"?: string,"business_id"?: string,"duration_minutes"?: number,"id"?: string,"name"?: string,"position"?: number,"price_cents"?: number,"service_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "appointment_services_appointment_id_business_id_fkey"
+      columns: ["appointment_id","business_id"]
+isOneToOne: false
+      referencedRelation: "appointments"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "appointment_services_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "appointment_services_service_id_business_id_fkey"
+      columns: ["service_id","business_id"]
+isOneToOne: false
+      referencedRelation: "services"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"appointments": {
+                  Row: {
+                    "business_id": string,"cancellation_reason": string | null,"cancelled_at": string | null,"cancelled_by": string | null,"created_at": string,"created_by": string | null,"customer_id": string,"customer_notes": string | null,"ends_at": string,"groomer_id": string,"grooming_record_id": string | null,"id": string,"location_id": string,"manage_token_hash": string | null,"notes": string | null,"pet_id": string,"price_estimate_cents": number | null,"price_from": boolean,"series_id": string | null,"service_ends_at": string,"source": string,"starts_at": string,"status": Database["public"]['Enums']["appointment_status"],"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"cancellation_reason"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"customer_notes"?: string | null,"ends_at": string,"groomer_id": string,"grooming_record_id"?: string | null,"id"?: string,"location_id": string,"manage_token_hash"?: string | null,"notes"?: string | null,"pet_id": string,"price_estimate_cents"?: number | null,"price_from"?: boolean,"series_id"?: string | null,"service_ends_at": string,"source"?: string,"starts_at": string,"status"?: Database["public"]['Enums']["appointment_status"],"updated_at"?: string
+                  }
+                  Update: {
+                    "business_id"?: string,"cancellation_reason"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"customer_notes"?: string | null,"ends_at"?: string,"groomer_id"?: string,"grooming_record_id"?: string | null,"id"?: string,"location_id"?: string,"manage_token_hash"?: string | null,"notes"?: string | null,"pet_id"?: string,"price_estimate_cents"?: number | null,"price_from"?: boolean,"series_id"?: string | null,"service_ends_at"?: string,"source"?: string,"starts_at"?: string,"status"?: Database["public"]['Enums']["appointment_status"],"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "appointments_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "appointments_customer_id_business_id_fkey"
+      columns: ["customer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "appointments_groomer_id_business_id_fkey"
+      columns: ["groomer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "business_members"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "appointments_grooming_record_id_business_id_fkey"
+      columns: ["grooming_record_id","business_id"]
+isOneToOne: false
+      referencedRelation: "grooming_records"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "appointments_location_id_business_id_fkey"
+      columns: ["location_id","business_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "appointments_pet_id_business_id_fkey"
+      columns: ["pet_id","business_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "appointments_pet_id_customer_id_fkey"
+      columns: ["pet_id","customer_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id","customer_id"]
+    },{
+      foreignKeyName: "appointments_series_id_business_id_fkey"
+      columns: ["series_id","business_id"]
+isOneToOne: false
+      referencedRelation: "appointment_series"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"audit_log": {
                   Row: {
                     "action": string,"actor_id": string | null,"business_id": string | null,"created_at": string,"entity": string | null,"entity_id": string | null,"id": number
                   }
@@ -23,6 +137,72 @@ export type Database = {
 isOneToOne: false
       referencedRelation: "businesses"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"booking_attempts": {
+                  Row: {
+                    "business_id": string,"client_hash": string | null,"created_at": string,"email_hash": string,"id": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"client_hash"?: string | null,"created_at"?: string,"email_hash": string,"id"?: never
+                  }
+                  Update: {
+                    "business_id"?: string,"client_hash"?: string | null,"created_at"?: string,"email_hash"?: string,"id"?: never
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "booking_attempts_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"booking_policies": {
+                  Row: {
+                    "business_id": string,"cancellation_hours": number,"max_days_ahead": number,"min_notice_minutes": number,"online_enabled": boolean,"policy_text": string | null,"slot_step_minutes": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"cancellation_hours"?: number,"max_days_ahead"?: number,"min_notice_minutes"?: number,"online_enabled"?: boolean,"policy_text"?: string | null,"slot_step_minutes"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "business_id"?: string,"cancellation_hours"?: number,"max_days_ahead"?: number,"min_notice_minutes"?: number,"online_enabled"?: boolean,"policy_text"?: string | null,"slot_step_minutes"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "booking_policies_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: true
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"business_closures": {
+                  Row: {
+                    "business_id": string,"created_at": string,"ends_on": string,"id": string,"location_id": string | null,"reason": string | null,"starts_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"ends_on": string,"id"?: string,"location_id"?: string | null,"reason"?: string | null,"starts_on": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"ends_on"?: string,"id"?: string,"location_id"?: string | null,"reason"?: string | null,"starts_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "business_closures_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "business_closures_location_id_business_id_fkey"
+      columns: ["location_id","business_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id","business_id"]
     }
                   ]
                 },"business_members": {
@@ -169,6 +349,32 @@ isOneToOne: false
       referencedColumns: ["id","business_id"]
     }
                   ]
+                },"location_hours": {
+                  Row: {
+                    "business_id": string,"closes": string,"id": string,"location_id": string,"opens": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"closes": string,"id"?: string,"location_id": string,"opens": string,"weekday": number
+                  }
+                  Update: {
+                    "business_id"?: string,"closes"?: string,"id"?: string,"location_id"?: string,"opens"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "location_hours_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "location_hours_location_id_business_id_fkey"
+      columns: ["location_id","business_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
                 },"locations": {
                   Row: {
                     "address_line": string | null,"archived_at": string | null,"business_id": string,"created_at": string,"id": string,"is_mobile": boolean,"name": string,"phone": string | null,"postcode": string | null,"state": string | null,"suburb": string | null,"timezone": string | null,"updated_at": string
@@ -275,22 +481,136 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"staff_hours": {
+                  Row: {
+                    "business_id": string,"ends": string,"id": string,"location_id": string,"member_id": string,"starts": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"ends": string,"id"?: string,"location_id": string,"member_id": string,"starts": string,"weekday": number
+                  }
+                  Update: {
+                    "business_id"?: string,"ends"?: string,"id"?: string,"location_id"?: string,"member_id"?: string,"starts"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "staff_hours_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "staff_hours_location_id_business_id_fkey"
+      columns: ["location_id","business_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "staff_hours_member_id_business_id_fkey"
+      columns: ["member_id","business_id"]
+isOneToOne: false
+      referencedRelation: "business_members"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"staff_time_off": {
+                  Row: {
+                    "business_id": string,"created_at": string,"ends_at": string,"id": string,"member_id": string,"reason": string | null,"starts_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"ends_at": string,"id"?: string,"member_id": string,"reason"?: string | null,"starts_at": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"ends_at"?: string,"id"?: string,"member_id"?: string,"reason"?: string | null,"starts_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "staff_time_off_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "staff_time_off_member_id_business_id_fkey"
+      columns: ["member_id","business_id"]
+isOneToOne: false
+      referencedRelation: "business_members"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"waitlist_entries": {
+                  Row: {
+                    "business_id": string,"created_at": string,"created_by": string | null,"customer_id": string,"earliest_on": string,"id": string,"latest_on": string,"location_id": string | null,"notes": string | null,"pet_id": string,"preferred_groomer_id": string | null,"service_ids": (string)[],"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"earliest_on": string,"id"?: string,"latest_on": string,"location_id"?: string | null,"notes"?: string | null,"pet_id": string,"preferred_groomer_id"?: string | null,"service_ids"?: (string)[],"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"earliest_on"?: string,"id"?: string,"latest_on"?: string,"location_id"?: string | null,"notes"?: string | null,"pet_id"?: string,"preferred_groomer_id"?: string | null,"service_ids"?: (string)[],"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "waitlist_entries_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "waitlist_entries_customer_id_business_id_fkey"
+      columns: ["customer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "waitlist_entries_location_id_business_id_fkey"
+      columns: ["location_id","business_id"]
+isOneToOne: false
+      referencedRelation: "locations"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "waitlist_entries_pet_id_customer_id_fkey"
+      columns: ["pet_id","customer_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id","customer_id"]
+    },{
+      foreignKeyName: "waitlist_entries_preferred_groomer_id_business_id_fkey"
+      columns: ["preferred_groomer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "business_members"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
                 }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            "business_slug_available":
+            "booking_context":
+{ Args: { "p_from": string,"p_slug": string,"p_to": string }; Returns: Json
+                           },
+"business_slug_available":
 { Args: { "p_slug": string }; Returns: boolean
+                           },
+"cancel_booking_by_token":
+{ Args: { "p_token": string }; Returns: undefined
                            },
 "create_business":
 { Args: { "p_location_name"?: string,"p_name": string,"p_slug": string,"p_timezone": string }; Returns: string
+                           },
+"create_online_booking":
+{ Args: { "p_client_hash"?: string,"p_customer": Json,"p_groomer": string,"p_location": string,"p_notes"?: string,"p_pet": Json,"p_service_ids": (string)[],"p_slug": string,"p_starts_at": string }; Returns: Json
                            },
 "customer_directory":
 { Args: { "p_business": string,"p_query"?: string }; Returns: {
               "created_at": string,"first_name": string,"groom_count": number,"id": string,"is_vip": boolean,"last_groomed_on": string,"last_name": string,"next_due_on": string,"pet_names": (string)[]
             }[]
+                           },
+"get_booking_by_token":
+{ Args: { "p_token": string }; Returns: Json
                            },
 "has_business_role":
 { Args: { "p_business": string,"p_roles": (Database["public"]['Enums']["business_role"])[] }; Returns: boolean
@@ -300,10 +620,25 @@ isOneToOne: false
                            },
 "media_business":
 { Args: { "p_name": string }; Returns: string
+                           },
+"pick_groomer":
+{ Args: { "p_business": string,"p_ends": string,"p_exclude"?: string,"p_groomer": string,"p_location": string,"p_starts": string }; Returns: string
+                           },
+"reschedule_booking_by_token":
+{ Args: { "p_groomer"?: string,"p_starts_at": string,"p_token": string }; Returns: Json
+                           },
+"service_price_for":
+{ Args: { "p_breed": string,"p_service": string,"p_size": string }; Returns: number
+                           },
+"set_appointment_status":
+{ Args: { "p_id": string,"p_reason"?: string,"p_status": Database["public"]['Enums']["appointment_status"] }; Returns: undefined
+                           },
+"slot_fits_hours":
+{ Args: { "p_ends": string,"p_groomer": string,"p_location": string,"p_starts": string }; Returns: boolean
                            }
           }
           Enums: {
-            "business_role": "owner"|"manager"|"receptionist"|"groomer","business_status": "active"|"suspended"|"closed","contact_method": "email"|"sms"|"phone","member_status": "active"|"invited"|"suspended","pet_sex": "male"|"female"|"unknown","pet_size": "toy"|"small"|"medium"|"large"|"giant","pet_species": "dog"|"cat"|"other","photo_kind": "before"|"after","plan_tier": "starter"|"growth"|"pro","price_rule_kind": "size"|"breed"|"coat_condition"
+            "appointment_status": "booked"|"confirmed"|"checked_in"|"in_progress"|"completed"|"cancelled"|"no_show","business_role": "owner"|"manager"|"receptionist"|"groomer","business_status": "active"|"suspended"|"closed","contact_method": "email"|"sms"|"phone","member_status": "active"|"invited"|"suspended","pet_sex": "male"|"female"|"unknown","pet_size": "toy"|"small"|"medium"|"large"|"giant","pet_species": "dog"|"cat"|"other","photo_kind": "before"|"after","plan_tier": "starter"|"growth"|"pro","price_rule_kind": "size"|"breed"|"coat_condition"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -419,7 +754,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "business_role": ["owner", "manager", "receptionist", "groomer"],"business_status": ["active", "suspended", "closed"],"contact_method": ["email", "sms", "phone"],"member_status": ["active", "invited", "suspended"],"pet_sex": ["male", "female", "unknown"],"pet_size": ["toy", "small", "medium", "large", "giant"],"pet_species": ["dog", "cat", "other"],"photo_kind": ["before", "after"],"plan_tier": ["starter", "growth", "pro"],"price_rule_kind": ["size", "breed", "coat_condition"]
+            "appointment_status": ["booked", "confirmed", "checked_in", "in_progress", "completed", "cancelled", "no_show"],"business_role": ["owner", "manager", "receptionist", "groomer"],"business_status": ["active", "suspended", "closed"],"contact_method": ["email", "sms", "phone"],"member_status": ["active", "invited", "suspended"],"pet_sex": ["male", "female", "unknown"],"pet_size": ["toy", "small", "medium", "large", "giant"],"pet_species": ["dog", "cat", "other"],"photo_kind": ["before", "after"],"plan_tier": ["starter", "growth", "pro"],"price_rule_kind": ["size", "breed", "coat_condition"]
           }
         }
 } as const

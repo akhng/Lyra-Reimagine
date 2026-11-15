@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AlertTriangle, CalendarClock, Pencil, Scissors } from "lucide-react";
+import { AlertTriangle, CalendarClock, CalendarPlus, Pencil, Scissors } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Card, CardTitle, EmptyState, buttonVariants } from "@lyra/ui";
@@ -9,6 +9,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { PetAvatar } from "@/components/PetAvatar";
 import { PetPhotoUpload } from "@/components/pets/PetPhotoUpload";
 import { petHistory } from "@/features/grooming/queries";
+import { appointmentsForPet } from "@/features/scheduling/queries";
+import { minutesToHhmm, toLocal } from "@/features/scheduling/time";
 import { getPet } from "@/features/pets/queries";
 import { ageLabel } from "@/features/pets/schemas";
 import { listTeam } from "@/features/team/queries";
@@ -41,7 +43,7 @@ export default async function PetProfile({ params, searchParams }: { params: Pro
   const sp = await searchParams;
   const id = uuidOr404(rawId);
   const { business } = await requireBusiness(slug);
-  const [pet, records, team] = await Promise.all([getPet(business.id, id), petHistory(business.id, id), listTeam(business.id)]);
+  const [pet, records, team, upcoming] = await Promise.all([getPet(business.id, id), petHistory(business.id, id), listTeam(business.id), appointmentsForPet(business.id, id, new Date().toISOString())]);
   if (!pet) notFound();
   const today = localDate(business.timezone);
   const last = records[0];
@@ -61,7 +63,8 @@ export default async function PetProfile({ params, searchParams }: { params: Pro
         description={[pet.breed, pet.size, age, pet.sex !== "unknown" ? pet.sex : null].filter((s): s is string => !!s).map((s) => `${s[0]!.toUpperCase()}${s.slice(1)}`).join(" · ") || undefined}
         actions={
           <>
-            <Link href={`/b/${slug}/pets/${id}/groom`} className={buttonVariants()}><Scissors className="size-4" aria-hidden /> Record a groom</Link>
+            <Link href={`/b/${slug}/appointments/new?customer=${pet.customers.id}&pet=${id}`} className={buttonVariants()}><CalendarPlus className="size-4" aria-hidden /> Book</Link>
+            <Link href={`/b/${slug}/pets/${id}/groom`} className={buttonVariants({ variant: "secondary" })}><Scissors className="size-4" aria-hidden /> Record a groom</Link>
             <Link href={`/b/${slug}/pets/${id}/edit`} className={buttonVariants({ variant: "secondary" })}><Pencil className="size-4" aria-hidden /> Edit</Link>
           </>
         }
@@ -92,6 +95,17 @@ export default async function PetProfile({ params, searchParams }: { params: Pro
           <Facts items={[["Coat", [pet.coat_type, pet.coat_colour].filter(Boolean).join(", ") || null], ["Weight", pet.weight_kg ? `${pet.weight_kg} kg` : null], ["Date of birth", pet.date_of_birth ? formatDay(pet.date_of_birth) : null], ["Microchip", pet.microchip], ["Groom every", pet.groom_interval_weeks ? `${pet.groom_interval_weeks} weeks` : null], ["Skin and coat", pet.skin_coat_concerns], ["Emergency contact", pet.emergency_contact]]} />
         </Card>
       </div>
+      {upcoming.length ? (
+        <section aria-labelledby="upcoming-title" className="rounded-[var(--radius-card)] border border-border bg-surface p-5 shadow-[var(--shadow-card)]">
+          <h2 id="upcoming-title" className="font-display text-lg font-semibold text-navy">Upcoming appointments</h2>
+          <ul className="mt-2 flex flex-col gap-1 text-sm">
+            {upcoming.map((a) => {
+              const st = toLocal(Date.parse(a.startsAt), business.timezone);
+              return <li key={a.id}><Link href={`/b/${slug}/appointments/${a.id}`} className="text-primary-text underline-offset-4 hover:underline">{formatDay(st.date)} at {minutesToHhmm(st.minutes)}</Link> · {a.services.join(", ")}</li>;
+            })}
+          </ul>
+        </section>
+      ) : null}
       <GroomComparison petName={pet.name} records={records} />
       <section aria-labelledby="history-title" className="flex flex-col gap-3">
         <h2 id="history-title" className="font-display text-xl font-semibold text-navy">Grooming history</h2>

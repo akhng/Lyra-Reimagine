@@ -28,6 +28,9 @@ export async function createGroomingRecordAction(slug: string, input: Record<str
     logger.error({ code: error?.code, business: ctx.business.id }, "create grooming record failed");
     return { error: "We couldn't save the grooming record. Please try again." };
   }
+  // Recorded from an appointment: link them (Phase 3).
+  const appointmentId = typeof input.appointmentId === "string" && z.uuid().safeParse(input.appointmentId).success ? input.appointmentId : null;
+  if (appointmentId) await db.from("appointments").update({ grooming_record_id: data.id }).eq("business_id", ctx.business.id).eq("id", appointmentId);
   return { ok: true, id: data.id };
 }
 

@@ -16,7 +16,7 @@ const ITEMS: Item[] = [
   { href: "/me/salons", label: "Salons", icon: Store },
 ];
 
-export function CustomerShell({ children, staff }: { children: ReactNode; staff: boolean }) {
+export function CustomerShell({ children, staff, bell }: { children: ReactNode; staff: boolean; bell?: ReactNode }) {
   const pathname = usePathname();
   const active = (i: Item) => (i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(`${i.href}/`));
   return (
@@ -34,7 +34,8 @@ export function CustomerShell({ children, staff }: { children: ReactNode; staff:
               </Link>
             ))}
           </nav>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-1 text-sm">
+            {bell}
             {staff ? (
               <Link href="/home" className="hidden h-11 items-center rounded-full px-3 font-semibold text-primary-text hover:bg-surface-2 sm:inline-flex">
                 My business

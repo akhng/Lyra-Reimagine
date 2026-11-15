@@ -43,6 +43,10 @@ export async function myBookings(): Promise<{ requests: MyRequest[]; appointment
   await requireUser();
   const db = await createSupabaseServerClient();
   await db.rpc("claim_customer_records");
+  // Move on requests whose time has passed, and queue reminders for the next 24 hours (both idempotent).
+  const { data: open } = await db.from("booking_requests").select("business_id").in("status", ["awaiting_review", "open"]).limit(50);
+  await Promise.all([...new Set((open ?? []).map((r) => r.business_id))].map((b) => db.rpc("tidy_booking_requests", { p_business: b })));
+  await db.rpc("queue_my_reminders");
   const { data, error } = await db.rpc("my_bookings");
   if (error) throw new Error("bookings query failed");
   const parsed = z.object({ requests: z.array(requestSchema), appointments: z.array(appointmentSchema) }).safeParse(data);

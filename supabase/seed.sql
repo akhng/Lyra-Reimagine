@@ -167,3 +167,26 @@ begin
     update public.pets set owner_pet_id = op, owner_notes = public.owner_notes_text(case when p.species = 'cat' then 'Teddy-bear face, short tidy' else 'Brush out and tidy feathers' end, p.behaviour) where id = p.id;
   end loop;
 end $$;
+
+-- Request marketplace demo (transformation R4). LOCAL TEST DATA ONLY.
+-- Fluff & Fold opens requests to groomers (40% commission); Sarah has asked for Mochi tomorrow at 2 pm,
+-- so alex@example.test and sam@example.test see it on their shift board.
+do $$
+declare
+  biz constant uuid := 'd0000000-0000-4000-8000-0000000000d1';
+  sarah constant uuid := 'eeeeeeee-0000-4000-8000-000000000001';
+  r record; req uuid; svc record; st timestamptz;
+begin
+  if exists (select 1 from public.booking_requests where business_id = biz) then return; end if;
+  update public.booking_policies set allocation_mode = 'open', accept_hours = 24, groomer_commission_percent = 40 where business_id = biz;
+  select c.id as customer_id, p.id as pet_id, l.id as location_id into r
+  from public.customers c join public.pets p on p.customer_id = c.id and p.name = 'Mochi' join public.locations l on l.business_id = c.business_id
+  where c.business_id = biz and c.account_user_id = sarah limit 1;
+  select * into svc from public.services where business_id = biz and name = 'Full groom';
+  st := (((now() at time zone 'Australia/Melbourne')::date + 1) + time '14:00') at time zone 'Australia/Melbourne';
+  insert into public.booking_requests (business_id, requester_id, customer_id, pet_id, location_id, status, preferred_start, notes, estimate_cents, estimate_minutes, block_minutes, accept_deadline)
+  values (biz, sarah, r.customer_id, r.pet_id, r.location_id, 'open', st, 'Teddy-bear face again please!', svc.base_price_cents, svc.duration_minutes, svc.duration_minutes + svc.buffer_minutes, least(now() + interval '24 hours', st - interval '1 hour'))
+  returning id into req;
+  insert into public.booking_request_services (business_id, request_id, service_id, name, duration_minutes, price_cents) values (biz, req, svc.id, svc.name, svc.duration_minutes, svc.base_price_cents);
+  insert into public.booking_request_events (business_id, request_id, actor_id, from_status, to_status) values (biz, req, sarah, null, 'submitted'), (biz, req, sarah, 'submitted', 'open');
+end $$;

@@ -34,6 +34,7 @@ export async function getDashboard(ctx: BusinessContext): Promise<DashboardData>
   const monthStart = `${today.slice(0, 8)}01`;
   const weekday = isoWeekday(today);
   const nowIso = new Date().toISOString();
+  await db.rpc("tidy_booking_requests", { p_business: business.id });
 
   const [pending, layoutRow, todays, upcoming, team, hours, timeOff, directory, pets, services, bookedServices, completedRows, onlineCount, groomCount] = await Promise.all([
     db.from("booking_requests").select("id, created_at, pets!booking_requests_pet_id_business_id_fkey(name)").eq("business_id", business.id).in("status", ["awaiting_review", "open"]).order("created_at").limit(50),

@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, Inbox, LayoutDashboard, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
+import { CalendarDays, ClipboardList, Inbox, LayoutDashboard, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -14,13 +14,14 @@ import { Mascot } from "./mascots/Mascot";
  */
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 
-export function BusinessShell({ slug, businessName, role, children }: { slug: string; businessName: string; role: string; children: ReactNode }) {
+export function BusinessShell({ slug, businessName, role, bell, children }: { slug: string; businessName: string; role: string; bell?: ReactNode; children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const items: Item[] = [
     { href: `/b/${slug}`, label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: `/b/${slug}/calendar`, label: "Calendar", icon: CalendarDays },
     { href: `/b/${slug}/requests`, label: "Requests", icon: Inbox },
+    { href: `/b/${slug}/shifts`, label: "Shift board", icon: ClipboardList },
     { href: `/b/${slug}/customers`, label: "Customers", icon: Users },
     { href: `/b/${slug}/pets`, label: "Pets", icon: PawPrint },
     { href: `/b/${slug}/grooming`, label: "Grooming records", icon: Scissors },
@@ -66,7 +67,10 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
         Skip to content
       </a>
       <aside className="sticky top-0 hidden h-dvh w-68 shrink-0 flex-col gap-6 rounded-r-[32px] bg-ink p-5 lg:flex">
-        <Brand href={`/b/${slug}`} inverted />
+        <div className="flex items-center justify-between gap-2">
+          <Brand href={`/b/${slug}`} inverted />
+          {bell}
+        </div>
         <div className="flex-1">{nav}</div>
         <div aria-hidden className="relative -mb-2 flex justify-center">
           <Mascot name="mochi" mood="sleepy" pose="peek" className="w-24 animate-bob" />
@@ -75,9 +79,12 @@ export function BusinessShell({ slug, businessName, role, children }: { slug: st
       </aside>
       <header className="sticky top-0 z-30 flex h-14 items-center justify-between bg-ink px-4 lg:hidden">
         <Brand href={`/b/${slug}`} inverted />
-        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" className="grid size-11 place-items-center text-white" aria-label={open ? "Close menu" : "Open menu"}>
-          {open ? <X className="size-6" aria-hidden /> : <Menu className="size-6" aria-hidden />}
-        </button>
+        <div className="flex items-center gap-1">
+          {bell}
+          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" className="grid size-11 place-items-center text-white" aria-label={open ? "Close menu" : "Open menu"}>
+            {open ? <X className="size-6" aria-hidden /> : <Menu className="size-6" aria-hidden />}
+          </button>
+        </div>
       </header>
       {open ? (
         <div id="mobile-nav" className="fixed inset-x-0 top-14 z-30 flex flex-col gap-6 bg-ink p-5 pb-8 lg:hidden">

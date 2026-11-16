@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { requireBusiness } from "@lyra/platform/tenancy/context";
 import { Board, type TileView } from "@/components/dashboard/Board";
 import { Greeting } from "@/components/dashboard/Greeting";
-import { AchievementsTile, CustomersTile, GroomersTile, RequestsTile, RevenueTile, ServicesTile, TodayTile } from "@/components/dashboard/TileContents";
+import { AchievementsTile, CustomersTile, GroomersTile, LoyaltyTile, RequestsTile, RevenueTile, ReviewsTile, ServicesTile, TodayTile } from "@/components/dashboard/TileContents";
 import { allowedTiles, type TileId } from "@/features/dashboard/layout";
 import { getDashboard } from "@/features/dashboard/queries";
 
@@ -36,6 +36,8 @@ export default async function Dashboard({ params }: { params: Promise<{ slug: st
     customers: { title: "Customers & pets", href: `/b/${slug}/customers`, action: "Open customers", tint: "bg-mint-tint", node: <CustomersTile d={d} /> },
     services: { title: "Grooming services", href: `/b/${slug}/services`, action: "Services & prices", tint: "bg-butter-tint", node: <ServicesTile d={d} /> },
     revenue: { title: "Revenue & performance", href: `/b/${slug}/grooming`, action: "Grooming records", tint: "bg-lavender-tint", node: <RevenueTile d={d} /> },
+    reviews: { title: "Customer reviews", href: `/b/${slug}/reviews`, action: "Read reviews", tint: "bg-coral-tint", node: <ReviewsTile d={d} /> },
+    loyalty: { title: "Loyalty & rewards", href: `/b/${slug}/settings/loyalty`, action: "Rewards settings", tint: "bg-mint-tint", node: <LoyaltyTile d={d} /> },
     achievements: { title: "Achievements", href: `/b/${slug}/grooming`, action: "See your grooms", tint: "bg-surface", node: <AchievementsTile d={d} /> },
   };
   const tiles = Object.fromEntries(allowedTiles(role).map((t) => [t, all[t]]));

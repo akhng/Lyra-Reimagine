@@ -27,7 +27,7 @@ export async function myOwnerPets(): Promise<OwnerPet[]> {
 
 const window = z.object({ date: z.string(), part: z.enum(["morning", "afternoon", "any"]) });
 const requestSchema = z.object({
-  id: z.string(), status: z.string(), businessName: z.string(), businessSlug: z.string(), timezone: z.string(), petName: z.string(), ownerPetId: z.string().nullable(),
+  id: z.string(), status: z.string(), appointmentId: z.string().nullable(), businessName: z.string(), businessSlug: z.string(), timezone: z.string(), petName: z.string(), ownerPetId: z.string().nullable(),
   preferredStart: z.string().nullable(), windows: z.array(window), notes: z.string().nullable(), estimateCents: z.number().nullable(), estimateFrom: z.boolean(), minutes: z.number(),
   services: z.array(z.string()), appointmentStart: z.string().nullable(), groomerName: z.string().nullable(), decisionReason: z.string().nullable(), createdAt: z.string(),
   cancellationHours: z.number().nullable(), events: z.array(z.object({ status: z.string(), at: z.string(), note: z.string().nullable() })),

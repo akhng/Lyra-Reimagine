@@ -5,11 +5,11 @@ describe("dashboard layout", () => {
   it("fills in defaults, drops unknown tiles and appends new ones", () => {
     const l = normaliseLayout({ order: ["revenue", "bogus", "today"], sizes: { revenue: "l" }, pinned: [], hidden: [] });
     expect(l.order.slice(0, 2)).toEqual(["revenue", "today"]);
-    expect(l.order).toHaveLength(7);
+    expect(l.order).toHaveLength(9);
     expect(l.sizes.revenue).toBe("l");
     expect(l.sizes.today).toBe("l");
     expect(normaliseLayout(null).order[0]).toBe("today");
-    expect(normaliseLayout({ order: "nope" }).order).toHaveLength(7);
+    expect(normaliseLayout({ order: "nope" }).order).toHaveLength(9);
   });
 
   it("shows pinned tiles first and leaves hidden ones out", () => {
@@ -43,6 +43,6 @@ describe("tiles by role", () => {
     expect(allowedTiles("owner")).toContain("revenue");
     expect(allowedTiles("receptionist")).not.toContain("revenue");
     expect(allowedTiles("receptionist")).toContain("requests");
-    expect(allowedTiles("groomer")).toEqual(["today", "groomers", "customers", "services", "achievements"]);
+    expect(allowedTiles("groomer")).toEqual(["today", "groomers", "customers", "services", "reviews", "achievements"]);
   });
 });

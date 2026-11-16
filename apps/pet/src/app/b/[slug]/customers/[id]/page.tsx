@@ -4,6 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge, Card, CardTitle, EmptyState, buttonVariants } from "@lyra/ui";
 import { requireBusiness } from "@lyra/platform/tenancy/context";
+import { RedeemPanel } from "@/components/loyalty/RedeemPanel";
+import { customerLoyalty, loyaltySettings, rewards as listRewards } from "@/features/loyalty/queries";
+import { levelFor } from "@/features/loyalty/engine";
 import { can } from "@lyra/platform/tenancy/roles";
 import { PageHeader } from "@/components/PageHeader";
 import { PetAvatar } from "@/components/PetAvatar";
@@ -23,7 +26,7 @@ export default async function CustomerProfile({ params }: { params: Promise<{ sl
   const id = uuidOr404(rawId);
   const { business, role } = await requireBusiness(slug);
   const seeContact = can(role, "customers.contact");
-  const [data, team] = await Promise.all([getCustomer(business.id, id, seeContact), listTeam(business.id)]);
+  const [data, team, loyalty, offers, rules] = await Promise.all([getCustomer(business.id, id, seeContact), listTeam(business.id), seeContact ? customerLoyalty(business.id, id) : null, seeContact ? listRewards(business.id, true) : [], loyaltySettings(business.id)]);
   if (!data) notFound();
   const { customer: c, contact, pets } = data;
   const urls = await signPaths(pets.flatMap((p) => (p.photo_path ? [p.photo_path] : [])));
@@ -83,6 +86,29 @@ export default async function CustomerProfile({ params }: { params: Promise<{ sl
               <p className="text-sm text-muted">Contact details are visible to owners, managers and reception.</p>
             </Card>
           )}
+          {loyalty && rules.enabled ? (
+            <Card aria-labelledby="loyalty-title" className="bg-butter-tint">
+              <CardTitle id="loyalty-title">Loyalty points</CardTitle>
+              <p className="mt-1 font-display text-4xl font-bold text-ink tabular">{loyalty.balance}</p>
+              <p className="text-sm text-ink/80">{levelFor(loyalty.lifetime).name} · {loyalty.lifetime} earned in total</p>
+              <div className="mt-3">
+                <RedeemPanel slug={slug} customerId={c.id} rewards={offers} balance={loyalty.balance} />
+              </div>
+              {loyalty.history.length ? (
+                <details className="mt-3 text-sm">
+                  <summary className="cursor-pointer font-semibold text-primary-text">History</summary>
+                  <ul className="mt-2 flex flex-col gap-1">
+                    {loyalty.history.map((h, i) => (
+                      <li key={i} className="flex justify-between gap-2">
+                        <span className="text-muted">{h.note ?? ({ appointment: "Completed appointment", birthday: "Pet birthday", redemption: "Reward", reversal: "Reversed", adjustment: "Adjustment" } as Record<string, string>)[h.reason]}</span>
+                        <span className={h.delta > 0 ? "font-semibold text-success tabular" : "font-semibold text-ink tabular"}>{h.delta > 0 ? `+${h.delta}` : h.delta}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              ) : null}
+            </Card>
+          ) : null}
           <Card aria-labelledby="notes-title">
             <CardTitle id="notes-title">Notes</CardTitle>
             <p className="mt-2 text-sm whitespace-pre-line">{c.notes || <span className="text-muted">No notes.</span>}</p>

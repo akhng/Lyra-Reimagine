@@ -148,9 +148,10 @@
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
 }
+/* Scale only (no fade), so text keeps full contrast throughout. */
 @keyframes pet-pop {
-  0% { transform: scale(0.6); opacity: 0; }
-  70% { transform: scale(1.06); opacity: 1; }
+  0% { transform: scale(0.85); }
+  70% { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
 @keyframes pet-confetti {

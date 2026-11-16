@@ -9,6 +9,7 @@ import { listTeam } from "@/features/team/queries";
 import { localDate } from "@/lib/dates";
 import type { BusinessMetrics } from "./achievements";
 import { normaliseLayout, type Layout } from "./layout";
+import { businessAwards, loyaltySettings, loyaltyStats, rewards as listRewards, reviewSummary } from "@/features/loyalty/queries";
 
 /** Everything the business dashboard shows, counted from real records (no sample numbers). */
 export type DashboardData = {
@@ -21,6 +22,9 @@ export type DashboardData = {
   services: { active: number; top: Array<{ name: string; count: number }> };
   revenue: { thisWeekCents: number; lastWeekCents: number; completedThisWeek: number };
   metrics: BusinessMetrics;
+  awards: Record<string, string>;
+  reviews: { count: number; average: number | null; latest: { rating: number; comment: string | null; petName: string } | null };
+  loyalty: { enabled: boolean; issued30: number; redemptions30: number; rewards: number; achievements: boolean };
   teamNames: Record<string, string>;
 };
 
@@ -53,6 +57,7 @@ export async function getDashboard(ctx: BusinessContext): Promise<DashboardData>
     db.from("grooming_records").select("id", { count: "exact", head: true }).eq("business_id", business.id),
   ]);
 
+  const [awards, reviewData, settings, stats, offers] = await Promise.all([businessAwards(business.id), reviewSummary(business.id), loyaltySettings(business.id), loyaltyStats(business.id, startOf(addDays(today, -30), tz)), listRewards(business.id, true)]);
   const off = new Set((timeOff.data ?? []).map((t) => t.member_id));
   const nowMinutes = toLocal(Date.now(), tz).minutes;
   const groomers = team
@@ -87,7 +92,10 @@ export async function getDashboard(ctx: BusinessContext): Promise<DashboardData>
     customers: { total: directory.length, newThisMonth: directory.filter((c) => c.created_at.slice(0, 10) >= monthStart).length, due: segments.filter((s) => s.includes("due")).length, pets: pets.count ?? 0 },
     services: { active: services.count ?? 0, top: [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name, count]) => ({ name, count })) },
     revenue: { thisWeekCents: sumBetween(thisWeekFrom, thisWeekTo), lastWeekCents: sumBetween(startOf(addDays(today, -13), tz), thisWeekFrom), completedThisWeek: completed.filter((a) => a.starts_at >= thisWeekFrom && a.starts_at < thisWeekTo).length },
-    metrics: { completed: completed.length, happyPets: new Set(completed.map((a) => a.pet_id)).size, loyalCustomers: [...visits.values()].filter((n) => n >= 3).length, onlineBookings: onlineCount.count ?? 0, groomRecords: groomCount.count ?? 0 },
+    metrics: { completed: completed.length, happyPets: new Set(completed.map((a) => a.pet_id)).size, loyalCustomers: [...visits.values()].filter((n) => n >= 3).length, onlineBookings: onlineCount.count ?? 0, groomRecords: groomCount.count ?? 0, fiveStarReviews: reviewData.average !== null && reviewData.average >= 4.8 ? reviewData.count : Math.min(reviewData.count, 9) },
+    awards: Object.fromEntries(awards),
+    reviews: { count: reviewData.count, average: reviewData.average, latest: reviewData.reviews[0] ? { rating: reviewData.reviews[0].rating, comment: reviewData.reviews[0].comment, petName: reviewData.reviews[0].petName } : null },
+    loyalty: { enabled: settings.enabled, issued30: stats.issued, redemptions30: stats.redemptions, rewards: offers.length, achievements: settings.achievements },
     teamNames: Object.fromEntries(team.map((m) => [m.id, m.name])),
   };
 }

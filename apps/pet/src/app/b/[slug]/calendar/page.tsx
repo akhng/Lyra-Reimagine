@@ -6,6 +6,7 @@ import { requireBusiness } from "@lyra/platform/tenancy/context";
 import { can } from "@lyra/platform/tenancy/roles";
 import { PageHeader } from "@/components/PageHeader";
 import { CalendarGrid, type GridAppointment, type GridColumn } from "@/components/scheduling/CalendarGrid";
+import { MonthGrid } from "@/components/scheduling/MonthGrid";
 import { STATUS_TONE } from "@/components/scheduling/status";
 import { appointmentsBetween, schedulingSetup } from "@/features/scheduling/queries";
 import { STATUS_LABEL } from "@/features/scheduling/schemas";
@@ -18,7 +19,7 @@ export const metadata: Metadata = { title: "Calendar" };
 
 const dayLabel = (date: string, opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-AU", { ...opts, timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
 
-/** /b/[slug]/calendar — day view (groomer columns) or week view (one groomer), with drag-to-reschedule. */
+/** /b/[slug]/calendar — day view (groomer columns), week view (one groomer, drag to reschedule) or month view (colour-coded overview). */
 export default async function CalendarPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { slug } = await params;
   const sp = await searchParams;
@@ -26,13 +27,18 @@ export default async function CalendarPage({ params, searchParams }: { params: P
   const tz = business.timezone;
   const today = localToday(tz);
   const date = /^\d{4}-\d{2}-\d{2}$/.test(param(sp.date)) ? param(sp.date) : today;
-  const view = param(sp.view) === "week" ? "week" : "day";
+  const view = param(sp.view) === "week" ? "week" : param(sp.view) === "month" ? "month" : "day";
   const [team, setup] = await Promise.all([listTeam(business.id), schedulingSetup(business.id)]);
   const locations = setup.locations.filter((l) => !l.isMobile).length ? setup.locations.filter((l) => !l.isMobile) : setup.locations;
   const location = locations.find((l) => l.id === param(sp.location)) ?? locations[0];
   const zone = location?.timezone ?? tz;
   const weekStart = addDays(date, 1 - isoWeekday(date));
-  const days = view === "week" ? Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)) : [date];
+  const monthStart = `${date.slice(0, 8)}01`;
+  const nextMonth = (d: string, n: number) => { const [y, m] = d.split("-").map(Number); const t = new Date(Date.UTC(y ?? 2026, (m ?? 1) - 1 + n, 1)); return t.toISOString().slice(0, 10); };
+  const monthEnd = addDays(nextMonth(monthStart, 1), -1);
+  const gridStart = addDays(monthStart, 1 - isoWeekday(monthStart));
+  const gridDays = Math.round((Date.parse(`${addDays(monthEnd, 7 - isoWeekday(monthEnd))}T00:00:00Z`) - Date.parse(`${gridStart}T00:00:00Z`)) / 86_400_000) + 1;
+  const days = view === "week" ? Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)) : view === "month" ? Array.from({ length: gridDays }, (_, i) => addDays(gridStart, i)) : [date];
   const from = new Date(fromLocal(days[0] ?? date, 0, zone)).toISOString();
   const to = new Date(fromLocal(addDays(days[days.length - 1] ?? date, 1), 0, zone)).toISOString();
   const appts = location ? (await appointmentsBetween(business.id, from, to)).filter((a) => a.locationId === location.id) : [];
@@ -63,9 +69,11 @@ export default async function CalendarPage({ params, searchParams }: { params: P
   const startMin = bounds.length ? Math.floor(Math.min(...bounds) / 60) * 60 : 8 * 60;
   const endMin = bounds.length ? Math.ceil(Math.max(...bounds) / 60) * 60 : 18 * 60;
   const step = view === "week" ? 7 : 1;
+  const prevDate = view === "month" ? nextMonth(monthStart, -1) : addDays(date, -step);
+  const nextDate = view === "month" ? nextMonth(monthStart, 1) : addDays(date, step);
   const href = (q: Record<string, string>) => `/b/${slug}/calendar?${new URLSearchParams({ date, view, ...(location ? { location: location.id } : {}), ...(view === "week" && weekGroomer ? { groomer: weekGroomer.id } : {}), ...q })}`;
   const canBook = can(role, "appointments.manage");
-  const title = view === "day" ? dayLabel(date, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : `Week of ${dayLabel(weekStart, { day: "numeric", month: "long", year: "numeric" })}`;
+  const title = view === "month" ? dayLabel(monthStart, { month: "long", year: "numeric" }) : view === "day" ? dayLabel(date, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : `Week of ${dayLabel(weekStart, { day: "numeric", month: "long", year: "numeric" })}`;
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
@@ -76,14 +84,14 @@ export default async function CalendarPage({ params, searchParams }: { params: P
       />
       <div className="flex flex-wrap items-center gap-2">
         <nav aria-label="Dates" className="flex items-center gap-1">
-          <Link href={href({ date: addDays(date, -step) })} className={buttonVariants({ variant: "secondary", size: "icon" })} aria-label={view === "week" ? "Previous week" : "Previous day"}><ChevronLeft className="size-4" aria-hidden /></Link>
+          <Link href={href({ date: prevDate })} className={buttonVariants({ variant: "secondary", size: "icon" })} aria-label={view === "month" ? "Previous month" : view === "week" ? "Previous week" : "Previous day"}><ChevronLeft className="size-4" aria-hidden /></Link>
           <Link href={href({ date: today })} className={buttonVariants({ variant: "secondary" })}>Today</Link>
-          <Link href={href({ date: addDays(date, step) })} className={buttonVariants({ variant: "secondary", size: "icon" })} aria-label={view === "week" ? "Next week" : "Next day"}><ChevronRight className="size-4" aria-hidden /></Link>
+          <Link href={href({ date: nextDate })} className={buttonVariants({ variant: "secondary", size: "icon" })} aria-label={view === "month" ? "Next month" : view === "week" ? "Next week" : "Next day"}><ChevronRight className="size-4" aria-hidden /></Link>
         </nav>
         <nav aria-label="View" className="flex rounded-full border border-border bg-surface p-1">
-          {(["day", "week"] as const).map((v) => (
+          {(["day", "week", "month"] as const).map((v) => (
             <Link key={v} href={href({ view: v })} aria-current={view === v ? "page" : undefined} className={cn("inline-flex min-h-9 items-center rounded-full px-4 text-sm font-medium", view === v ? "bg-primary text-primary-contrast" : "text-muted hover:text-text")}>
-              {v === "day" ? "Day" : "Week"}
+              {v === "day" ? "Day" : v === "week" ? "Week" : "Month"}
             </Link>
           ))}
         </nav>
@@ -110,7 +118,15 @@ export default async function CalendarPage({ params, searchParams }: { params: P
         </form>
       </div>
 
-      {!location ? (
+      {location && view === "month" ? (
+        <MonthGrid
+          days={days}
+          month={monthStart.slice(0, 7)}
+          today={today}
+          dayHref={(d) => href({ date: d, view: "day" })}
+          items={appts.map((a) => { const s = toLocal(Date.parse(a.startsAt), zone); return { id: a.id, date: s.date, time: minutesToHhmm(s.minutes), petName: a.petName, groomer: groomerFor(a.groomerId), status: a.status }; })}
+        />
+      ) : !location ? (
         <EmptyState art={<Mascot name="biscuit" mood="sleepy" className="w-28" />} title="Add a location first" description="The calendar is per location." action={<Link href={`/b/${slug}/settings#locations`} className={buttonVariants()}>Settings</Link>} />
       ) : columns.length === 0 ? (
         <EmptyState art={<Mascot name="biscuit" mood="sleepy" className="w-28" />} title="Nobody is rostered" description={setup.staffHours.length ? "No one works at this location on this day." : "Set your team's working hours so the calendar knows who's on."} action={can(role, "hours.manage") ? <Link href={`/b/${slug}/settings/hours`} className={buttonVariants()}>Set hours</Link> : undefined} />

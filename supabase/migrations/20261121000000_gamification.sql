@@ -311,3 +311,29 @@ $$;
 
 revoke all on function public.redeem_reward(uuid, uuid), public.claim_birthday_rewards(), public.submit_review(uuid, integer, text), public.reply_review(uuid, text), public.my_loyalty() from public, anon;
 grant execute on function public.redeem_reward(uuid, uuid), public.claim_birthday_rewards(), public.submit_review(uuid, integer, text), public.reply_review(uuid, text), public.my_loyalty() to authenticated;
+
+-- my_bookings() now includes the appointment id, so a completed request can be reviewed.
+create or replace function public.my_bookings()
+returns jsonb language sql stable security definer set search_path = '' as $$
+  select jsonb_build_object(
+    'requests', (select coalesce(jsonb_agg(jsonb_build_object(
+        'id', r.id, 'status', r.status, 'appointmentId', r.appointment_id, 'businessName', b.name, 'businessSlug', b.slug, 'timezone', b.timezone, 'petName', p.name, 'ownerPetId', p.owner_pet_id,
+        'preferredStart', r.preferred_start, 'windows', r.windows, 'notes', r.notes, 'estimateCents', r.estimate_cents, 'estimateFrom', r.estimate_from, 'minutes', r.estimate_minutes,
+        'services', (select coalesce(jsonb_agg(s.name order by s.position), '[]') from public.booking_request_services s where s.request_id = r.id),
+        'appointmentStart', a.starts_at, 'groomerName', m.display_name, 'decisionReason', r.decision_reason, 'createdAt', r.created_at,
+        'cancellationHours', (select cancellation_hours from public.booking_policies where business_id = r.business_id),
+        'events', (select coalesce(jsonb_agg(jsonb_build_object('status', e.to_status, 'at', e.created_at, 'note', e.note) order by e.created_at), '[]') from public.booking_request_events e where e.request_id = r.id)
+      ) order by r.created_at desc), '[]')
+      from public.booking_requests r join public.businesses b on b.id = r.business_id join public.pets p on p.id = r.pet_id
+      left join public.appointments a on a.id = r.appointment_id left join public.business_members m on m.id = a.groomer_id
+      where r.requester_id = auth.uid()),
+    'appointments', (select coalesce(jsonb_agg(jsonb_build_object(
+        'id', a.id, 'status', a.status, 'startsAt', a.starts_at, 'minutes', extract(epoch from (a.service_ends_at - a.starts_at))::int / 60, 'businessName', b.name, 'businessSlug', b.slug, 'timezone', b.timezone,
+        'petName', p.name, 'ownerPetId', p.owner_pet_id, 'groomerName', m.display_name,
+        'services', (select coalesce(jsonb_agg(s.name order by s.position), '[]') from public.appointment_services s where s.appointment_id = a.id)
+      ) order by a.starts_at desc), '[]')
+      from public.appointments a join public.customers c on c.id = a.customer_id join public.businesses b on b.id = a.business_id join public.pets p on p.id = a.pet_id
+      left join public.business_members m on m.id = a.groomer_id
+      where c.account_user_id = auth.uid() and a.starts_at > now() - interval '2 years')
+  );
+$$;

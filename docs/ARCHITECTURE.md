@@ -67,6 +67,14 @@ Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths s
 - **Housekeeping without a scheduler:** `tidy_booking_requests()` returns unclaimed requests to the front desk at their deadline and expires requests whose time has passed; `queue_my_reminders()` adds reminders for the next 24 hours. Both are idempotent and run when the requests page, shift board, dashboard or customer portal loads.
 - **Notifications:** one `notifications` table per person (audience customer or staff, kind, small payload, dedupe key, read flag; RLS own rows; only `read_at` is writable). Database functions create them for new, open, assigned, accepted, confirmed, rejected, cancelled, unclaimed and expired requests, grooming started and completed, and reminders. Wording lives in `features/notifications/templates.ts`, so email or SMS delivery can be added later as channels without changing callers (no provider is configured; nothing is sent outside the app).
 
+## Gamification, loyalty and reviews (transformation R5, ADR 0003)
+
+- **Engine in the database:** `points_ledger` (earned, redeemed, reversed; `source_key` unique per business and customer, so the same event can never pay twice), `achievement_awards` (unique per business+key or pet+key), `loyalty_settings` (points per completed appointment and per dollar, pet birthday points, loyalty and achievements switches) and `loyalty_rewards`. A trigger on appointment completion awards points and evaluates pet milestones (1st, 5th, 10th, 25th groom) and business achievements (the catalogue in `features/dashboard/achievements.ts`, plus Five-Star Champion), with notifications. If a completed appointment changes status, its points are reversed. Points are never awarded for submitting a request, and gamification never touches prices, availability or payments.
+- **Redemption** (`redeem_reward`, front desk) locks the customer and checks the balance. **Birthdays** (`claim_birthday_rewards`) pay once a year when the owner opens the app within 30 days after the birthday.
+- **Levels and streaks** are computed from the ledger and completed grooms by pure functions (`features/loyalty/engine.ts`): levels from lifetime points (redemptions never lower a level); streaks count grooms within the pet's interval plus two weeks and never punish a gap.
+- **Reviews:** one per completed appointment by its customer (`submit_review`), owner/manager replies (`reply_review`), staff read via RLS.
+- **Screens:** pet owners get Rewards (balance, level, progress, rewards, history, badges), streak and badge chips on pet cards, a celebration and review form on completed requests. Staff get Settings → Loyalty & rewards, a points panel with Redeem on the customer page, Reviews with replies, dashboard tiles for reviews and loyalty, achievements with unlock dates, and a colour-coded calendar month view.
+
 ## Request flow
 
 `UI (Server Components / Server Actions) → feature actions (Zod validation, permission check) → user-scoped Supabase client (RLS) → Postgres`. Elevated operations use security-definer functions that check `auth.uid()` themselves.
@@ -84,7 +92,7 @@ Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths s
 | 1 | Foundation: monorepo, tenancy, auth, business registration, settings ✓ |
 | 2 | Core grooming: dashboard, customers, pets, grooming history (before/after photos), services and pricing ✓ |
 | 3 | Scheduling: calendars, booking engine with database-level overlap prevention, public booking portal, recurring bookings, cancellations, waitlist ✓ |
-| 4 | Operations: staff and rosters, invitations, payments (Stripe Connect), email/SMS notifications |
+| 4 | Operations: staff and rosters, invitations, payments (Stripe Connect), email/SMS delivery of the in-app notifications |
 | 5 | AI and growth: grooming assistant, retention, loyalty, marketing, business intelligence |
 | 6 | SaaS commercialisation: plans and entitlements, Stripe Billing, platform administration, usage |
 | 7 | Production readiness: security review, performance, deployment |

@@ -9,7 +9,7 @@ const when = (iso: string, tz: string) => new Intl.DateTimeFormat("en-AU", { wee
 const day = (iso: string, tz: string) => new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", year: "numeric", timeZone: tz }).format(new Date(iso));
 
 /** An illustrated pet profile card: photo first, then the essentials and what's next. */
-export function PetCard({ pet, index, next, last }: { pet: OwnerPet; index: number; next: MyAppointment | null; last: MyAppointment | null }) {
+export function PetCard({ pet, index, next, last, streak, badges }: { pet: OwnerPet; index: number; next: MyAppointment | null; last: MyAppointment | null; streak?: number; badges?: number }) {
   const age = ageLabel(pet.dateOfBirth, pet.estimatedAge);
   return (
     <article className={`lift relative flex h-full flex-col gap-3 overflow-hidden rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-card)] ${TINTS[index % TINTS.length]}`}>
@@ -36,6 +36,12 @@ export function PetCard({ pet, index, next, last }: { pet: OwnerPet; index: numb
           <dd className="text-ink">{last ? `Last groomed ${day(last.startsAt, last.timezone)}` : "No grooms yet"}</dd>
         </div>
       </dl>
+      {streak || badges ? (
+        <p className="flex flex-wrap gap-1.5">
+          {streak && streak > 1 ? <span className="rounded-full bg-surface px-2.5 py-0.5 text-xs font-bold text-ink">{streak}-groom streak</span> : null}
+          {badges ? <span className="rounded-full bg-butter px-2.5 py-0.5 text-xs font-bold text-ink">{badges} badge{badges === 1 ? "" : "s"}</span> : null}
+        </p>
+      ) : null}
       {pet.groomingPreferences || pet.careNotes ? (
         <p className="line-clamp-2 text-sm text-ink/80">{[pet.groomingPreferences, pet.careNotes].filter(Boolean).join(" · ")}</p>
       ) : null}

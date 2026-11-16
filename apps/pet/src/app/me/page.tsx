@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarHeart, Heart, History, PawPrint, Plus, Store, type LucideIcon } from "lucide-react";
+import { CalendarHeart, Gift, Heart, History, PawPrint, Plus, Store, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants, EmptyState } from "@lyra/ui";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
@@ -7,6 +7,9 @@ import { Mascot, type MascotName } from "@/components/mascots/Mascot";
 import { mascotFor } from "@/components/PetAvatar";
 import { PetCard } from "@/components/portal/PetCard";
 import { myBookings, myFavourites, myOwnerPets } from "@/features/portal/queries";
+import { groomStreak, levelFor } from "@/features/loyalty/engine";
+import { myLoyalty } from "@/features/loyalty/queries";
+import { localToday } from "@/features/scheduling/time";
 import { ACTIVE_REQUEST } from "@/features/portal/schemas";
 import { nowMs } from "@/features/scheduling/time";
 
@@ -17,7 +20,10 @@ const COMPLIMENTS = ["is looking fabulous today!", "says hello!", "is ready for 
 /** The pet owner's home: a welcome, their pets as illustrated cards, then the things they can do (all real data). */
 export default async function MeHome() {
   const db = await createSupabaseServerClient();
-  const [{ data: auth }, pets, bookings, favourites] = await Promise.all([db.auth.getUser(), myOwnerPets(), myBookings(), myFavourites()]);
+  const [{ data: auth }, pets, bookings, favourites, loyalty] = await Promise.all([db.auth.getUser(), myOwnerPets(), myBookings(), myFavourites(), myLoyalty()]);
+  const today = localToday("Australia/Melbourne");
+  const points = loyalty.salons.filter((s) => s.enabled).reduce((n, s) => n + s.balance, 0);
+  const lifetime = loyalty.salons.reduce((n, s) => n + s.lifetime, 0);
   const firstName = String(auth.user?.user_metadata?.full_name ?? "").split(" ")[0] || "there";
   const now = nowMs();
   const upcoming = bookings.appointments.filter((a) => Date.parse(a.startsAt) > now && !["cancelled", "no_show", "completed"].includes(a.status)).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
@@ -29,6 +35,7 @@ export default async function MeHome() {
     { title: "Book a grooming appointment", body: "Choose a pet, a salon and a time that suits you.", href: "/me/book", icon: PawPrint, tint: "bg-primary-tint" },
     { title: "Upcoming appointments", body: upcoming.length ? `${upcoming.length} booked${openRequests.length ? ` · ${openRequests.length} waiting for a reply` : ""}` : openRequests.length ? `${openRequests.length} request${openRequests.length === 1 ? "" : "s"} waiting for a reply` : "Nothing booked yet.", href: "/me/bookings", icon: CalendarHeart, tint: "bg-coral-tint" },
     { title: "Grooming history", body: done.length ? `${done.length} completed groom${done.length === 1 ? "" : "s"}` : "Your pets' grooms will collect here.", href: "/me/bookings#history", icon: History, tint: "bg-mint-tint" },
+    { title: "Loyalty rewards", body: points || lifetime ? `${points} points · ${levelFor(lifetime).name}` : "Earn points every time a groom is completed.", href: "/me/rewards", icon: Gift, tint: "bg-butter-tint" },
     { title: "Favourite salons", body: favourites.size ? `${favourites.size} saved` : "Tap the heart on a salon to keep it handy.", href: "/me/salons", icon: Heart, tint: "bg-sky-tint" },
   ];
   return (
@@ -56,7 +63,7 @@ export default async function MeHome() {
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {pets.map((p, i) => (
               <li key={p.id}>
-                <PetCard pet={p} index={i} next={upcoming.find((a) => a.ownerPetId === p.id) ?? null} last={done.find((a) => a.ownerPetId === p.id) ?? null} />
+                <PetCard pet={p} index={i} next={upcoming.find((a) => a.ownerPetId === p.id) ?? null} last={done.find((a) => a.ownerPetId === p.id) ?? null} streak={groomStreak(loyalty.groomDates.filter((g) => g.ownerPetId === p.id).map((g) => g.date), loyalty.groomDates.find((g) => g.ownerPetId === p.id)?.interval ?? null, today).current} badges={loyalty.petAwards.filter((a) => a.ownerPetId === p.id).length} />
               </li>
             ))}
           </ul>

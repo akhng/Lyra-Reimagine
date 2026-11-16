@@ -79,15 +79,27 @@ export default async function Bookings() {
         <h2 id="history-title" className="font-display text-2xl font-semibold text-ink">Grooming history</h2>
         {history.length ? (
           <ul className="grid gap-2 sm:grid-cols-2">
-            {history.map((a) => (
-              <li key={a.id} className="flex items-center gap-3 rounded-[var(--radius-card)] bg-mint-tint p-4">
-                <Mascot name="mochi" mood="proud" pose="peek" className="w-12 shrink-0" />
-                <span>
-                  <span className="block font-semibold text-ink">{a.petName} · {a.services.join(", ")}</span>
-                  <span className="block text-sm text-ink/80">{new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: a.timezone }).format(new Date(a.startsAt))} · {a.businessName}</span>
-                </span>
-              </li>
-            ))}
+            {history.map((a) => {
+              const req = requests.find((r) => r.appointmentId === a.id);
+              const body = (
+                <>
+                  <Mascot name="mochi" mood="proud" pose="peek" className="w-12 shrink-0" />
+                  <span>
+                    <span className="block font-semibold text-ink">{a.petName} · {a.services.join(", ")}</span>
+                    <span className="block text-sm text-ink/80">{new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "long", year: "numeric", timeZone: a.timezone }).format(new Date(a.startsAt))} · {a.businessName}</span>
+                  </span>
+                </>
+              );
+              return (
+                <li key={a.id}>
+                  {req ? (
+                    <Link href={`/me/requests/${req.id}`} className="lift flex items-center gap-3 rounded-[var(--radius-card)] bg-mint-tint p-4">{body}</Link>
+                  ) : (
+                    <div className="flex items-center gap-3 rounded-[var(--radius-card)] bg-mint-tint p-4">{body}</div>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="text-sm text-muted">Completed grooms will collect here.</p>

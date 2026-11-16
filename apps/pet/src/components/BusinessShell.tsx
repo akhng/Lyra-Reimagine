@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, ClipboardList, Inbox, LayoutDashboard, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
+import { CalendarDays, ClipboardList, Heart, Inbox, LayoutDashboard, Star, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -27,6 +27,7 @@ export function BusinessShell({ slug, businessName, role, bell, children }: { sl
     { href: `/b/${slug}/grooming`, label: "Grooming records", icon: Scissors },
     { href: `/b/${slug}/services`, label: "Services & pricing", icon: Tags },
     { href: `/b/${slug}/waitlist`, label: "Waitlist", icon: ListTodo },
+    { href: `/b/${slug}/reviews`, label: "Reviews", icon: Star },
     { href: `/b/${slug}/settings`, label: "Settings", icon: Settings },
   ];
   const active = (i: Item) => (i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(`${i.href}/`));
@@ -49,9 +50,12 @@ export function BusinessShell({ slug, businessName, role, bell, children }: { sl
     <div className="border-t border-white/10 pt-4">
       <p className="truncate text-sm font-semibold text-white">{businessName}</p>
       <p className="text-xs text-ink-text capitalize">{role}</p>
-      <div className="mt-3 flex items-center gap-3 text-sm">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
         <Link href="/home" className="text-ink-accent hover:underline">
           Switch business
+        </Link>
+        <Link href="/me" className="inline-flex items-center gap-1 text-ink-accent hover:underline">
+          <Heart className="size-4" aria-hidden /> My pets
         </Link>
         <form action={signOutAction}>
           <button type="submit" className="inline-flex items-center gap-1 text-ink-text hover:text-white">

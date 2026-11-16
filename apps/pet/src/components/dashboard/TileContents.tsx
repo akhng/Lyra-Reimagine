@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge, cn } from "@lyra/ui";
 import { Mascot, type MascotName, type Mood } from "@/components/mascots/Mascot";
 import { STATUS_TONE } from "@/components/scheduling/status";
+import { Stars } from "@/components/loyalty/Stars";
 import { sortAchievements, achievementProgress } from "@/features/dashboard/achievements";
 import type { DashboardData } from "@/features/dashboard/queries";
 import { STATUS_LABEL } from "@/features/scheduling/schemas";
@@ -154,8 +155,46 @@ export function RevenueTile({ d }: { d: DashboardData }) {
   );
 }
 
+export function ReviewsTile({ d }: { d: DashboardData }) {
+  const r = d.reviews;
+  return (
+    <>
+      <Stat value={r.average !== null ? r.average.toFixed(1) : "–"} label={r.count ? `average from ${r.count} review${r.count === 1 ? "" : "s"}` : "no reviews yet"} mascot="coco" mood={r.average !== null && r.average >= 4.5 ? "proud" : "happy"} />
+      {r.latest ? (
+        <p className="rounded-2xl bg-surface/80 px-3 py-2 text-sm text-ink">
+          <Stars rating={r.latest.rating} /> <span className="font-semibold">{r.latest.petName}</span>
+          {r.latest.comment ? <span className="mt-0.5 line-clamp-2 block text-ink/80">&ldquo;{r.latest.comment}&rdquo;</span> : null}
+        </p>
+      ) : (
+        <p className="text-sm text-ink/80">Customers with a Lyra Pet account can review each completed groom.</p>
+      )}
+    </>
+  );
+}
+
+export function LoyaltyTile({ d }: { d: DashboardData }) {
+  const l = d.loyalty;
+  if (!l.enabled) return <p className="text-sm text-ink/80">Loyalty points are switched off. Turn them on to reward regulars.</p>;
+  return (
+    <>
+      <Stat value={l.issued30} label="points earned by customers in 30 days" mascot="biscuit" mood={l.issued30 ? "excited" : "happy"} />
+      <dl className="grid grid-cols-2 gap-2 text-sm">
+        <div className="rounded-2xl bg-surface/80 px-3 py-2">
+          <dt className="text-xs text-muted">Rewards redeemed</dt>
+          <dd className="font-display text-xl font-bold text-ink tabular">{l.redemptions30}</dd>
+        </div>
+        <div className="rounded-2xl bg-surface/80 px-3 py-2">
+          <dt className="text-xs text-muted">Rewards on offer</dt>
+          <dd className="font-display text-xl font-bold text-ink tabular">{l.rewards}</dd>
+        </div>
+      </dl>
+    </>
+  );
+}
+
 export function AchievementsTile({ d }: { d: DashboardData }) {
-  const list = sortAchievements(achievementProgress(d.metrics));
+  if (!d.loyalty.achievements) return <p className="text-sm text-ink/80">Achievements are switched off for this business.</p>;
+  const list = sortAchievements(achievementProgress(d.metrics)).map((a) => ({ ...a, done: a.done || !!d.awards[a.key], ratio: d.awards[a.key] ? 1 : a.ratio }));
   const done = list.filter((a) => a.done).length;
   return (
     <>
@@ -171,7 +210,7 @@ export function AchievementsTile({ d }: { d: DashboardData }) {
               <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-label={a.title} aria-valuemin={0} aria-valuemax={a.target} aria-valuenow={a.value}>
                 <div className={cn("animate-fill h-full rounded-full", a.done ? "bg-butter" : "bg-primary")} style={{ width: `${Math.round(a.ratio * 100)}%` }} />
               </div>
-              <p className="mt-0.5 text-xs text-muted tabular">{a.done ? "Unlocked" : `${a.value} of ${a.target}`}</p>
+              <p className="mt-0.5 text-xs text-muted tabular">{a.done ? (d.awards[a.key] ? `Unlocked ${new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short" }).format(new Date(d.awards[a.key] as string))}` : "Unlocked") : `${a.value} of ${a.target}`}</p>
             </div>
           </li>
         ))}

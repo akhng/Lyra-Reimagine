@@ -190,3 +190,32 @@ begin
   insert into public.booking_request_services (business_id, request_id, service_id, name, duration_minutes, price_cents) values (biz, req, svc.id, svc.name, svc.duration_minutes, svc.base_price_cents);
   insert into public.booking_request_events (business_id, request_id, actor_id, from_status, to_status) values (biz, req, sarah, null, 'submitted'), (biz, req, sarah, 'submitted', 'open');
 end $$;
+
+-- Gamification demo (transformation R5). LOCAL TEST DATA ONLY.
+-- Fluff & Fold's loyalty rules and rewards; points for its past completed appointments
+-- (seeded history bypassed the completion trigger), milestones, and two reviews from Sarah.
+do $$
+declare
+  biz constant uuid := 'd0000000-0000-4000-8000-0000000000d1';
+  sarah constant uuid := 'eeeeeeee-0000-4000-8000-000000000001';
+  a record; p record; n int := 0;
+begin
+  if exists (select 1 from public.loyalty_settings where business_id = biz) then return; end if;
+  insert into public.loyalty_settings (business_id, points_per_appointment, points_per_dollar, birthday_points) values (biz, 10, 1, 50);
+  insert into public.loyalty_rewards (business_id, name, description, cost_points) values
+    (biz, 'Free nail trim', 'Added to any groom', 150),
+    (biz, 'Blueberry facial', 'A gentle face wash that smells amazing', 250),
+    (biz, '$20 off a full groom', null, 400);
+  for a in select * from public.appointments where business_id = biz and status = 'completed' order by starts_at loop
+    perform public.award_points(biz, a.customer_id, 10 + floor(coalesce(a.price_estimate_cents, 0) / 100.0)::int, 'appointment', 'appt:' || a.id, null);
+  end loop;
+  for p in select id from public.pets where business_id = biz loop
+    perform public.evaluate_pet_achievements(biz, p.id);
+  end loop;
+  perform public.evaluate_business_achievements(biz);
+  for a in select ap.* from public.appointments ap join public.customers c on c.id = ap.customer_id where ap.business_id = biz and ap.status = 'completed' and c.account_user_id = sarah order by ap.starts_at desc limit 2 loop
+    n := n + 1;
+    insert into public.reviews (business_id, appointment_id, customer_id, author_id, rating, comment, reply, replied_at)
+    values (biz, a.id, a.customer_id, sarah, case when n = 1 then 5 else 4 end, case when n = 1 then 'Mochi came home looking like a cloud. So gentle with her!' else 'Lovely job, a little late picking up.' end, case when n = 1 then 'Thank you Sarah, Mochi is a delight!' end, case when n = 1 then now() end);
+  end loop;
+end $$;

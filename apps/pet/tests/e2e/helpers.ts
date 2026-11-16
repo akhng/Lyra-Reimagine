@@ -37,7 +37,7 @@ export async function signIn(page: Page, email: string, password: string) {
 export async function noSeriousViolations(page: Page) {
   await expect(page).toHaveTitle(/\S/);
   const r = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-  expect(r.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`)).toEqual([]);
+  expect(r.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(" ") + (process.env.AXE_DEBUG ? ` ${n.html} ${n.failureSummary}` : "")).join(", ")}`)).toEqual([]);
 }
 
 /** Open the main navigation (a menu on phones and tablets) and follow a link. */

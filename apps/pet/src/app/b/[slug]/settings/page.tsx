@@ -41,6 +41,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
         <div className="mt-4 flex flex-wrap gap-2">
           <Link href={`/b/${slug}/settings/listing`} className={buttonVariants({ variant: "secondary" })}>Manage your listing</Link>
           {can(role, "hours.manage") ? <Link href={`/b/${slug}/settings/allocation`} className={buttonVariants({ variant: "secondary" })}>Request allocation</Link> : null}
+          <Link href={`/b/${slug}/settings/loyalty`} className={buttonVariants({ variant: "secondary" })}>Loyalty &amp; rewards</Link>
         </div>
       </Card>
       <Card id="locations" aria-labelledby="locations-title">

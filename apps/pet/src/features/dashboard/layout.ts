@@ -5,11 +5,11 @@ import { z } from "zod";
  * unit-tested: unknown tiles are dropped, new tiles are appended, pinned
  * tiles come first, hidden tiles are kept out of the board but can return.
  */
-export const TILE_IDS = ["today", "requests", "groomers", "customers", "services", "revenue", "achievements"] as const;
+export const TILE_IDS = ["today", "requests", "groomers", "customers", "services", "revenue", "reviews", "loyalty", "achievements"] as const;
 export type TileId = (typeof TILE_IDS)[number];
 export type TileSize = "s" | "l";
 
-export const DEFAULT_SIZES: Record<TileId, TileSize> = { today: "l", requests: "s", groomers: "s", customers: "s", services: "s", revenue: "s", achievements: "l" };
+export const DEFAULT_SIZES: Record<TileId, TileSize> = { today: "l", requests: "s", groomers: "s", customers: "s", services: "s", revenue: "s", reviews: "s", loyalty: "s", achievements: "l" };
 
 const tileId = z.enum(TILE_IDS);
 // Stored layouts may name tiles that no longer exist: accept any short names, then keep the known ones.
@@ -58,5 +58,5 @@ export function toggle(list: TileId[], id: TileId): TileId[] {
 export function allowedTiles(role: "owner" | "manager" | "receptionist" | "groomer"): TileId[] {
   if (role === "owner" || role === "manager") return [...TILE_IDS];
   if (role === "receptionist") return TILE_IDS.filter((t) => t !== "revenue");
-  return TILE_IDS.filter((t) => t !== "revenue" && t !== "requests");
+  return TILE_IDS.filter((t) => t !== "revenue" && t !== "requests" && t !== "loyalty");
 }

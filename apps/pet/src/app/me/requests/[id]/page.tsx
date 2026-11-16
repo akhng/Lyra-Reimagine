@@ -8,6 +8,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { CancelRequest } from "@/components/portal/CancelRequest";
 import { requestWhen } from "@/components/portal/when";
 import { myBookings } from "@/features/portal/queries";
+import { ReviewForm } from "@/components/loyalty/ReviewForm";
+import { Stars } from "@/components/loyalty/Stars";
+import { awardLabel } from "@/features/loyalty/engine";
+import { myLoyalty } from "@/features/loyalty/queries";
 import { STATUS_TEXT } from "@/features/portal/schemas";
 import { formatAud } from "@/features/services/pricing";
 import { nowMs } from "@/features/scheduling/time";
@@ -25,8 +29,11 @@ const JOURNEY = [
 /** One request: where it's up to, what was asked, and cancel while it's still allowed. */
 export default async function RequestPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ new?: string }> }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
-  const r = (await myBookings()).requests.find((x) => x.id === id);
+  const [bookings, loyalty] = await Promise.all([myBookings(), myLoyalty()]);
+  const r = bookings.requests.find((x) => x.id === id);
   if (!r) notFound();
+  const review = loyalty.reviews.find((v) => v.appointmentId === r.appointmentId);
+  const milestone = r.status === "completed" ? loyalty.petAwards.find((a) => a.ownerPetId === r.ownerPetId && a.key.startsWith("grooms_") && r.appointmentStart !== null && Math.abs(Date.parse(a.at) - nowMs()) < 7 * 86_400_000) : undefined;
   const reached = new Set(r.events.map((e) => e.status));
   const closed = ["cancelled", "rejected", "expired"].includes(r.status);
   const fresh = sp.new === "1" && r.status === "awaiting_review";
@@ -53,10 +60,32 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
         </section>
       ) : null}
       {r.status === "completed" ? (
-        <section className="flex items-center gap-4 rounded-[var(--radius-card)] bg-mint-tint p-5">
-          <Mascot name="coco" mood="proud" className="w-20 shrink-0" />
-          <p className="text-lg font-semibold text-ink">Woof! {r.petName} is all done. Thanks for visiting {r.businessName}.</p>
-        </section>
+        <>
+          {milestone ? <Confetti /> : null}
+          <section className="flex items-center gap-4 rounded-[var(--radius-card)] bg-mint-tint p-5">
+            <Mascot name="coco" mood="proud" className="w-20 shrink-0" />
+            <div>
+              <p className="text-lg font-semibold text-ink">Woof! {r.petName} is all done. Thanks for visiting {r.businessName}.</p>
+              {milestone ? <p className="animate-pop mt-1 font-bold text-ink">{awardLabel(milestone.key, r.petName).body}</p> : null}
+            </div>
+          </section>
+          {r.appointmentId ? (
+            <Card>
+              <h2 className="font-display text-xl font-semibold text-ink">Your review</h2>
+              <div className="mt-3">
+                {review ? (
+                  <div className="flex flex-col gap-1">
+                    <Stars rating={review.rating} />
+                    {review.comment ? <p className="text-ink">{review.comment}</p> : null}
+                    {review.reply ? <p className="text-sm text-muted">{r.businessName} replied: {review.reply}</p> : null}
+                  </div>
+                ) : (
+                  <ReviewForm appointmentId={r.appointmentId} petName={r.petName} />
+                )}
+              </div>
+            </Card>
+          ) : null}
+        </>
       ) : null}
       {r.status === "rejected" ? (
         <section className="flex items-center gap-4 rounded-[var(--radius-card)] bg-coral-tint p-5">

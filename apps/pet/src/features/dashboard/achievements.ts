@@ -4,7 +4,7 @@
  * queries. Persistent awards and celebrations arrive with the gamification
  * engine (transformation R5).
  */
-export type BusinessMetrics = { completed: number; happyPets: number; loyalCustomers: number; onlineBookings: number; groomRecords: number };
+export type BusinessMetrics = { completed: number; happyPets: number; loyalCustomers: number; onlineBookings: number; groomRecords: number; fiveStarReviews: number };
 
 export type Achievement = { key: string; title: string; description: string; metric: keyof BusinessMetrics; target: number; mascot: "coco" | "mochi" | "biscuit" | "luna" };
 
@@ -15,6 +15,7 @@ export const BUSINESS_ACHIEVEMENTS: Achievement[] = [
   { key: "loyalty_hero", title: "Customer Loyalty Hero", description: "Ten customers who have visited three or more times.", metric: "loyalCustomers", target: 10, mascot: "luna" },
   { key: "online_star", title: "Online Booking Star", description: "Twenty-five bookings made online.", metric: "onlineBookings", target: 25, mascot: "coco" },
   { key: "history_keeper", title: "History Keeper", description: "Record twenty-five grooms with notes or photos.", metric: "groomRecords", target: 25, mascot: "mochi" },
+  { key: "five_star", title: "Five-Star Grooming Champion", description: "Ten reviews averaging 4.8 stars or more.", metric: "fiveStarReviews", target: 10, mascot: "biscuit" },
 ];
 
 export type AchievementProgress = Achievement & { value: number; done: boolean; ratio: number };

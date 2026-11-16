@@ -17,3 +17,13 @@ describe("notification text", () => {
     expect(notificationHref("request_new", d, "staff", "fluff")).toBe("/b/fluff/requests");
   });
 });
+
+describe("gamification notifications", () => {
+  it("celebrates milestones and points", () => {
+    expect(renderNotification("achievement", { petName: "Mochi", count: 5 }).title).toBe("Congratulations! Mochi has completed 5 grooming sessions!");
+    expect(renderNotification("achievement", { key: "five_star" }).body).toBe("Five-Star Grooming Champion");
+    expect(renderNotification("points_earned", { points: 105, petName: "Mochi", businessName: "Fluff" }).title).toBe("+105 loyalty points!");
+    expect(notificationHref("points_earned", {}, "customer")).toBe("/me/rewards");
+    expect(notificationHref("review_new", {}, "staff", "fluff")).toBe("/b/fluff/reviews");
+  });
+});

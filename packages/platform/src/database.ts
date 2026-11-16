@@ -1105,6 +1105,9 @@ isOneToOne: false
 "is_business_member":
 { Args: { "p_business": string }; Returns: boolean
                            },
+"listing_pays_online":
+{ Args: { "p_slug": string }; Returns: boolean
+                           },
 "log_request_event":
 { Args: { "p_business": string,"p_from": Database["public"]['Enums']["booking_request_status"],"p_note": string,"p_request": string,"p_to": Database["public"]['Enums']["booking_request_status"] }; Returns: undefined
                            },

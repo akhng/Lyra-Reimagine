@@ -52,7 +52,7 @@ create table public.payments (
   foreign key (customer_id, business_id) references public.customers (id, business_id) on delete cascade,
   check (fee_cents <= amount_cents)
 );
-create unique index payments_active_request_uidx on public.payments (request_id) where status in ('pending', 'paid', 'refund_due');
+create unique index payments_active_request_uidx on public.payments (request_id) where status in ('pending', 'paid');
 create index payments_business_idx on public.payments (business_id, created_at desc);
 create index payments_request_idx on public.payments (request_id);
 create index payments_customer_idx on public.payments (customer_id);
@@ -70,6 +70,16 @@ returns boolean language sql stable security definer set search_path = '' as $$
   select coalesce((select charges_enabled from public.payment_accounts where business_id = p_business), false);
 $$;
 grant execute on function public.payments_enabled(uuid) to anon, authenticated;
+
+-- For the booking page: does this listed salon take payment at booking?
+create or replace function public.listing_pays_online(p_slug text)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select coalesce((select a.charges_enabled from public.payment_accounts a
+    join public.businesses b on b.id = a.business_id
+    join public.marketplace_profiles mp on mp.business_id = b.id and mp.listed
+    where b.slug = lower(btrim(p_slug)) and b.status = 'active'), false);
+$$;
+grant execute on function public.listing_pays_online(text) to anon, authenticated;
 
 -- The requester records the Stripe Checkout session they're about to pay (amounts come from the request, not the caller).
 create or replace function public.record_checkout(p_request uuid, p_session text, p_fee_bps integer)
@@ -102,6 +112,12 @@ begin
   if p.status = 'paid' then return p.request_id; end if;
   if p.status not in ('pending', 'expired') then return p.request_id; end if;
   select * into r from public.booking_requests where id = p.request_id for update;
+  if exists (select 1 from public.payments where request_id = p.request_id and id <> p.id and status in ('paid', 'refund_due', 'refunded')) then
+    -- An older, superseded checkout was paid as well: refund the duplicate.
+    update public.payments set status = 'refund_due', stripe_payment_intent_id = p_intent, paid_at = now(), refund_reason = 'Duplicate payment' where id = p.id;
+    return r.id;
+  end if;
+  update public.payments set status = 'expired' where request_id = p.request_id and id <> p.id and status = 'pending';
   update public.payments set status = 'paid', stripe_payment_intent_id = p_intent, paid_at = now() where id = p.id;
   if r.status = 'draft' then
     update public.booking_requests set status = 'submitted' where id = r.id;

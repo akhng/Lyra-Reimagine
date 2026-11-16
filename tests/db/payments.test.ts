@@ -117,4 +117,22 @@ describe("with Stripe connected", () => {
     expect((await ned.from("payment_accounts").select("business_id").eq("business_id", PAWS)).data).toEqual([]);
     void ownerId;
   });
+
+  it("tells the booking page the salon takes payment, and refunds a duplicate payment of a superseded checkout", async () => {
+    expect((await other.rpc("listing_pays_online", { p_slug: "paws-test" })).data).toBe(true);
+    expect((await other.rpc("listing_pays_online", { p_slug: "no-such-salon" })).data).toBe(false);
+    const id = await submit(10);
+    await owner.rpc("record_checkout", { p_request: id, p_session: "cs_test_e1", p_fee_bps: 500 });
+    // The customer abandons the first checkout and starts another; the first is superseded.
+    await owner.rpc("record_checkout", { p_request: id, p_session: "cs_test_e2", p_fee_bps: 500 });
+    await admin.rpc("mark_payment_paid", { p_session: "cs_test_e2", p_intent: "pi_test_e2" });
+    // Both get paid (two tabs): the second payment is refunded, the request stays with the salon.
+    await admin.rpc("mark_payment_paid", { p_session: "cs_test_e1", p_intent: "pi_test_e1" });
+    const rows = (await admin.from("payments").select("stripe_checkout_session_id, status, refund_reason").eq("request_id", id).order("stripe_checkout_session_id")).data;
+    expect(rows).toEqual([
+      { stripe_checkout_session_id: "cs_test_e1", status: "refund_due", refund_reason: "Duplicate payment" },
+      { stripe_checkout_session_id: "cs_test_e2", status: "paid", refund_reason: null },
+    ]);
+    expect(await reqStatus(id)).toBe("awaiting_review");
+  });
 });

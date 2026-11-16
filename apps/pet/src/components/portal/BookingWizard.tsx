@@ -17,7 +17,7 @@ import { formatAud } from "@/features/services/pricing";
 type Window = { date: string; part: (typeof PARTS)[number] };
 const STEPS = ["Services", "When", "Notes", "Review"] as const;
 
-export function BookingWizard({ pet, listing }: { pet: OwnerPet; listing: Listing }) {
+export function BookingWizard({ pet, listing, payOnline }: { pet: OwnerPet; listing: Listing; payOnline: boolean }) {
   const router = useRouter();
   const tz = listing.timezone;
   const today = localToday(tz);
@@ -59,7 +59,8 @@ export function BookingWizard({ pet, listing }: { pet: OwnerPet; listing: Listin
       const [hh, mm] = time.split(":").map(Number);
       const preferredStart = mode === "specific" && time ? new Date(fromLocal(date, (hh ?? 0) * 60 + (mm ?? 0), tz)).toISOString() : null;
       const r = await submitRequestAction({ slug: listing.slug, ownerPetId: pet.id, serviceIds, preferredStart, windows: mode === "flexible" ? windows : [], notes });
-      if (r.ok) router.push(`/me/requests/${r.id}?new=1`);
+      if (r.ok && r.payUrl) window.location.assign(r.payUrl);
+      else if (r.ok) router.push(`/me/requests/${r.id}?new=1`);
       else setError(r.error);
     });
   }
@@ -182,7 +183,11 @@ export function BookingWizard({ pet, listing }: { pet: OwnerPet; listing: Listin
               </>
             ) : null}
           </dl>
-          <p className="text-sm text-muted">This is a request: {listing.name} checks their groomers and confirms a time before anything is booked. The final price is set at the salon.</p>
+          <p className="text-sm text-muted">
+            {payOnline
+              ? `You'll pay ${formatAud(total)} securely with Stripe now. ${listing.name} then confirms a time; if they can't, you're refunded in full.`
+              : `This is a request: ${listing.name} checks their groomers and confirms a time before anything is booked. You pay at the salon.`}
+          </p>
         </section>
       ) : null}
 
@@ -203,7 +208,7 @@ export function BookingWizard({ pet, listing }: { pet: OwnerPet; listing: Listin
           </Button>
         ) : (
           <Button type="button" size="lg" onClick={submit} disabled={pending}>
-            {pending ? "Sending…" : "Send request"}
+            {pending ? "Sending…" : payOnline ? `Pay ${formatAud(total)} and send` : "Send request"}
           </Button>
         )}
         {chosen.length ? <span className="text-sm font-semibold text-ink tabular">{from ? "from " : ""}{formatAud(total)} · {minutes} min</span> : null}

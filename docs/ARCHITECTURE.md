@@ -75,6 +75,25 @@ Photos live in the private Storage bucket `media` (8 MB, JPEG/PNG/WebP). Paths s
 - **Reviews:** one per completed appointment by its customer (`submit_review`), owner/manager replies (`reply_review`), staff read via RLS.
 - **Screens:** pet owners get Rewards (balance, level, progress, rewards, history, badges), streak and badge chips on pet cards, a celebration and review form on completed requests. Staff get Settings → Loyalty & rewards, a points panel with Redeem on the customer page, Reviews with replies, dashboard tiles for reviews and loyalty, achievements with unlock dates, and a colour-coded calendar month view.
 
+## Payments (ADR 0004)
+
+Salons connect their own Stripe account (Connect, direct charges). When a listed salon takes online payments, a customer's request is a `draft` until Stripe Checkout succeeds; then it's routed as usual. Lyra Pet's service fee is 5% (GST included), taken as Stripe's application fee; the salon pays Stripe's processing fees. Declined, expired and cancelled paid requests are refunded in full, with the fee returned.
+
+- `features/payments/`
+  - `provider.ts`: the interface.
+  - `stripe.ts`: the only file that talks to Stripe.
+  - `fake.ts`: test only.
+  - `service.ts`: checkout, confirmation, refunds, account sync.
+  - `fees.ts`: pure fee and GST maths.
+  - `queries.ts`, `actions.ts`.
+- `app/api/stripe/webhook`: signature-verified; handles `checkout.session.completed` / `expired`, async payment events and `account.updated`.
+- Tables:
+  - `payment_accounts`: owners and managers can read it; only the service role writes.
+  - `payments`: the front desk and the requester can read; no client writes.
+  - At most one pending or paid payment per request.
+- State changes only through definer functions. The service role runs them after Stripe confirms; the requester runs `record_checkout`, which sets the amount and fee from the request.
+- Settings → Payments: connect, fee explanation, monthly statement, and a tax invoice for the fees (`PLATFORM_LEGAL_NAME`, `PLATFORM_ABN`).
+
 ## Request flow
 
 `UI (Server Components / Server Actions) → feature actions (Zod validation, permission check) → user-scoped Supabase client (RLS) → Postgres`. Elevated operations use security-definer functions that check `auth.uid()` themselves.

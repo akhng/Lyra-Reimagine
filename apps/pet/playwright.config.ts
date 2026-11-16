@@ -18,7 +18,8 @@ export default defineConfig({
     command: `pnpm build && pnpm exec next start -p ${PORT}`,
     url: `http://localhost:${PORT}/login`,
     reuseExistingServer: !process.env.CI,
-    env: { APP_URL: `http://localhost:${PORT}` },
+    // The test-only payment provider and platform details let e2e cover paying at booking without Stripe.
+    env: { APP_URL: `http://localhost:${PORT}`, PAYMENTS_PROVIDER: "fake", PLATFORM_LEGAL_NAME: "Lyra Pet Test Pty Ltd", PLATFORM_ABN: "00 000 000 000" },
     timeout: 240_000,
   },
 });

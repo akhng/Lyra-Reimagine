@@ -14,6 +14,7 @@ import { marketplaceProfile, requestsForBusiness } from "@/features/requests/que
 import { minutesToHhmm, toLocal } from "@/features/scheduling/time";
 import { formatAud } from "@/features/services/pricing";
 import { listTeam } from "@/features/team/queries";
+import { requestPayments } from "@/features/payments/queries";
 
 export const metadata: Metadata = { title: "Requests" };
 
@@ -22,7 +23,10 @@ export default async function Requests({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const { business, role } = await requireBusiness(slug);
   const tz = business.timezone;
-  const [all, team, listing, allocation] = await Promise.all([requestsForBusiness(business.id), listTeam(business.id), marketplaceProfile(business.id), allocationSettings(business.id)]);
+  const [everything, team, listing, allocation] = await Promise.all([requestsForBusiness(business.id), listTeam(business.id), marketplaceProfile(business.id), allocationSettings(business.id)]);
+  // Unpaid drafts aren't the salon's business until the customer pays.
+  const all = everything.filter((r) => r.status !== "draft");
+  const paid = await requestPayments(all.map((r) => r.id));
   const nameOf = (id: string | null) => team.find((m) => m.id === id)?.name ?? null;
   const waiting = all.filter((r) => ["awaiting_review", "open", "submitted"].includes(r.status));
   const recent = all.filter((r) => !waiting.includes(r)).slice(0, 20);
@@ -51,6 +55,7 @@ export default async function Requests({ params }: { params: Promise<{ slug: str
                         <h3 className="font-display text-2xl leading-tight font-bold text-ink">{r.pet.name}</h3>
                         <p className="text-sm font-semibold text-ink/80">{[r.pet.breed ?? (r.pet.species === "cat" ? "Cat" : "Dog"), r.pet.size].filter(Boolean).join(" · ")}</p>
                         <p className="text-xs text-muted">Owner: {r.customerName}</p>
+                        {paid.get(r.id)?.status === "paid" ? <Badge tone="success" className="mt-1">Paid {formatAud(paid.get(r.id)?.amount ?? 0)}</Badge> : null}
                       </div>
                     </div>
                     <dl className="grid grid-cols-2 gap-2 text-sm">

@@ -42,6 +42,14 @@ export const serverSchema = clientSchema.extend({
   LYRA_MODEL_PRIMARY: optional,
   LYRA_MODEL_FAST: optional,
   PLATFORM_ADMIN_EMAILS: z.string().default(""),
+  /** Stripe Connect (ADR 0004). Missing keys ⇒ online payments are off and requests are paid at the salon. */
+  STRIPE_SECRET_KEY: optional,
+  STRIPE_WEBHOOK_SECRET: optional,
+  /** "fake" is for automated tests only and is refused in production. */
+  PAYMENTS_PROVIDER: z.enum(["stripe", "fake"]).default("stripe"),
+  /** Shown on service fee tax invoices. */
+  PLATFORM_LEGAL_NAME: optional,
+  PLATFORM_ABN: optional,
 });
 
 export type ClientEnv = z.infer<typeof clientSchema>;

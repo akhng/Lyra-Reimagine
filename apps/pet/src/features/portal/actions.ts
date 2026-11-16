@@ -7,6 +7,7 @@ import { logger } from "@lyra/platform/logger";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { fieldErrors, text, type FormState } from "@/lib/form";
 import { ownerPetSchema, REQUEST_ERRORS, requestSchema } from "./schemas";
+import { processRefunds, startCheckout } from "@/features/payments/service";
 
 /** Customer portal writes. The person comes from the session; RLS and definer functions check ownership. */
 function petFromForm(form: FormData) {
@@ -41,7 +42,7 @@ export async function setOwnerPetPhotoAction(petId: string, path: string): Promi
   return { ok: !error };
 }
 
-export type RequestResult = { ok: true; id: string } | { ok: false; error: string; field?: string };
+export type RequestResult = { ok: true; id: string; payUrl?: string } | { ok: false; error: string; field?: string };
 
 export async function submitRequestAction(input: unknown): Promise<RequestResult> {
   await requireUser();
@@ -49,14 +50,23 @@ export async function submitRequestAction(input: unknown): Promise<RequestResult
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Please check your request." };
   const v = parsed.data;
   const db = await createSupabaseServerClient();
-  const { data, error } = await db.rpc("submit_booking_request", { p_slug: v.slug, p_owner_pet: v.ownerPetId, p_service_ids: v.serviceIds, p_preferred_start: v.preferredStart ?? undefined, p_windows: v.windows, p_notes: v.notes || undefined } as never);
+  // Send every argument, null when empty: PostgREST finds the function by the argument names present.
+  const { data, error } = await db.rpc("submit_booking_request", { p_slug: v.slug, p_owner_pet: v.ownerPetId, p_service_ids: v.serviceIds, p_preferred_start: v.preferredStart ?? null, p_windows: v.windows, p_notes: v.notes || null } as never);
   if (error || !data) {
     const msg = error?.message ?? "";
     if (!REQUEST_ERRORS[msg]) logger.warn({ code: error?.code }, "booking request failed");
     return { ok: false, error: REQUEST_ERRORS[msg] ?? "We couldn't send your request. Please try again." };
   }
+  const id = data as unknown as string;
+  // Salons that take online payments are paid in full at booking: send the customer to Stripe Checkout.
+  const { data: req } = await db.from("booking_requests").select("status").eq("id", id).single();
+  if (req?.status === "draft") {
+    const user = await requireUser();
+    const pay = await startCheckout(id, user.email).catch(() => ({ ok: false as const, error: "" }));
+    return pay.ok ? { ok: true, id, payUrl: pay.url } : { ok: true, id };
+  }
   revalidatePath("/me");
-  return { ok: true, id: data as unknown as string };
+  return { ok: true, id };
 }
 
 export async function cancelRequestAction(id: string, reason: string): Promise<{ ok: boolean; error?: string }> {
@@ -65,6 +75,7 @@ export async function cancelRequestAction(id: string, reason: string): Promise<{
   const db = await createSupabaseServerClient();
   const { error } = await db.rpc("cancel_booking_request", { p_id: id, p_reason: reason.slice(0, 500) });
   if (error) return { ok: false, error: REQUEST_ERRORS[error.message] ?? "We couldn't cancel that. Please try again." };
+  await processRefunds().catch(() => 0);
   revalidatePath("/me");
   return { ok: true };
 }

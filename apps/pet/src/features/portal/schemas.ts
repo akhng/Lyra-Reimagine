@@ -65,7 +65,7 @@ export const REQUEST_ERRORS: Record<string, string> = {
 
 /** Request status for people (ADR 0003 statuses, as a pet owner reads them). */
 export const STATUS_TEXT: Record<string, { label: string; tone: "neutral" | "primary" | "success" | "warning" | "danger" | "coral" | "sky" | "butter" }> = {
-  draft: { label: "Draft", tone: "neutral" },
+  draft: { label: "Waiting for payment", tone: "warning" },
   submitted: { label: "Submitted", tone: "sky" },
   awaiting_review: { label: "Awaiting the salon", tone: "butter" },
   open: { label: "Finding a groomer", tone: "butter" },

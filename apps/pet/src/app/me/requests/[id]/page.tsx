@@ -15,6 +15,9 @@ import { myLoyalty } from "@/features/loyalty/queries";
 import { STATUS_TEXT } from "@/features/portal/schemas";
 import { formatAud } from "@/features/services/pricing";
 import { nowMs } from "@/features/scheduling/time";
+import { PayRequest } from "@/components/payments/PayRequest";
+import { requestPayments } from "@/features/payments/queries";
+import { confirmCheckout } from "@/features/payments/service";
 
 export const metadata: Metadata = { title: "Your request" };
 
@@ -27,16 +30,19 @@ const JOURNEY = [
 ] as const;
 
 /** One request: where it's up to, what was asked, and cancel while it's still allowed. */
-export default async function RequestPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ new?: string }> }) {
+export default async function RequestPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ new?: string; paid?: string; cancelled?: string }> }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
+  // Back from Stripe Checkout: confirm with Stripe now (the webhook may arrive later). Idempotent.
+  const justPaid = sp.paid ? await confirmCheckout(id, sp.paid).catch(() => false) : false;
   const [bookings, loyalty] = await Promise.all([myBookings(), myLoyalty()]);
   const r = bookings.requests.find((x) => x.id === id);
   if (!r) notFound();
   const review = loyalty.reviews.find((v) => v.appointmentId === r.appointmentId);
   const milestone = r.status === "completed" ? loyalty.petAwards.find((a) => a.ownerPetId === r.ownerPetId && a.key.startsWith("grooms_") && r.appointmentStart !== null && Math.abs(Date.parse(a.at) - nowMs()) < 7 * 86_400_000) : undefined;
+  const payment = (await requestPayments([r.id])).get(r.id);
   const reached = new Set(r.events.map((e) => e.status));
   const closed = ["cancelled", "rejected", "expired"].includes(r.status);
-  const fresh = sp.new === "1" && r.status === "awaiting_review";
+  const fresh = (sp.new === "1" || justPaid) && ["awaiting_review", "open", "submitted"].includes(r.status);
   const canCancel = ["submitted", "awaiting_review", "open", "accepted"].includes(r.status) || (r.status === "confirmed" && !!r.appointmentStart && Date.parse(r.appointmentStart) - (r.cancellationHours ?? 0) * 3_600_000 > nowMs());
   const fmt = (iso: string) => new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: r.timezone }).format(new Date(iso));
   return (
@@ -48,6 +54,16 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
           <Mascot name="coco" mood="excited" pose="wave" className="w-36" />
           <h2 className="font-display text-3xl font-bold text-ink">Your grooming request has been submitted!</h2>
           <p className="text-lg text-ink/80">Your appointment is awaiting acceptance by the grooming team.</p>
+        </section>
+      ) : null}
+      {r.status === "draft" ? (
+        <section className="flex flex-col gap-3 rounded-[var(--radius-card)] bg-butter-tint p-5">
+          <p className="text-lg font-semibold text-ink">
+            {sp.paid && !justPaid ? "We're still waiting for Stripe to confirm your payment. Refresh in a moment." : `${r.businessName} takes payment when you book. Pay ${r.estimateCents !== null ? formatAud(r.estimateCents) : ""} to send your request.`}
+          </p>
+          {sp.cancelled ? <p className="text-sm text-ink">Payment was cancelled, so your request hasn&apos;t been sent yet.</p> : null}
+          <p className="text-sm text-ink/80">If {r.businessName} can&apos;t take it, the request expires or you cancel, you&apos;re refunded in full. Unpaid requests are removed after 2 hours.</p>
+          <PayRequest requestId={r.id} label={`Pay ${r.estimateCents !== null ? formatAud(r.estimateCents) : ""} securely`} />
         </section>
       ) : null}
       {r.status === "confirmed" && r.appointmentStart ? (
@@ -125,6 +141,12 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
           <dd className="font-semibold text-ink">{requestWhen(r)}</dd>
           <dt className="text-muted">Estimate</dt>
           <dd className="font-semibold text-ink">{r.estimateCents !== null ? `${r.estimateFrom ? "from " : ""}${formatAud(r.estimateCents)} · about ${r.minutes} min` : `About ${r.minutes} min`}</dd>
+          {payment && payment.status !== "pending" && payment.status !== "expired" && payment.status !== "failed" ? (
+            <>
+              <dt className="text-muted">Payment</dt>
+              <dd className="font-semibold text-ink">{payment.status === "paid" ? `Paid ${formatAud(payment.amount)}` : payment.status === "refunded" ? `Refunded ${formatAud(payment.amount)}` : `Refund of ${formatAud(payment.amount)} on its way`}</dd>
+            </>
+          ) : null}
           {r.notes ? (
             <>
               <dt className="text-muted">Your notes</dt>

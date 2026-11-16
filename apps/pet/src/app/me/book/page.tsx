@@ -6,7 +6,7 @@ import { Mascot } from "@/components/mascots/Mascot";
 import { PageHeader } from "@/components/PageHeader";
 import { PetAvatar } from "@/components/PetAvatar";
 import { BookingWizard } from "@/components/portal/BookingWizard";
-import { listing, listings, myFavourites, myOwnerPets } from "@/features/portal/queries";
+import { listing, listingPaysOnline, listings, myFavourites, myOwnerPets } from "@/features/portal/queries";
 import { formatAud } from "@/features/services/pricing";
 
 export const metadata: Metadata = { title: "Book a groom" };
@@ -94,7 +94,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ p
       ) : !chosen.accepting || !chosen.services.length ? (
         <EmptyState art={<Mascot name="luna" mood="sleepy" className="w-28" />} title={`${chosen.name} isn't taking requests right now`} description="Choose another salon, or try again later." action={<Link href={q({ salon: undefined })} className={buttonVariants({ variant: "secondary" })}>Choose another salon</Link>} />
       ) : (
-        <BookingWizard key={`${pet.id}-${chosen.slug}`} pet={pet} listing={chosen} />
+        <BookingWizard key={`${pet.id}-${chosen.slug}`} pet={pet} listing={chosen} payOnline={await listingPaysOnline(chosen.slug)} />
       )}
     </div>
   );

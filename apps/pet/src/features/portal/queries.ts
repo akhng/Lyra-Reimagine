@@ -1,4 +1,5 @@
 import "server-only";
+import { processRefunds } from "@/features/payments/service";
 import { z } from "zod";
 import { requireUser } from "@lyra/platform/auth/session";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
@@ -47,6 +48,7 @@ export async function myBookings(): Promise<{ requests: MyRequest[]; appointment
   const { data: open } = await db.from("booking_requests").select("business_id").in("status", ["awaiting_review", "open"]).limit(50);
   await Promise.all([...new Set((open ?? []).map((r) => r.business_id))].map((b) => db.rpc("tidy_booking_requests", { p_business: b })));
   await db.rpc("queue_my_reminders");
+  await processRefunds().catch(() => 0);
   const { data, error } = await db.rpc("my_bookings");
   if (error) throw new Error("bookings query failed");
   const parsed = z.object({ requests: z.array(requestSchema), appointments: z.array(appointmentSchema) }).safeParse(data);
@@ -77,6 +79,12 @@ export async function listing(slug: string): Promise<Listing | null> {
   const { data, error } = await db.rpc("marketplace_listing", { p_slug: slug });
   if (error) throw new Error("listing query failed");
   return data === null ? null : listingSchema.parse(data);
+}
+
+export async function listingPaysOnline(slug: string): Promise<boolean> {
+  const db = await createSupabaseServerClient();
+  const { data } = await db.rpc("listing_pays_online", { p_slug: slug });
+  return data === true;
 }
 
 export async function myFavourites(): Promise<Set<string>> {

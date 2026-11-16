@@ -5,7 +5,33 @@ export type Database = {
   
   "public": {
           Tables: {
-            "appointment_series": {
+            "achievement_awards": {
+                  Row: {
+                    "awarded_at": string,"business_id": string,"id": number,"key": string,"pet_id": string | null,"subject": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "awarded_at"?: string,"business_id": string,"id"?: never,"key": string,"pet_id"?: string | null,"subject": string
+                  }
+                  Update: {
+                    "awarded_at"?: string,"business_id"?: string,"id"?: never,"key"?: string,"pet_id"?: string | null,"subject"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "achievement_awards_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "achievement_awards_pet_id_business_id_fkey"
+      columns: ["pet_id","business_id"]
+isOneToOne: false
+      referencedRelation: "pets"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"appointment_series": {
                   Row: {
                     "business_id": string,"created_at": string,"created_by": string | null,"id": string,"interval_weeks": number,"occurrences": number
                   }
@@ -555,6 +581,46 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"loyalty_rewards": {
+                  Row: {
+                    "active": boolean,"business_id": string,"cost_points": number,"created_at": string,"description": string | null,"id": string,"name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "active"?: boolean,"business_id": string,"cost_points": number,"created_at"?: string,"description"?: string | null,"id"?: string,"name": string
+                  }
+                  Update: {
+                    "active"?: boolean,"business_id"?: string,"cost_points"?: number,"created_at"?: string,"description"?: string | null,"id"?: string,"name"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "loyalty_rewards_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"loyalty_settings": {
+                  Row: {
+                    "achievements_enabled": boolean,"birthday_points": number,"business_id": string,"enabled": boolean,"points_per_appointment": number,"points_per_dollar": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "achievements_enabled"?: boolean,"birthday_points"?: number,"business_id": string,"enabled"?: boolean,"points_per_appointment"?: number,"points_per_dollar"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "achievements_enabled"?: boolean,"birthday_points"?: number,"business_id"?: string,"enabled"?: boolean,"points_per_appointment"?: number,"points_per_dollar"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "loyalty_settings_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: true
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"marketplace_profiles": {
                   Row: {
                     "about": string | null,"accepting_requests": boolean,"business_id": string,"headline": string | null,"listed": boolean,"mascot": string,"suburb": string | null,"updated_at": string
@@ -673,6 +739,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"points_ledger": {
+                  Row: {
+                    "business_id": string,"created_at": string,"created_by": string | null,"customer_id": string,"delta": number,"id": number,"note": string | null,"reason": string,"reward_id": string | null,"source_key": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"delta": number,"id"?: never,"note"?: string | null,"reason": string,"reward_id"?: string | null,"source_key": string
+                  }
+                  Update: {
+                    "business_id"?: string,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"delta"?: number,"id"?: never,"note"?: string | null,"reason"?: string,"reward_id"?: string | null,"source_key"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "points_ledger_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "points_ledger_customer_id_business_id_fkey"
+      columns: ["customer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "points_ledger_reward_id_business_id_fkey"
+      columns: ["reward_id","business_id"]
+isOneToOne: false
+      referencedRelation: "loyalty_rewards"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "created_at": string,"full_name": string | null,"id": string,"phone": string | null,"updated_at": string
@@ -686,6 +784,38 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"reviews": {
+                  Row: {
+                    "appointment_id": string,"author_id": string,"business_id": string,"comment": string | null,"created_at": string,"customer_id": string,"id": string,"rating": number,"replied_at": string | null,"reply": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "appointment_id": string,"author_id": string,"business_id": string,"comment"?: string | null,"created_at"?: string,"customer_id": string,"id"?: string,"rating": number,"replied_at"?: string | null,"reply"?: string | null
+                  }
+                  Update: {
+                    "appointment_id"?: string,"author_id"?: string,"business_id"?: string,"comment"?: string | null,"created_at"?: string,"customer_id"?: string,"id"?: string,"rating"?: number,"replied_at"?: string | null,"reply"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "reviews_appointment_id_business_id_fkey"
+      columns: ["appointment_id","business_id"]
+isOneToOne: false
+      referencedRelation: "appointments"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "reviews_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "reviews_customer_id_business_id_fkey"
+      columns: ["customer_id","business_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id","business_id"]
+    }
                   ]
                 },"service_price_rules": {
                   Row: {
@@ -850,6 +980,12 @@ isOneToOne: false
 "auto_allocate":
 { Args: { "p_request": string }; Returns: string
                            },
+"award_achievement":
+{ Args: { "p_business": string,"p_key": string,"p_pet": string }; Returns: boolean
+                           },
+"award_points":
+{ Args: { "p_business": string,"p_customer": string,"p_delta": number,"p_note": string,"p_reason": string,"p_source": string }; Returns: boolean
+                           },
 "booking_context":
 { Args: { "p_from": string,"p_slug": string,"p_to": string }; Returns: Json
                            },
@@ -861,6 +997,9 @@ isOneToOne: false
                            },
 "cancel_booking_request":
 { Args: { "p_id": string,"p_reason": string }; Returns: undefined
+                           },
+"claim_birthday_rewards":
+{ Args: Record<PropertyKey, never>; Returns: number
                            },
 "claim_customer_records":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -896,6 +1035,12 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"evaluate_business_achievements":
+{ Args: { "p_business": string }; Returns: undefined
+                           },
+"evaluate_pet_achievements":
+{ Args: { "p_business": string,"p_pet": string }; Returns: undefined
+                           },
 "get_booking_by_token":
 { Args: { "p_token": string }; Returns: Json
                            },
@@ -926,6 +1071,9 @@ isOneToOne: false
 "my_favourite_slugs":
 { Args: Record<PropertyKey, never>; Returns: (string)[]
                            },
+"my_loyalty":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "notify":
 { Args: { "p_audience": string,"p_business": string,"p_data": Json,"p_dedupe": string,"p_kind": string,"p_user": string }; Returns: undefined
                            },
@@ -949,6 +1097,12 @@ isOneToOne: false
                            },
 "queue_my_reminders":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"redeem_reward":
+{ Args: { "p_customer": string,"p_reward": string }; Returns: number
+                           },
+"reply_review":
+{ Args: { "p_reply": string,"p_review": string }; Returns: undefined
                            },
 "request_candidate_starts":
 { Args: { "p_request": string }; Returns: string[]
@@ -982,6 +1136,9 @@ isOneToOne: false
                            },
 "submit_booking_request":
 { Args: { "p_notes": string,"p_owner_pet": string,"p_preferred_start": string,"p_service_ids": (string)[],"p_slug": string,"p_windows": Json }; Returns: string
+                           },
+"submit_review":
+{ Args: { "p_appointment": string,"p_comment": string,"p_rating": number }; Returns: string
                            },
 "tidy_booking_requests":
 { Args: { "p_business": string }; Returns: number

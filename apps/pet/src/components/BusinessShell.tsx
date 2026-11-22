@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, ClipboardList, Heart, Inbox, LayoutDashboard, Star, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
+import { CalendarDays, ClipboardList, Heart, Inbox, LayoutDashboard, MessageCircle, Star, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -14,13 +14,14 @@ import { Mascot } from "./mascots/Mascot";
  */
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 
-export function BusinessShell({ slug, businessName, role, bell, children }: { slug: string; businessName: string; role: string; bell?: ReactNode; children: ReactNode }) {
+export function BusinessShell({ slug, businessName, role, bell, unreadMessages = 0, children }: { slug: string; businessName: string; role: string; bell?: ReactNode; unreadMessages?: number; children: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const items: Item[] = [
     { href: `/b/${slug}`, label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: `/b/${slug}/calendar`, label: "Calendar", icon: CalendarDays },
     { href: `/b/${slug}/requests`, label: "Requests", icon: Inbox },
+    { href: `/b/${slug}/messages`, label: "Messages", icon: MessageCircle },
     { href: `/b/${slug}/shifts`, label: "Shift board", icon: ClipboardList },
     { href: `/b/${slug}/customers`, label: "Customers", icon: Users },
     { href: `/b/${slug}/pets`, label: "Pets", icon: PawPrint },
@@ -42,6 +43,12 @@ export function BusinessShell({ slug, businessName, role, bell, children }: { sl
           className={cn("flex h-11 items-center gap-3 rounded-full px-4 text-sm font-semibold transition-[background-color,transform] duration-200 hover:translate-x-0.5", active(i) ? "bg-primary text-white shadow-[0_8px_20px_-10px_var(--primary)]" : "text-ink-text hover:bg-white/8 hover:text-white")}
         >
           <i.icon className="size-5 shrink-0" aria-hidden /> {i.label}
+          {i.href.endsWith("/messages") && unreadMessages > 0 ? (
+            <span className="ml-auto rounded-full bg-coral px-2 text-xs font-bold text-ink tabular">
+              {unreadMessages}
+              <span className="sr-only"> unread</span>
+            </span>
+          ) : null}
         </Link>
       ))}
     </nav>

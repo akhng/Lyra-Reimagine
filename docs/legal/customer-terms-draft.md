@@ -43,6 +43,10 @@ You'll give accurate information about your pet's health, behaviour and needs so
 
 We handle your personal information in line with our Privacy Policy. We share your name, contact details and pet information only with salons you send requests to.
 
+## 6A. Messages
+
+You can message salons through Lyra Pet, with or without a booking. Your messages are seen by the salon's team: its owner, managers and front desk, and your groomer while they have a booking with you. Until you've paid for a booking through Lyra Pet, phone numbers, emails and links in messages are hidden. Be respectful; either side can block or report a conversation.
+
 ## 7. General
 
 These terms are governed by the laws of [Victoria], Australia.

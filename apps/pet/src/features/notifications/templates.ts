@@ -4,7 +4,7 @@
  * without touching stored rows, and the same text can later go out by email
  * or SMS.
  */
-export type NotificationData = { key?: string; points?: number; count?: number; rating?: number; requestId?: string; businessName?: string; businessSlug?: string; timezone?: string; petName?: string; startsAt?: string | null; groomerName?: string | null; appointmentId?: string | null; services?: string[] };
+export type NotificationData = { key?: string; points?: number; count?: number; rating?: number; requestId?: string; businessName?: string; businessSlug?: string; timezone?: string; petName?: string; startsAt?: string | null; groomerName?: string | null; appointmentId?: string | null; services?: string[]; conversationId?: string; customerName?: string };
 export type Rendered = { title: string; body: string; mascot: "coco" | "mochi" | "biscuit" | "luna"; mood: "happy" | "excited" | "curious" | "proud" | "sleepy" };
 
 export function when(iso: string | null | undefined, tz = "Australia/Melbourne"): string | null {
@@ -53,6 +53,12 @@ export function renderNotification(kind: string, d: NotificationData): Rendered 
         : { title: "Achievement unlocked!", body: achievementTitle(d.key), mascot: "coco", mood: "proud" };
     case "review_new":
       return { title: `New ${d.rating ?? ""}-star review`, body: `For ${pet}'s groom.`, mascot: "coco", mood: "happy" };
+    case "message_new":
+      return d.customerName
+        ? { title: `New message from ${d.customerName}`, body: "Open Messages to reply.", mascot: "luna", mood: "curious" }
+        : { title: `New message from ${salon}`, body: "Open Messages to reply.", mascot: "mochi", mood: "happy" };
+    case "message_reported":
+      return { title: "A conversation was reported", body: `About the conversation with ${d.customerName ?? "a customer"}. Take a look.`, mascot: "luna", mood: "curious" };
     default:
       return { title: "Update", body: salon, mascot: "coco", mood: "happy" };
   }
@@ -65,6 +71,7 @@ function achievementTitle(key?: string): string {
 
 /** Where a notification leads. */
 export function notificationHref(kind: string, d: NotificationData, audience: "customer" | "staff", slug?: string): string {
+  if (kind.startsWith("message_") && d.conversationId) return audience === "customer" ? `/me/messages/${d.conversationId}` : `/b/${slug}/messages/${d.conversationId}`;
   if (audience === "customer") {
     if (kind === "points_earned" || kind === "birthday" || kind === "achievement") return "/me/rewards";
     return d.requestId ? `/me/requests/${d.requestId}` : "/me/bookings";

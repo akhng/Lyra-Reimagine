@@ -65,6 +65,14 @@ then the service fee is returned to you in full.
 
 6.3 You won't use Lyra Pet to take bookings off the platform to avoid the service fee for Customers who found you through the Lyra Pet marketplace. [Optional; consider whether to include.]
 
+## 6A. Messages with customers
+
+6A.1 Customers can message your salon through Lyra Pet. Your owners, managers and front desk can read every conversation with your salon; a groomer can read a conversation while they have a booking for that customer. Tell your staff that their messages are visible to owners and managers.
+
+6A.2 Until a customer has paid for a booking through Lyra Pet, phone numbers, emails and links in messages are hidden. You agree not to use messages to move bookings that customers found through the Lyra Pet marketplace off the app to avoid the service fee.
+
+6A.3 Messages are customer personal information: use them only to provide your services, and keep them confidential.
+
 ## 7. Data and privacy
 
 7.1 You own your business data. We process it to provide the service, in line with our Privacy Policy.

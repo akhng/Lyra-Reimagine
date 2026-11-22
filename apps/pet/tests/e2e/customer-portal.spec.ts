@@ -11,21 +11,23 @@ const PASSWORD = "a-strong-passphrase-42";
 const TZ = "Australia/Melbourne";
 const localDate = (days: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date(Date.now() + days * 86_400_000));
 
-async function salon(project: string) {
+async function salon(project: string, opts: { bookableOnline?: boolean; tag?: string } = {}) {
   const db = admin();
-  const email = uniqueEmail("r3-owner", project);
+  const tag = opts.tag ?? "r3";
+  const email = uniqueEmail(`${tag}-owner`, project);
   const { data } = await db.auth.admin.createUser({ email, password: PASSWORD, email_confirm: true, user_metadata: { intent: "business" } });
   const ownerId = data.user?.id ?? "";
-  const slug = uniqueSlug("r3", project);
-  const biz = (await db.from("businesses").insert({ name: `Request Test Salon ${project}`, slug, timezone: TZ, created_by: ownerId }).select("id").single()).data;
+  const slug = uniqueSlug(tag, project);
+  const name = tag === "r3" ? `Request Test Salon ${project}` : `Offline Test Salon ${project}`;
+  const biz = (await db.from("businesses").insert({ name, slug, timezone: TZ, created_by: ownerId }).select("id").single()).data;
   if (!biz) throw new Error("business insert failed");
   const member = (await db.from("business_members").insert({ business_id: biz.id, user_id: ownerId, role: "owner", display_name: "Olive" }).select("id").single()).data;
   const location = (await db.from("locations").insert({ business_id: biz.id, name: "Studio", timezone: TZ, suburb: "Carlton" }).select("id").single()).data;
   const days = [1, 2, 3, 4, 5, 6, 7];
   await db.from("location_hours").insert(days.map((weekday) => ({ business_id: biz.id, location_id: location?.id ?? "", weekday, opens: "08:00", closes: "18:00" })));
   await db.from("staff_hours").insert(days.map((weekday) => ({ business_id: biz.id, member_id: member?.id ?? "", location_id: location?.id ?? "", weekday, starts: "08:00", ends: "18:00" })));
-  await db.from("services").insert({ business_id: biz.id, name: "Full groom", duration_minutes: 90, buffer_minutes: 15, base_price_cents: 9500, bookable_online: true });
-  return { slug, email, ownerId, businessId: biz.id, cleanup: async () => { await db.from("businesses").delete().eq("id", biz.id); await db.auth.admin.deleteUser(ownerId); } };
+  await db.from("services").insert({ business_id: biz.id, name: "Full groom", duration_minutes: 90, buffer_minutes: 15, base_price_cents: 9500, bookable_online: opts.bookableOnline ?? true });
+  return { slug, name, email, ownerId, businessId: biz.id, cleanup: async () => { await db.from("businesses").delete().eq("id", biz.id); await db.auth.admin.deleteUser(ownerId); } };
 }
 
 /** Switch person: drop the session cookies (sign-out itself is covered by the foundation tests). */
@@ -36,6 +38,9 @@ async function signOut(page: Page) {
 test("a pet owner books through the marketplace and the salon confirms", async ({ page }, info) => {
   test.setTimeout(150_000);
   const s = await salon(info.project.name);
+  // Listed and accepting, but nothing bookable online: pet owners must not be led into a dead end.
+  const offline = await salon(info.project.name, { bookableOnline: false, tag: "r3off" });
+  await admin().from("marketplace_profiles").insert({ business_id: offline.businessId, listed: true, accepting_requests: true });
   const ownerEmail = uniqueEmail("r3-petowner", info.project.name);
   let petOwnerId = "";
   try {
@@ -74,6 +79,17 @@ test("a pet owner books through the marketplace and the salon confirms", async (
     await main.getByRole("button", { name: "Add pet" }).click();
     await expect(main.getByText(/Saved\. Salons you book with/)).toBeVisible();
     await noSeriousViolations(page);
+
+    // A salon with no services bookable online isn't offered, and its page explains why.
+    await page.goto("/me/book");
+    await expect(main.getByRole("link", { name: new RegExp(`Request Test Salon ${info.project.name}`) })).toBeVisible();
+    await expect(main.getByRole("link", { name: new RegExp(offline.name) })).toHaveCount(0);
+    await page.goto(`/me/book?salon=${offline.slug}`);
+    await expect(main.getByRole("heading", { name: `${offline.name} isn't taking requests right now` })).toBeVisible();
+    await expect(main.getByText(/haven't put any services up for online booking yet/)).toBeVisible();
+    await page.goto(`/me/salons/${offline.slug}`);
+    await expect(main.getByRole("heading", { name: offline.name })).toBeVisible();
+    await expect(main.getByRole("link", { name: "Request a groom" })).toHaveCount(0);
 
     // Finds the salon and requests a groom.
     await page.goto("/me/salons");
@@ -131,6 +147,7 @@ test("a pet owner books through the marketplace and the salon confirms", async (
     await noSeriousViolations(page);
   } finally {
     await s.cleanup();
+    await offline.cleanup();
     if (petOwnerId) await admin().auth.admin.deleteUser(petOwnerId);
   }
 });

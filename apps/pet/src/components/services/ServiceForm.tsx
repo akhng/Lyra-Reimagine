@@ -26,7 +26,7 @@ export function ServiceForm({ slug, service, idPrefix }: { slug: string; service
       <TextField {...p} name="basePrice" label="Base price (A$, incl. GST)" inputMode="decimal" defaultValue={dollars(service?.base_price_cents)} />
       <div className="flex flex-col justify-end gap-1">
         <CheckField name="priceFrom" label="Show as “from” price" defaultChecked={service?.price_from} />
-        <CheckField name="bookableOnline" label="Customers can book online" defaultChecked={service?.bookable_online} />
+        <CheckField name="bookableOnline" label="Customers can book online" defaultChecked={service?.bookable_online ?? true} />
         {service ? <CheckField name="active" label="Active" defaultChecked={service.active} /> : null}
       </div>
       <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-5">

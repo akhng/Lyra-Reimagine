@@ -39,7 +39,7 @@ export default async function Salons() {
                     </span>
                   ) : null}
                   <span>{s.services} services{s.fromCents !== null ? ` · from ${formatAud(s.fromCents)}` : ""}</span>
-                  {!s.accepting ? <span className="text-muted">Not taking requests right now</span> : null}
+                  {!s.accepting || !s.services ? <span className="text-muted">Not taking requests right now</span> : null}
                 </p>
                 <Mascot name={s.mascot} pose="peek" mood="happy" className="absolute -right-3 -bottom-4 w-20 opacity-90" />
               </article>

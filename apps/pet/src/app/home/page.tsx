@@ -18,8 +18,9 @@ export default async function Home() {
   const businesses = await myBusinesses();
   if (businesses.length === 0) {
     const db = await createSupabaseServerClient();
-    const { data } = await db.auth.getUser();
-    redirect(data.user?.user_metadata?.intent === "business" ? "/onboarding" : "/me");
+    // Sign-up metadata is in the verified JWT claims; no Auth round trip needed.
+    const { data } = await db.auth.getClaims();
+    redirect(data?.claims?.user_metadata?.intent === "business" ? "/onboarding" : "/me");
   }
   if (businesses.length === 1) redirect(`/b/${businesses[0]!.slug}`); // length checked
   return (

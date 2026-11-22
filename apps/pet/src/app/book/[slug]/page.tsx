@@ -8,7 +8,8 @@ import { Mascot } from "@/components/mascots/Mascot";
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const ctx = await getBookingContext((await params).slug, 1);
+  // Same arguments as the page, so the per-request cache serves both from one RPC call.
+  const ctx = await getBookingContext((await params).slug);
   return { title: ctx ? `Book with ${ctx.business.name}` : "Book", robots: { index: !!ctx?.online } };
 }
 

@@ -20,11 +20,11 @@ const COMPLIMENTS = ["is looking fabulous today!", "says hello!", "is ready for 
 /** The pet owner's home: a welcome, their pets as illustrated cards, then the things they can do (all real data). */
 export default async function MeHome() {
   const db = await createSupabaseServerClient();
-  const [{ data: auth }, pets, bookings, favourites, loyalty] = await Promise.all([db.auth.getUser(), myOwnerPets(), myBookings(), myFavourites(), myLoyalty()]);
+  const [{ data: auth }, pets, bookings, favourites, loyalty] = await Promise.all([db.auth.getClaims(), myOwnerPets(), myBookings(), myFavourites(), myLoyalty()]);
   const today = localToday("Australia/Melbourne");
   const points = loyalty.salons.filter((s) => s.enabled).reduce((n, s) => n + s.balance, 0);
   const lifetime = loyalty.salons.reduce((n, s) => n + s.lifetime, 0);
-  const firstName = String(auth.user?.user_metadata?.full_name ?? "").split(" ")[0] || "there";
+  const firstName = String(auth?.claims?.user_metadata?.full_name ?? "").split(" ")[0] || "there";
   const now = nowMs();
   const upcoming = bookings.appointments.filter((a) => Date.parse(a.startsAt) > now && !["cancelled", "no_show", "completed"].includes(a.status)).sort((a, b) => a.startsAt.localeCompare(b.startsAt));
   const done = bookings.appointments.filter((a) => a.status === "completed");

@@ -41,10 +41,10 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-  // Before any redirect decision, so expired sessions are refreshed.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Before any redirect decision, so expired sessions are refreshed. getClaims()
+  // verifies the JWT locally (no Auth round trip) with asymmetric signing keys.
+  const { data: claimsData } = await supabase.auth.getClaims();
+  const user = claimsData?.claims?.sub ? claimsData.claims : null;
 
   const { pathname, search } = request.nextUrl;
   let redirectTo: URL | null = null;

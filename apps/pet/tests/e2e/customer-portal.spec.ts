@@ -79,8 +79,12 @@ test("a pet owner books through the marketplace and the salon confirms", async (
     await page.goto("/me/salons");
     await main.getByRole("link", { name: `Request Test Salon ${info.project.name}` }).click();
     await expect(main.getByText("Calm grooming in Carlton")).toBeVisible();
-    await main.getByRole("button", { name: /Save .* to favourites/ }).filter({ visible: true }).first().click();
-    await expect(main.getByRole("button", { name: /Remove .* from favourites/ }).filter({ visible: true }).first()).toBeVisible();
+    // Retry until the page is interactive (a click before hydration does nothing).
+    const remove = main.getByRole("button", { name: /Remove .* from favourites/ }).filter({ visible: true }).first();
+    await expect(async () => {
+      if (!(await remove.isVisible())) await main.getByRole("button", { name: /Save .* to favourites/ }).filter({ visible: true }).first().click();
+      await expect(remove).toBeVisible({ timeout: 1_500 });
+    }).toPass({ timeout: 15_000 });
     await noSeriousViolations(page);
     await main.getByRole("link", { name: "Request a groom" }).click();
     await expect(main.getByText(/Pet: Pippin/)).toBeVisible();

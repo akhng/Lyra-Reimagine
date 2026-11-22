@@ -1,5 +1,5 @@
 "use client";
-import { CalendarHeart, Home, LogOut, PawPrint, Store, type LucideIcon } from "lucide-react";
+import { CalendarHeart, Home, LogOut, MessageCircle, PawPrint, Store, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -14,9 +14,12 @@ const ITEMS: Item[] = [
   { href: "/me/book", label: "Book", icon: PawPrint },
   { href: "/me/bookings", label: "Bookings", icon: CalendarHeart },
   { href: "/me/salons", label: "Salons", icon: Store },
+  { href: "/me/messages", label: "Messages", icon: MessageCircle },
 ];
 
-export function CustomerShell({ children, staff, bell }: { children: ReactNode; staff: boolean; bell?: ReactNode }) {
+export function CustomerShell({ children, staff, bell, unreadMessages = 0 }: { children: ReactNode; staff: boolean; bell?: ReactNode; unreadMessages?: number }) {
+  const badge = (i: Item) => (i.href === "/me/messages" && unreadMessages > 0 ? <span className="absolute top-1 right-2 size-2.5 rounded-full bg-coral" aria-hidden /> : null);
+  const srBadge = (i: Item) => (i.href === "/me/messages" && unreadMessages > 0 ? <span className="sr-only">, {unreadMessages} unread</span> : null);
   const pathname = usePathname();
   const active = (i: Item) => (i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(`${i.href}/`));
   return (
@@ -29,8 +32,10 @@ export function CustomerShell({ children, staff, bell }: { children: ReactNode; 
           <Brand href="/me" />
           <nav aria-label="Main" className="hidden items-center gap-1 sm:flex">
             {ITEMS.map((i) => (
-              <Link key={i.href} href={i.href} aria-current={active(i) ? "page" : undefined} className={cn("inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold", active(i) ? "bg-primary text-white" : "text-ink hover:bg-surface-2")}>
+              <Link key={i.href} href={i.href} aria-current={active(i) ? "page" : undefined} className={cn("relative inline-flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold", active(i) ? "bg-primary text-white" : "text-ink hover:bg-surface-2")}>
                 <i.icon className="size-4" aria-hidden /> {i.label}
+                {srBadge(i)}
+                {badge(i)}
               </Link>
             ))}
           </nav>
@@ -53,10 +58,12 @@ export function CustomerShell({ children, staff, bell }: { children: ReactNode; 
       <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none sm:py-8">
         {children}
       </main>
-      <nav aria-label="Main" className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 rounded-full border border-border bg-surface/95 p-1.5 shadow-[var(--shadow-lift)] backdrop-blur sm:hidden">
+      <nav aria-label="Main" className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 rounded-full border border-border bg-surface/95 p-1.5 shadow-[var(--shadow-lift)] backdrop-blur sm:hidden">
         {ITEMS.map((i) => (
-          <Link key={i.href} href={i.href} aria-current={active(i) ? "page" : undefined} className={cn("flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-bold", active(i) ? "bg-primary text-white" : "text-ink")}>
+          <Link key={i.href} href={i.href} aria-current={active(i) ? "page" : undefined} className={cn("relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-full text-[11px] font-bold", active(i) ? "bg-primary text-white" : "text-ink")}>
             <i.icon className="size-5" aria-hidden /> {i.label}
+            {srBadge(i)}
+            {badge(i)}
           </Link>
         ))}
       </nav>

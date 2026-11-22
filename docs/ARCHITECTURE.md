@@ -94,6 +94,33 @@ Salons connect their own Stripe account (Connect, direct charges). When a listed
 - State changes only through definer functions. The service role runs them after Stripe confirms; the requester runs `record_checkout`, which sets the amount and fee from the request.
 - Settings → Payments: connect, fee explanation, monthly statement, and a tax invoice for the fees (`PLATFORM_LEGAL_NAME`, `PLATFORM_ABN`).
 
+## Private messages (ADR 0005)
+
+Pet owners message a salon from its listing, with or without a booking.
+
+**Tables** (all with RLS; writes only through definer functions):
+- `chat_conversations`: one per owner and salon.
+- `chat_messages`.
+- `chat_staff_reads`.
+- `chat_reports`.
+
+**Access:**
+- The owner.
+- The front desk.
+- A groomer while they have a current booking for that owner.
+- Owners and managers can read everything (`chat_staff_access`, `chat_can_read`).
+
+**Functions:**
+- `send_chat_message`: masks phone numbers, emails and links until the owner has paid through the app (`chat_contact_unlocked`, `mask_contact_details`). It also enforces blocks and fair use, and notifies the other side at most hourly.
+- Lists: `my_conversations` / `business_conversations`, which include the unread state.
+
+**Live updates:** Supabase Realtime on `chat_messages`, with a 30-second refresh fallback.
+
+**UI:**
+- `/me/messages`.
+- `/b/[slug]/messages`, with this owner's requests in a side panel and no contact details.
+- Message buttons and unread badges in both navigations.
+
 ## Request flow
 
 `UI (Server Components / Server Actions) → feature actions (Zod validation, permission check) → user-scoped Supabase client (RLS) → Postgres`. Elevated operations use security-definer functions that check `auth.uid()` themselves.

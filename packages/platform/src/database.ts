@@ -385,6 +385,92 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"chat_conversations": {
+                  Row: {
+                    "blocked_at": string | null,"blocked_by": string | null,"business_id": string,"created_at": string,"customer_last_read_at": string | null,"customer_name": string,"customer_user_id": string,"id": string,"last_message_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "blocked_at"?: string | null,"blocked_by"?: string | null,"business_id": string,"created_at"?: string,"customer_last_read_at"?: string | null,"customer_name": string,"customer_user_id": string,"id"?: string,"last_message_at"?: string | null
+                  }
+                  Update: {
+                    "blocked_at"?: string | null,"blocked_by"?: string | null,"business_id"?: string,"created_at"?: string,"customer_last_read_at"?: string | null,"customer_name"?: string,"customer_user_id"?: string,"id"?: string,"last_message_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_conversations_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chat_messages": {
+                  Row: {
+                    "body": string,"business_id": string,"conversation_id": string,"created_at": string,"id": number,"masked": boolean,"sender_kind": string,"sender_name": string,"sender_user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"business_id": string,"conversation_id": string,"created_at"?: string,"id"?: never,"masked"?: boolean,"sender_kind": string,"sender_name": string,"sender_user_id"?: string | null
+                  }
+                  Update: {
+                    "body"?: string,"business_id"?: string,"conversation_id"?: string,"created_at"?: string,"id"?: never,"masked"?: boolean,"sender_kind"?: string,"sender_name"?: string,"sender_user_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_messages_conversation_id_business_id_fkey"
+      columns: ["conversation_id","business_id"]
+isOneToOne: false
+      referencedRelation: "chat_conversations"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"chat_reports": {
+                  Row: {
+                    "business_id": string,"conversation_id": string,"created_at": string,"id": string,"reason": string | null,"reporter_kind": string,"reporter_user_id": string | null,"resolved_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"conversation_id": string,"created_at"?: string,"id"?: string,"reason"?: string | null,"reporter_kind": string,"reporter_user_id"?: string | null,"resolved_at"?: string | null
+                  }
+                  Update: {
+                    "business_id"?: string,"conversation_id"?: string,"created_at"?: string,"id"?: string,"reason"?: string | null,"reporter_kind"?: string,"reporter_user_id"?: string | null,"resolved_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_reports_conversation_id_business_id_fkey"
+      columns: ["conversation_id","business_id"]
+isOneToOne: false
+      referencedRelation: "chat_conversations"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
+                },"chat_staff_reads": {
+                  Row: {
+                    "business_id": string,"conversation_id": string,"last_read_at": string,"member_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "business_id": string,"conversation_id": string,"last_read_at"?: string,"member_id": string
+                  }
+                  Update: {
+                    "business_id"?: string,"conversation_id"?: string,"last_read_at"?: string,"member_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_staff_reads_conversation_id_business_id_fkey"
+      columns: ["conversation_id","business_id"]
+isOneToOne: false
+      referencedRelation: "chat_conversations"
+      referencedColumns: ["id","business_id"]
+    },{
+      foreignKeyName: "chat_staff_reads_member_id_business_id_fkey"
+      columns: ["member_id","business_id"]
+isOneToOne: false
+      referencedRelation: "business_members"
+      referencedColumns: ["id","business_id"]
+    }
+                  ]
                 },"customer_contacts": {
                   Row: {
                     "address_line": string | null,"business_id": string,"customer_id": string,"email": string | null,"mobile": string | null,"postcode": string | null,"state": string | null,"suburb": string | null,"updated_at": string
@@ -1041,6 +1127,9 @@ isOneToOne: false
 "booking_context":
 { Args: { "p_from": string,"p_slug": string,"p_to": string }; Returns: Json
                            },
+"business_conversations":
+{ Args: { "p_business": string }; Returns: Json
+                           },
 "business_slug_available":
 { Args: { "p_slug": string }; Returns: boolean
                            },
@@ -1049,6 +1138,15 @@ isOneToOne: false
                            },
 "cancel_booking_request":
 { Args: { "p_id": string,"p_reason": string }; Returns: undefined
+                           },
+"chat_can_read":
+{ Args: { "p_conversation": string }; Returns: boolean
+                           },
+"chat_contact_unlocked":
+{ Args: { "p_conversation": string }; Returns: boolean
+                           },
+"chat_staff_access":
+{ Args: { "p_conversation": string }; Returns: boolean
                            },
 "claim_birthday_rewards":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -1111,6 +1209,9 @@ isOneToOne: false
 "log_request_event":
 { Args: { "p_business": string,"p_from": Database["public"]['Enums']["booking_request_status"],"p_note": string,"p_request": string,"p_to": Database["public"]['Enums']["booking_request_status"] }; Returns: undefined
                            },
+"mark_conversation_read":
+{ Args: { "p_conversation": string }; Returns: undefined
+                           },
 "mark_payment_failed":
 { Args: { "p_session": string }; Returns: undefined
                            },
@@ -1126,10 +1227,16 @@ isOneToOne: false
 "marketplace_listings":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"mask_contact_details":
+{ Args: { "p_body": string }; Returns: string
+                           },
 "media_business":
 { Args: { "p_name": string }; Returns: string
                            },
 "my_bookings":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_conversations":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
 "my_favourite_slugs":
@@ -1137,6 +1244,11 @@ isOneToOne: false
                            },
 "my_loyalty":
 { Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"my_member":
+{ Args: { "p_business": string }; Returns: {
+              "display_name": string,"id": string,"role": Database["public"]['Enums']["business_role"]
+            }[]
                            },
 "notify":
 { Args: { "p_audience": string,"p_business": string,"p_data": Json,"p_dedupe": string,"p_kind": string,"p_user": string }; Returns: undefined
@@ -1174,6 +1286,9 @@ isOneToOne: false
 "reply_review":
 { Args: { "p_reply": string,"p_review": string }; Returns: undefined
                            },
+"report_conversation":
+{ Args: { "p_conversation": string,"p_reason": string }; Returns: string
+                           },
 "request_candidate_starts":
 { Args: { "p_request": string }; Returns: string[]
                            },
@@ -1182,6 +1297,9 @@ isOneToOne: false
                            },
 "reschedule_booking_by_token":
 { Args: { "p_groomer"?: string,"p_starts_at": string,"p_token": string }; Returns: Json
+                           },
+"resolve_chat_report":
+{ Args: { "p_report": string }; Returns: undefined
                            },
 "review_booking_request":
 { Args: { "p_action": string,"p_groomer": string,"p_id": string,"p_reason": string,"p_starts_at": string }; Returns: string
@@ -1192,17 +1310,26 @@ isOneToOne: false
 "save_my_hours":
 { Args: { "p_business": string,"p_hours": Json,"p_location": string }; Returns: undefined
                            },
+"send_chat_message":
+{ Args: { "p_body": string,"p_conversation": string }; Returns: number
+                           },
 "service_price_for":
 { Args: { "p_breed": string,"p_service": string,"p_size": string }; Returns: number
                            },
 "set_appointment_status":
 { Args: { "p_id": string,"p_reason"?: string,"p_status": Database["public"]['Enums']["appointment_status"] }; Returns: undefined
                            },
+"set_conversation_blocked":
+{ Args: { "p_blocked": boolean,"p_conversation": string }; Returns: undefined
+                           },
 "shift_board":
 { Args: { "p_business": string }; Returns: Json
                            },
 "slot_fits_hours":
 { Args: { "p_ends": string,"p_groomer": string,"p_location": string,"p_starts": string }; Returns: boolean
+                           },
+"start_conversation":
+{ Args: { "p_slug": string }; Returns: string
                            },
 "submit_booking_request":
 { Args: { "p_notes": string,"p_owner_pet": string,"p_preferred_start": string,"p_service_ids": (string)[],"p_slug": string,"p_windows": Json }; Returns: string

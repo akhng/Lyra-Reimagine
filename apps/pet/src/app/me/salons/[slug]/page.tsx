@@ -6,6 +6,7 @@ import { buttonVariants, Card } from "@lyra/ui";
 import { Mascot } from "@/components/mascots/Mascot";
 import { PageHeader } from "@/components/PageHeader";
 import { FavouriteButton } from "@/components/portal/FavouriteButton";
+import { MessageSalonButton } from "@/components/messages/MessageSalonButton";
 import { listing, myFavourites } from "@/features/portal/queries";
 import { WEEKDAY_LABEL } from "@/features/scheduling/schemas";
 import { formatAud } from "@/features/services/pricing";
@@ -19,7 +20,7 @@ export default async function Salon({ params }: { params: Promise<{ slug: string
   const days = [1, 2, 3, 4, 5, 6, 7].map((d) => ({ d, spans: s.hours.filter((h) => h.weekday === d) }));
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={s.name} description={s.headline ?? undefined} back={{ href: "/me/salons", label: "Salons" }} actions={<div className="flex items-center gap-2"><FavouriteButton slug={s.slug} name={s.name} initial={favourites.has(s.slug)} />{s.accepting ? <Link href={`/me/book?salon=${s.slug}`} className={buttonVariants()}>Request a groom</Link> : null}</div>} />
+      <PageHeader title={s.name} description={s.headline ?? undefined} back={{ href: "/me/salons", label: "Salons" }} actions={<div className="flex items-center gap-2"><FavouriteButton slug={s.slug} name={s.name} initial={favourites.has(s.slug)} /><MessageSalonButton slug={s.slug} name={s.name} />{s.accepting ? <Link href={`/me/book?salon=${s.slug}`} className={buttonVariants()}>Request a groom</Link> : null}</div>} />
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <Card>
           <h2 className="font-display text-xl font-semibold text-ink">Services and prices</h2>

@@ -12,7 +12,7 @@ function contentSecurityPolicy(nonce: string, supabaseUrl: string): string {
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' blob: data: ${supabaseUrl}`,
     "font-src 'self'",
-    `connect-src 'self' ${supabaseUrl}${dev ? " ws:" : ""}`,
+    `connect-src 'self' ${supabaseUrl} ${supabaseUrl.replace(/^http/, "ws")}${dev ? " ws:" : ""}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

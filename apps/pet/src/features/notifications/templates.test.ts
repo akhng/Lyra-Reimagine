@@ -27,3 +27,12 @@ describe("gamification notifications", () => {
     expect(notificationHref("review_new", {}, "staff", "fluff")).toBe("/b/fluff/reviews");
   });
 });
+
+describe("message notifications", () => {
+  it("names the sender and links to the conversation for each side", () => {
+    expect(renderNotification("message_new", { businessName: "Fluff & Fold" }).title).toBe("New message from Fluff & Fold");
+    expect(renderNotification("message_new", { customerName: "Sarah" }).title).toBe("New message from Sarah");
+    expect(notificationHref("message_new", { conversationId: "c1" }, "customer")).toBe("/me/messages/c1");
+    expect(notificationHref("message_reported", { conversationId: "c1" }, "staff", "fluff")).toBe("/b/fluff/messages/c1");
+  });
+});

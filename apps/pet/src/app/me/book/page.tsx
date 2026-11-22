@@ -25,6 +25,8 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ p
     const p = new URLSearchParams(Object.entries({ pet: pet?.id, salon: chosen?.slug, ...over }).filter((e): e is [string, string] => !!e[1]));
     return `/me/book?${p.toString()}`;
   };
+  // A salon can only take a request if it's accepting and has at least one service bookable online.
+  const bookable = salons.filter((s) => s.accepting && s.services > 0);
   const steps = [
     { n: 1, label: "Pet", done: !!pet, value: pet?.name, href: q({ pet: undefined }) },
     { n: 2, label: "Salon", done: !!chosen, value: chosen?.name, href: q({ salon: undefined }) },
@@ -70,9 +72,9 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ p
       ) : !chosen ? (
         <section aria-labelledby="choose-salon" className="flex flex-col gap-3">
           <h2 id="choose-salon" className="font-display text-xl font-semibold text-ink">2. Choose a salon</h2>
-          {salons.filter((s) => s.accepting).length ? (
+          {bookable.length ? (
             <ul className="grid gap-3 sm:grid-cols-2">
-              {[...salons].filter((s) => s.accepting).sort((a, b) => Number(favourites.has(b.slug)) - Number(favourites.has(a.slug))).map((s) => (
+              {[...bookable].sort((a, b) => Number(favourites.has(b.slug)) - Number(favourites.has(a.slug))).map((s) => (
                 <li key={s.slug}>
                   <Link href={q({ salon: s.slug })} className={cn("lift relative flex h-full flex-col gap-1 overflow-hidden rounded-[var(--radius-card)] bg-surface p-4 pr-20 shadow-[var(--shadow-card)]")}>
                     <span className="font-display text-lg font-semibold text-ink">{s.name}</span>
@@ -92,7 +94,7 @@ export default async function Book({ searchParams }: { searchParams: Promise<{ p
           )}
         </section>
       ) : !chosen.accepting || !chosen.services.length ? (
-        <EmptyState art={<Mascot name="luna" mood="sleepy" className="w-28" />} title={`${chosen.name} isn't taking requests right now`} description="Choose another salon, or try again later." action={<Link href={q({ salon: undefined })} className={buttonVariants({ variant: "secondary" })}>Choose another salon</Link>} />
+        <EmptyState art={<Mascot name="luna" mood="sleepy" className="w-28" />} title={`${chosen.name} isn't taking requests right now`} description={chosen.accepting ? "They haven't put any services up for online booking yet. Choose another salon, or try again later." : "Choose another salon, or try again later."} action={<Link href={q({ salon: undefined })} className={buttonVariants({ variant: "secondary" })}>Choose another salon</Link>} />
       ) : (
         <BookingWizard key={`${pet.id}-${chosen.slug}`} pet={pet} listing={chosen} payOnline={await listingPaysOnline(chosen.slug)} />
       )}

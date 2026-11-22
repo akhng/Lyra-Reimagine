@@ -61,6 +61,9 @@ test("owner sets up a service, adds a customer with two pets, records a groom wi
     await main.getByRole("button", { name: "Add service" }).click();
     await expect(main.getByRole("status").filter({ hasText: "Service saved." })).toBeVisible();
     await expect(main.getByRole("link", { name: /Full groom/ })).toContainText("$75.00 – $120.00");
+    // New services are bookable online unless the owner unticks it, so the salon can take requests straight away.
+    const { data: svc } = await admin().from("services").select("bookable_online").eq("business_id", b.businessId).eq("name", "Full groom").single();
+    expect(svc?.bookable_online).toBe(true);
     const { data: rules } = await admin().from("service_price_rules").select("kind, match_value, price_cents").eq("business_id", b.businessId).order("price_cents");
     expect(rules).toEqual([
       { kind: "coat_condition", match_value: "matted", price_cents: 2500 },

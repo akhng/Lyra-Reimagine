@@ -142,3 +142,10 @@ Pet owners message a salon from its listing, with or without a booking.
 | 5 | AI and growth: grooming assistant, retention, loyalty, marketing, business intelligence |
 | 6 | SaaS commercialisation: plans and entitlements, Stripe Billing, platform administration, usage |
 | 7 | Production readiness: security review, performance, deployment |
+
+## Performance notes
+
+- **Region:** Supabase (Lyra Pet) is in Sydney, so Vercel functions must run in `syd1`. Each page makes several sequential database calls; from the default US region every one adds ~200 ms.
+- **Auth checks use `getClaims()`**, not `getUser()`, in `proxy.ts` and `getSessionUser()`. With the project's asymmetric JWT signing keys it verifies the session locally (no Auth round trip); with a legacy symmetric secret it falls back to the Auth server. Turn on asymmetric signing keys in the Supabase dashboard (Auth → Signing Keys) to get the benefit.
+- **Dynamic rendering is deliberate:** the nonce-based CSP needs a fresh nonce per response, so no page is statically cached. Keep per-request data calls few and parallel, and wrap shared queries in React `cache()` so a layout, page and `generateMetadata` share one call.
+- **Loading states:** busy business pages have their own `loading.tsx` (`PageSkeleton`) so navigation shows the page title immediately.

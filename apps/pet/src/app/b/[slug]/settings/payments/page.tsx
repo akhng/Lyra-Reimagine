@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge, Card, CardDescription, CardTitle, cn } from "@lyra/ui";
+import { logger } from "@lyra/platform/logger";
 import { requireBusiness } from "@lyra/platform/tenancy/context";
 import { PageHeader } from "@/components/PageHeader";
 import { ConnectStripe } from "@/components/payments/ConnectStripe";
@@ -25,11 +26,20 @@ export default async function PaymentsSettingsPage({ params, searchParams }: { p
   const [{ slug }, sp] = await Promise.all([params, searchParams]);
   const { business, role } = await requireBusiness(slug);
   const canSee = role === "owner" || role === "manager";
-  let { configured, account } = await paymentAccount(business.id);
-  if (canSee && sp.returned === "1" && account) {
-    // Back from Stripe onboarding: refresh the account status now rather than waiting for the webhook.
-    await syncAccount(business.id, account.stripe_account_id).catch(() => undefined);
-    ({ configured, account } = await paymentAccount(business.id));
+  const { configured, account: saved } = await paymentAccount(business.id);
+  let account = saved;
+  if (canSee && account && !account.charges_enabled) {
+    // Until Stripe enables charges, ask Stripe on every visit rather than relying on the return
+    // redirect or the account.updated webhook alone: owners often finish onboarding in another
+    // tab or in Stripe's dashboard, and a missed webhook would otherwise leave this stuck.
+    try {
+      // Use Stripe's answer directly: re-reading the row in this render would return the
+      // memoised (identical) earlier request, i.e. the stale status.
+      const fresh = await syncAccount(business.id, account.stripe_account_id);
+      if (fresh) account = { ...account, charges_enabled: fresh.chargesEnabled, payouts_enabled: fresh.payoutsEnabled, details_submitted: fresh.detailsSubmitted };
+    } catch (e) {
+      logger.warn({ businessId: business.id, returned: sp.returned === "1", err: e instanceof Error ? e.message.slice(0, 80) : "unknown" }, "stripe account sync failed");
+    }
   }
   const thisMonth = new Date(nowMs()).toISOString().slice(0, 7);
   const month = sp.month && MONTH.test(sp.month) ? sp.month : thisMonth;
@@ -38,7 +48,7 @@ export default async function PaymentsSettingsPage({ params, searchParams }: { p
   const platform = platformDetails();
   const monthLabel = new Intl.DateTimeFormat("en-AU", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${month}-01T00:00:00Z`));
   const day = (iso: string | null) => (iso ? new Intl.DateTimeFormat("en-AU", { day: "numeric", month: "short", timeZone: business.timezone }).format(new Date(iso)) : "—");
-  const status = !account ? { label: "Not connected", tone: "neutral" as const } : account.charges_enabled ? { label: "Taking payments", tone: "success" as const } : { label: "Setup incomplete", tone: "warning" as const };
+  const status = !account ? { label: "Not connected", tone: "neutral" as const } : account.charges_enabled ? { label: "Taking payments", tone: "success" as const } : account.details_submitted ? { label: "Stripe is reviewing", tone: "warning" as const } : { label: "Setup incomplete", tone: "warning" as const };
 
   if (!canSee) {
     return (
@@ -66,6 +76,11 @@ export default async function PaymentsSettingsPage({ params, searchParams }: { p
             <p className="text-sm text-muted">{account?.charges_enabled ? "Customers pay when they book." : "Ask the business owner to connect Stripe."}</p>
           ) : account?.charges_enabled ? (
             <p className="text-sm text-ink">Customers pay when they book. Payouts {account.payouts_enabled ? "are on" : "start once Stripe has verified your bank details"}.</p>
+          ) : account?.details_submitted ? (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-ink">You&apos;ve sent your details. Stripe switches on card payments once it has checked them, usually within minutes. If Stripe needs anything else, it asks on the next screen.</p>
+              <ConnectStripe slug={slug} label="Check your Stripe details" />
+            </div>
           ) : (
             <ConnectStripe slug={slug} label={account ? "Finish setting up Stripe" : "Connect Stripe"} />
           )}

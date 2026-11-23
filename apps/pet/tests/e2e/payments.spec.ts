@@ -81,3 +81,30 @@ test("a pet owner pays at booking; declining refunds them", async ({ page }, inf
     await db.auth.admin.deleteUser(customer);
   }
 });
+
+test("a Stripe account that finished onboarding elsewhere shows as ready on the next visit", async ({ page }, info) => {
+  const db = admin();
+  const project = info.project.name;
+  const ownerEmail = uniqueEmail("pay-sync", project);
+  const owner = (await db.auth.admin.createUser({ email: ownerEmail, password: PASSWORD, email_confirm: true, user_metadata: { intent: "business" } })).data.user?.id ?? "";
+  const slug = uniqueSlug("paysync", project);
+  const biz = (await db.from("businesses").insert({ name: `Sync Test Salon ${project}`, slug, timezone: TZ, created_by: owner }).select("id").single()).data?.id ?? "";
+  try {
+    await db.from("business_members").insert({ business_id: biz, user_id: owner, role: "owner", display_name: "Olive" });
+    // Saved as not ready (as if the return redirect and webhook were both missed); the provider now reports it ready.
+    const { error } = await db.rpc("sync_payment_account", { p_business: biz, p_account: `acct_${project}${Date.now().toString(36)}`, p_charges: false, p_payouts: false, p_details: true });
+    expect(error).toBeNull();
+
+    await signIn(page, ownerEmail, PASSWORD);
+    // A plain visit, without ?returned=1, asks the provider again.
+    await page.goto(`/b/${slug}/settings/payments`);
+    const main = page.getByRole("main");
+    await expect(main.getByText("Taking payments")).toBeVisible();
+    await expect(main.getByRole("button", { name: /Finish setting up Stripe|Check your Stripe details/ })).toHaveCount(0);
+    const { data } = await db.from("payment_accounts").select("charges_enabled").eq("business_id", biz).single();
+    expect(data?.charges_enabled).toBe(true);
+  } finally {
+    await db.from("businesses").delete().eq("id", biz);
+    await db.auth.admin.deleteUser(owner);
+  }
+});

@@ -5,7 +5,7 @@ import { createSupabaseAdminClient } from "@lyra/platform/supabase/admin";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { fakeProvider } from "./fake";
 import { FEE_BPS } from "./fees";
-import type { PaymentsProvider } from "./provider";
+import type { ConnectedAccount, PaymentsProvider } from "./provider";
 import { stripeProvider } from "./stripe";
 
 /**
@@ -24,12 +24,14 @@ export function paymentsProvider(): PaymentsProvider | null {
   return env.STRIPE_SECRET_KEY ? stripeProvider(env.STRIPE_SECRET_KEY, env.STRIPE_WEBHOOK_SECRET) : null;
 }
 
-export async function syncAccount(businessId: string, accountId: string): Promise<void> {
+/** Records the connected account's status from Stripe and returns it (null when payments aren't configured). */
+export async function syncAccount(businessId: string, accountId: string): Promise<ConnectedAccount | null> {
   const provider = paymentsProvider();
-  if (!provider) return;
+  if (!provider) return null;
   const a = await provider.getAccount(accountId);
   const { error } = await createSupabaseAdminClient().rpc("sync_payment_account", { p_business: businessId, p_account: a.id, p_charges: a.chargesEnabled, p_payouts: a.payoutsEnabled, p_details: a.detailsSubmitted });
   if (error) throw new Error(`account sync failed: ${error.code}`);
+  return a;
 }
 
 /** Starts Stripe Checkout for a draft request owned by the signed-in customer. Returns the URL to send them to. */

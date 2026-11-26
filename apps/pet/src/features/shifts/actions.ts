@@ -1,10 +1,12 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { logger } from "@lyra/platform/logger";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { requireBusiness } from "@lyra/platform/tenancy/context";
 import { can } from "@lyra/platform/tenancy/roles";
+import { processEmailOutbox } from "@/features/email/service";
 import { fieldErrors, text, type FormState } from "@/lib/form";
 
 /** Shift board and allocation actions; the database functions re-check everything. */
@@ -27,6 +29,8 @@ export async function acceptRequestAction(slug: string, requestId: string, start
     if (!ACCEPT_ERRORS[error.message]) logger.warn({ businessId: ctx.business.id, code: error.code }, "accept failed");
     return { ok: false, error: ACCEPT_ERRORS[error.message] ?? "We couldn't accept that. Please try again." };
   }
+  // The customer's confirmation email was queued with the acceptance; send it after responding.
+  after(() => processEmailOutbox());
   // No revalidation: it would refresh the board and remove the card before it shows its result.
   // Every page renders on request, so the next visit is fresh anyway.
   return { ok: true };

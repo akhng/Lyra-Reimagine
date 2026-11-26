@@ -1,8 +1,10 @@
 import "server-only";
+import { after } from "next/server";
 import { serverEnv } from "@lyra/platform/env";
 import { logger } from "@lyra/platform/logger";
 import { createSupabaseAdminClient } from "@lyra/platform/supabase/admin";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
+import { processEmailOutbox } from "@/features/email/service";
 import { fakeProvider } from "./fake";
 import { FEE_BPS } from "./fees";
 import type { ConnectedAccount, PaymentsProvider } from "./provider";
@@ -79,6 +81,8 @@ export async function confirmCheckout(requestId: string, sessionId: string): Pro
   if (!s.paid) return false;
   const { error } = await createSupabaseAdminClient().rpc("mark_payment_paid", { p_session: sessionId, p_intent: s.paymentIntent ?? "" });
   if (error) throw new Error(`mark paid failed: ${error.code}`);
+  // Paying routes the request, and automatic allocation may confirm it (queuing the confirmation email).
+  after(() => processEmailOutbox());
   return true;
 }
 

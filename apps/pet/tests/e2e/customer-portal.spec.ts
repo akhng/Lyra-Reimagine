@@ -30,6 +30,18 @@ async function salon(project: string, opts: { bookableOnline?: boolean; tag?: st
   return { slug, name, email, ownerId, businessId: biz.id, cleanup: async () => { await db.from("businesses").delete().eq("id", biz.id); await db.auth.admin.deleteUser(ownerId); } };
 }
 
+const MAILPIT = process.env.MAILPIT_URL ?? "http://127.0.0.1:55324";
+/** The newest email to `to` whose subject matches (the test email provider delivers to Mailpit). */
+async function emailTo(to: string, subject: string): Promise<{ Subject: string; Text: string }> {
+  for (let i = 0; i < 60; i++) {
+    const search = await fetch(`${MAILPIT}/api/v1/search?query=${encodeURIComponent(`to:"${to}" subject:"${subject}"`)}`).then((r) => r.json());
+    const id: string | undefined = search.messages?.[0]?.ID;
+    if (id) return fetch(`${MAILPIT}/api/v1/message/${id}`).then((r) => r.json());
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error(`no "${subject}" email arrived`);
+}
+
 /** Switch person: drop the session cookies (sign-out itself is covered by the foundation tests). */
 async function signOut(page: Page) {
   await page.context().clearCookies();
@@ -136,6 +148,13 @@ test("a pet owner books through the marketplace and the salon confirms", async (
     await expect(handled.getByText("Confirmed")).toBeVisible();
     await expect(handled.getByRole("link", { name: "Open appointment" })).toBeVisible();
     expect((await admin().from("appointments").select("status, source").eq("business_id", s.businessId)).data).toEqual([{ status: "confirmed", source: "online" }]);
+    // The pet owner is emailed the confirmation: who, where and the price.
+    const confirmation = await emailTo(ownerEmail, "Booked!");
+    expect(confirmation.Subject).toContain(`Booked! Pippin's groom at Request Test Salon ${info.project.name}`);
+    expect(confirmation.Text).toContain("Hi Sam,");
+    expect(confirmation.Text).toContain("has accepted Pippin's grooming request with Olive.");
+    expect(confirmation.Text).toContain("Where: Studio, Carlton");
+    expect(confirmation.Text).toContain("Price: $95.00, to pay at the salon");
     await signOut(page);
 
     // The owner sees it confirmed.

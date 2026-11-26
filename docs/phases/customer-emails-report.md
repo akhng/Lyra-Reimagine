@@ -38,6 +38,14 @@ See ADR 0006: outbox written in the decline's transaction; provider chosen later
 2. In Resend, verify your sending domain (Domains → Add domain, then add the DNS records it shows).
 3. In Vercel (Production), add `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` (the `re_…` key) and `EMAIL_FROM` (e.g. `Lyra Pet <bookings@your-domain>`, on the verified domain), then redeploy.
 
+## Addendum: accepted-request email
+
+- Migration `20261127000000_accepted_email.sql` replaces `queue_email_for_notification()` so `request_confirmed` is emailed too. This covers front desk confirm, groomer acceptance and automatic allocation.
+- The email ("Booked! *Pet*'s groom at *Salon* on *date*") gives when, where (location and address), the groomer, services, price ("paid in the app" or "to pay at the salon"), the cancellation window and the salon's phone, with a link to the booking.
+- Delivery also runs after a groomer accepts, after a new request, and after a confirmed payment (automatic allocation can confirm then).
+- Tests: 3 unit tests (wording, paid and "from" prices, missing salon details); the db test now checks a confirmation is queued with its details, and that opening a request to groomers sends nothing; `customer-portal.spec.ts` checks the confirmation email arrives after the front desk confirms. `pnpm check`, 83 db tests and 54 e2e tests pass.
+- **Setup:** run `20261127000000_accepted_email.sql` in the Supabase SQL Editor before or after merging. Without it, accepted requests send no email (nothing else breaks).
+
 ## Next phase assumes
 
 Customer emails go through `email_outbox` and `EmailProvider` only. New email kinds add a template and the kind to `queue_email_for_notification()`.

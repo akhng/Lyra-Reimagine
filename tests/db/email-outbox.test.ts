@@ -71,10 +71,23 @@ describe("email outbox", () => {
     expect(data?.[0]).toMatchObject({ kind: "request_rejected", status: "pending", user_id: customerId, data: { petName: "Pepper", businessName: "Paws Test Salon", reason: "Fully booked that week", refund: false } });
   });
 
-  it("doesn't email when the salon confirms", async () => {
+  it("queues a confirmation email with where, when, price and the cancellation window when the salon accepts", async () => {
     const id = await submit(7);
-    const r = await olivia.rpc("review_booking_request", { p_id: id, p_action: "confirm", p_groomer: groomerMember, p_starts_at: melbourne(7, "10:00"), p_reason: null } as never);
+    const start = melbourne(7, "10:00");
+    const r = await olivia.rpc("review_booking_request", { p_id: id, p_action: "confirm", p_groomer: groomerMember, p_starts_at: start, p_reason: null } as never);
     expect(r.error).toBeNull();
+    const { data } = await outbox(id);
+    expect(data).toHaveLength(1);
+    expect(data?.[0]).toMatchObject({ kind: "request_confirmed", status: "pending", user_id: customerId, data: { petName: "Pepper", businessName: "Paws Test Salon", estimateCents: 9000, estimateFrom: false, paid: false } });
+    const d = data?.[0]?.data as { startsAt: string; locationName: string | null; cancellationHours: number };
+    expect(Date.parse(d.startsAt)).toBe(Date.parse(start));
+    expect(d.locationName).toBeTruthy();
+    expect(typeof d.cancellationHours).toBe("number");
+  });
+
+  it("doesn't email other updates (such as opening a request to groomers)", async () => {
+    const id = await submit(9);
+    expect((await olivia.rpc("open_booking_request", { p_id: id, p_groomer: null, p_hours: 24 } as never)).error).toBeNull();
     expect((await outbox(id)).data).toEqual([]);
   });
 

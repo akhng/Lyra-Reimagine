@@ -18,6 +18,6 @@ When a salon declined a booking request, the customer was told only inside the a
 
 ## Consequences
 
-- Only `request_rejected` sends an email for now. Other kinds (confirmed, cancelled by the salon, expired) need a template and one line in `queue_email_for_notification()`.
+- `request_rejected` and `request_confirmed` (added 2026-11-26 at the product owner's request) send emails. Other kinds (cancelled by the salon, expired, reminders) need a template and the kind in `queue_email_for_notification()`.
 - Delivery runs from the app (after the decline, and on page loads), not a scheduled job. If nothing triggers it, a failed email waits for the next page load (up to 24 hours).
 - Transactional booking emails don't need an unsubscribe under the Spam Act; any marketing email still needs consent and an unsubscribe (CLAUDE.md §7).

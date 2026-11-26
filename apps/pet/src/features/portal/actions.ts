@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@lyra/platform/auth/session";
 import { logger } from "@lyra/platform/logger";
@@ -8,6 +9,7 @@ import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { fieldErrors, text, type FormState } from "@/lib/form";
 import { ownerPetSchema, REQUEST_ERRORS, requestSchema } from "./schemas";
 import { processRefunds, startCheckout } from "@/features/payments/service";
+import { processEmailOutbox } from "@/features/email/service";
 
 /** Customer portal writes. The person comes from the session; RLS and definer functions check ownership. */
 function petFromForm(form: FormData) {
@@ -65,6 +67,8 @@ export async function submitRequestAction(input: unknown): Promise<RequestResult
     const pay = await startCheckout(id, user.email).catch(() => ({ ok: false as const, error: "" }));
     return pay.ok ? { ok: true, id, payUrl: pay.url } : { ok: true, id };
   }
+  // Automatic allocation can confirm the request straight away, which queues the confirmation email.
+  after(() => processEmailOutbox());
   revalidatePath("/me");
   return { ok: true, id };
 }

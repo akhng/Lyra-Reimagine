@@ -1,4 +1,6 @@
 import "server-only";
+import { after } from "next/server";
+import { processEmailOutbox } from "@/features/email/service";
 import { processRefunds } from "@/features/payments/service";
 import { z } from "zod";
 import { requireUser } from "@lyra/platform/auth/session";
@@ -49,6 +51,8 @@ export async function myBookings(): Promise<{ requests: MyRequest[]; appointment
   await Promise.all([...new Set((open ?? []).map((r) => r.business_id))].map((b) => db.rpc("tidy_booking_requests", { p_business: b })));
   await db.rpc("queue_my_reminders");
   await processRefunds().catch(() => 0);
+  // Retry customer emails that didn't go out straight away, after the page is sent.
+  after(() => processEmailOutbox());
   const { data, error } = await db.rpc("my_bookings");
   if (error) throw new Error("bookings query failed");
   const parsed = z.object({ requests: z.array(requestSchema), appointments: z.array(appointmentSchema) }).safeParse(data);

@@ -1,4 +1,6 @@
 import "server-only";
+import { after } from "next/server";
+import { processEmailOutbox } from "@/features/email/service";
 import { processRefunds } from "@/features/payments/service";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 
@@ -16,6 +18,8 @@ export async function requestsForBusiness(businessId: string, statuses?: string[
   await db.rpc("tidy_booking_requests", { p_business: businessId });
   // Refund customers whose paid requests were declined, expired or cancelled (idempotent, retried here).
   await processRefunds(businessId).catch(() => 0);
+  // Retry customer emails that didn't go out straight away, after the page is sent.
+  after(() => processEmailOutbox());
   let q = db
     .from("booking_requests")
     .select("id, status, created_at, preferred_start, windows, notes, estimate_cents, estimate_from, estimate_minutes, appointment_id, decision_reason, accept_deadline, assigned_groomer_id, accepted_by, customer_id, customers!inner(first_name, last_name), pets!booking_requests_pet_id_business_id_fkey!inner(id, name, species, breed, size, owner_notes, photo_path, owner_pets(photo_path)), booking_request_services(name, position)")

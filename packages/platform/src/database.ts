@@ -543,6 +543,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"email_outbox": {
+                  Row: {
+                    "attempts": number,"business_id": string,"claimed_at": string | null,"created_at": string,"data": NonNullable<Json>,"dedupe_key": string,"id": number,"kind": string,"last_error": string | null,"sent_at": string | null,"status": Database["public"]['Enums']["email_status"],"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"business_id": string,"claimed_at"?: string | null,"created_at"?: string,"data"?: NonNullable<Json>,"dedupe_key": string,"id"?: never,"kind": string,"last_error"?: string | null,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["email_status"],"user_id": string
+                  }
+                  Update: {
+                    "attempts"?: number,"business_id"?: string,"claimed_at"?: string | null,"created_at"?: string,"data"?: NonNullable<Json>,"dedupe_key"?: string,"id"?: never,"kind"?: string,"last_error"?: string | null,"sent_at"?: string | null,"status"?: Database["public"]['Enums']["email_status"],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "email_outbox_business_id_fkey"
+      columns: ["business_id"]
+isOneToOne: false
+      referencedRelation: "businesses"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"favourite_businesses": {
                   Row: {
                     "business_id": string,"created_at": string,"user_id": string
@@ -1154,6 +1174,27 @@ isOneToOne: false
 "claim_customer_records":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"claim_email_outbox":
+{ Args: { "p_limit": number }; Returns: {
+              "attempts": number,
+"business_id": string,
+"claimed_at": string | null,
+"created_at": string,
+"data": NonNullable<Json>,
+"dedupe_key": string,
+"id": number,
+"kind": string,
+"last_error": string | null,
+"sent_at": string | null,
+"status": Database["public"]['Enums']["email_status"],
+"user_id": string
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "email_outbox"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
 "close_booking_request":
 { Args: { "p_id": string }; Returns: undefined
                            },
@@ -1348,7 +1389,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "allocation_mode": "manual"|"open"|"automatic"|"assigned_only","appointment_status": "booked"|"confirmed"|"checked_in"|"in_progress"|"completed"|"cancelled"|"no_show","booking_request_status": "draft"|"submitted"|"awaiting_review"|"open"|"accepted"|"confirmed"|"in_progress"|"completed"|"cancelled"|"rejected"|"expired","business_role": "owner"|"manager"|"receptionist"|"groomer","business_status": "active"|"suspended"|"closed","contact_method": "email"|"sms"|"phone","member_status": "active"|"invited"|"suspended","payment_status": "pending"|"paid"|"refund_due"|"refunded"|"failed"|"expired","pet_sex": "male"|"female"|"unknown","pet_size": "toy"|"small"|"medium"|"large"|"giant","pet_species": "dog"|"cat"|"other","photo_kind": "before"|"after","plan_tier": "starter"|"growth"|"pro","price_rule_kind": "size"|"breed"|"coat_condition"
+            "allocation_mode": "manual"|"open"|"automatic"|"assigned_only","appointment_status": "booked"|"confirmed"|"checked_in"|"in_progress"|"completed"|"cancelled"|"no_show","booking_request_status": "draft"|"submitted"|"awaiting_review"|"open"|"accepted"|"confirmed"|"in_progress"|"completed"|"cancelled"|"rejected"|"expired","business_role": "owner"|"manager"|"receptionist"|"groomer","business_status": "active"|"suspended"|"closed","contact_method": "email"|"sms"|"phone","email_status": "pending"|"sending"|"sent"|"failed"|"skipped","member_status": "active"|"invited"|"suspended","payment_status": "pending"|"paid"|"refund_due"|"refunded"|"failed"|"expired","pet_sex": "male"|"female"|"unknown","pet_size": "toy"|"small"|"medium"|"large"|"giant","pet_species": "dog"|"cat"|"other","photo_kind": "before"|"after","plan_tier": "starter"|"growth"|"pro","price_rule_kind": "size"|"breed"|"coat_condition"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1464,7 +1505,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "allocation_mode": ["manual", "open", "automatic", "assigned_only"],"appointment_status": ["booked", "confirmed", "checked_in", "in_progress", "completed", "cancelled", "no_show"],"booking_request_status": ["draft", "submitted", "awaiting_review", "open", "accepted", "confirmed", "in_progress", "completed", "cancelled", "rejected", "expired"],"business_role": ["owner", "manager", "receptionist", "groomer"],"business_status": ["active", "suspended", "closed"],"contact_method": ["email", "sms", "phone"],"member_status": ["active", "invited", "suspended"],"payment_status": ["pending", "paid", "refund_due", "refunded", "failed", "expired"],"pet_sex": ["male", "female", "unknown"],"pet_size": ["toy", "small", "medium", "large", "giant"],"pet_species": ["dog", "cat", "other"],"photo_kind": ["before", "after"],"plan_tier": ["starter", "growth", "pro"],"price_rule_kind": ["size", "breed", "coat_condition"]
+            "allocation_mode": ["manual", "open", "automatic", "assigned_only"],"appointment_status": ["booked", "confirmed", "checked_in", "in_progress", "completed", "cancelled", "no_show"],"booking_request_status": ["draft", "submitted", "awaiting_review", "open", "accepted", "confirmed", "in_progress", "completed", "cancelled", "rejected", "expired"],"business_role": ["owner", "manager", "receptionist", "groomer"],"business_status": ["active", "suspended", "closed"],"contact_method": ["email", "sms", "phone"],"email_status": ["pending", "sending", "sent", "failed", "skipped"],"member_status": ["active", "invited", "suspended"],"payment_status": ["pending", "paid", "refund_due", "refunded", "failed", "expired"],"pet_sex": ["male", "female", "unknown"],"pet_size": ["toy", "small", "medium", "large", "giant"],"pet_species": ["dog", "cat", "other"],"photo_kind": ["before", "after"],"plan_tier": ["starter", "growth", "pro"],"price_rule_kind": ["size", "breed", "coat_condition"]
           }
         }
 } as const

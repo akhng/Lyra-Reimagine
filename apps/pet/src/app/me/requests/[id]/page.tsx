@@ -18,6 +18,7 @@ import { nowMs } from "@/features/scheduling/time";
 import { PayRequest } from "@/components/payments/PayRequest";
 import { requestPayments } from "@/features/payments/queries";
 import { confirmCheckout } from "@/features/payments/service";
+import { markRequestNotificationsRead } from "@/features/notifications/queries";
 
 export const metadata: Metadata = { title: "Your request" };
 
@@ -37,6 +38,8 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
   const [bookings, loyalty] = await Promise.all([myBookings(), myLoyalty()]);
   const r = bookings.requests.find((x) => x.id === id);
   if (!r) notFound();
+  // The customer is looking at this request now, so its notices (e.g. "declined") are read.
+  await markRequestNotificationsRead(r.id);
   const review = loyalty.reviews.find((v) => v.appointmentId === r.appointmentId);
   const milestone = r.status === "completed" ? loyalty.petAwards.find((a) => a.ownerPetId === r.ownerPetId && a.key.startsWith("grooms_") && r.appointmentStart !== null && Math.abs(Date.parse(a.at) - nowMs()) < 7 * 86_400_000) : undefined;
   const payment = (await requestPayments([r.id])).get(r.id);
@@ -106,7 +109,7 @@ export default async function RequestPage({ params, searchParams }: { params: Pr
       {r.status === "rejected" ? (
         <section className="flex items-center gap-4 rounded-[var(--radius-card)] bg-coral-tint p-5">
           <Mascot name="luna" mood="sleepy" className="w-20 shrink-0" />
-          <p className="font-semibold text-ink">{r.businessName} couldn&apos;t take this request{r.decisionReason ? `: ${r.decisionReason}` : "."} You can request another time or try a different salon.</p>
+          <p className="font-semibold text-ink">{r.businessName} couldn&apos;t take this request{r.decisionReason ? `: ${r.decisionReason.trim().replace(/[.!?]+$/, "")}.` : "."} You can request another time or try a different salon.</p>
         </section>
       ) : null}
 

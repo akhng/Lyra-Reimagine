@@ -85,7 +85,8 @@ describe("no double-booking", () => {
   });
 
   it("lets only one of two simultaneous bookings for the same slot through", async () => {
-    const t = melbourne(4, "11:00");
+    // Clear of the previous test's 10:00–14:00 bookings: when day 3 is a Sunday, melbourne() moves it onto day 4.
+    const t = melbourne(4, "15:30");
     const [a, b] = await Promise.all([olivia.from("appointments").insert(appt(t, 60)).select("id"), olivia.from("appointments").insert(appt(t, 60)).select("id")]);
     expect([a.error, b.error].filter((e) => e === null)).toHaveLength(1);
     expect([a.error?.code, b.error?.code]).toContain("23P01");

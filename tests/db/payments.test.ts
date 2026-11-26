@@ -93,6 +93,8 @@ describe("with Stripe connected", () => {
     await admin.rpc("mark_payment_paid", { p_session: "cs_test_c", p_intent: "pi_test_c" });
     await olivia.rpc("review_booking_request", { p_id: id, p_action: "reject", p_groomer: null, p_starts_at: null, p_reason: "Fully booked" } as never);
     expect(await payment(id)).toMatchObject({ status: "refund_due", refund_reason: "Declined by the salon" });
+    // The decline email tells the customer they're being refunded.
+    expect((await admin.from("email_outbox").select("data").eq("data->>requestId", id).single()).data?.data).toMatchObject({ refund: true, reason: "Fully booked" });
     const p = (await admin.from("payments").select("id").eq("request_id", id).single()).data?.id ?? "";
     await admin.rpc("mark_payment_refunded", { p_payment: p, p_refund: "re_test" });
     expect(await payment(id)).toMatchObject({ status: "refunded" });

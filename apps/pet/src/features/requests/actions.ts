@@ -1,11 +1,13 @@
 "use server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { logger } from "@lyra/platform/logger";
 import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { requireBusiness } from "@lyra/platform/tenancy/context";
 import { can } from "@lyra/platform/tenancy/roles";
 import { fromLocal, hhmmToMinutes } from "@/features/scheduling/time";
+import { processEmailOutbox } from "@/features/email/service";
 import { fieldErrors, text, type FormState } from "@/lib/form";
 
 /** Front-desk decisions on booking requests and the marketplace listing (checked again in the database). */
@@ -36,6 +38,8 @@ export async function reviewRequestAction(slug: string, requestId: string, _prev
     if (!REVIEW_ERRORS[error.message]) logger.warn({ businessId: ctx.business.id, code: error.code }, "request review failed");
     return { error: REVIEW_ERRORS[error.message] ?? "We couldn't save that. Please try again." };
   }
+  // The decline email was queued in the same transaction; send it once the response is on its way.
+  if (v.action === "reject") after(() => processEmailOutbox());
   revalidatePath(`/b/${slug}/requests`);
   revalidatePath(`/b/${slug}`);
   return { ok: true };

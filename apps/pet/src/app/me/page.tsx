@@ -6,6 +6,8 @@ import { createSupabaseServerClient } from "@lyra/platform/supabase/server";
 import { Mascot, type MascotName } from "@/components/mascots/Mascot";
 import { mascotFor } from "@/components/PetAvatar";
 import { PetCard } from "@/components/portal/PetCard";
+import { DeclinedNotices } from "@/components/notifications/DeclinedNotices";
+import { myNotifications } from "@/features/notifications/queries";
 import { myBookings, myFavourites, myOwnerPets } from "@/features/portal/queries";
 import { groomStreak, levelFor } from "@/features/loyalty/engine";
 import { myLoyalty } from "@/features/loyalty/queries";
@@ -20,7 +22,8 @@ const COMPLIMENTS = ["is looking fabulous today!", "says hello!", "is ready for 
 /** The pet owner's home: a welcome, their pets as illustrated cards, then the things they can do (all real data). */
 export default async function MeHome() {
   const db = await createSupabaseServerClient();
-  const [{ data: auth }, pets, bookings, favourites, loyalty] = await Promise.all([db.auth.getClaims(), myOwnerPets(), myBookings(), myFavourites(), myLoyalty()]);
+  const [{ data: auth }, pets, bookings, favourites, loyalty, notifications] = await Promise.all([db.auth.getClaims(), myOwnerPets(), myBookings(), myFavourites(), myLoyalty(), myNotifications("customer", undefined, 20)]);
+  const declined = notifications.filter((n) => n.kind === "request_rejected" && !n.readAt).map((n) => ({ id: n.id, data: n.data }));
   const today = localToday("Australia/Melbourne");
   const points = loyalty.salons.filter((s) => s.enabled).reduce((n, s) => n + s.balance, 0);
   const lifetime = loyalty.salons.reduce((n, s) => n + s.lifetime, 0);
@@ -49,6 +52,8 @@ export default async function MeHome() {
         </div>
         <Mascot name={mascot} mood="excited" pose="wave" className="absolute -right-2 -bottom-6 hidden w-40 sm:block" />
       </section>
+
+      <DeclinedNotices notices={declined} />
 
       <section aria-labelledby="pets" className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3">

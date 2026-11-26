@@ -22,3 +22,9 @@ export async function unreadCount(audience: "customer" | "staff", businessId?: s
   const { count } = await q;
   return count ?? 0;
 }
+
+/** Opening a request counts as reading its customer notifications (RLS: own rows; only read_at is writable). */
+export async function markRequestNotificationsRead(requestId: string): Promise<void> {
+  const db = await createSupabaseServerClient();
+  await db.from("notifications").update({ read_at: new Date().toISOString() }).eq("audience", "customer").is("read_at", null).eq("data->>requestId", requestId);
+}

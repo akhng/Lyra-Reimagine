@@ -10,10 +10,10 @@
 ## Files
 
 - Migration `20261126000000_email_outbox.sql`: `email_outbox` (RLS, service role only), the `queue_email_for_notification` trigger, `claim_email_outbox`, and `notifications` added to `supabase_realtime`.
-- `features/email/`: `provider.ts`, `fake.ts`, `templates.ts` (+ tests), `service.ts`.
+- `features/email/`: `provider.ts`, `resend.ts` (+ tests), `fake.ts`, `templates.ts` (+ tests), `service.ts`.
 - `components/notifications/LiveNotifications.tsx` and `DeclinedNotices.tsx`; `app/me/layout.tsx`, `app/me/page.tsx`, `app/me/requests/[id]/page.tsx`.
 - Delivery hooks: `features/requests/actions.ts` (after a decline), `features/requests/queries.ts` and `features/portal/queries.ts` (retries on page load).
-- `packages/platform/src/env.ts`: `EMAIL_PROVIDER`, `EMAIL_FROM`, `EMAIL_FAKE_URL`.
+- `packages/platform/src/env.ts`: `EMAIL_PROVIDER`, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_FAKE_URL`.
 
 ## Decisions
 
@@ -28,14 +28,15 @@ See ADR 0006: outbox written in the decline's transaction; provider chosen later
 
 ## Not verified here / gaps
 
-- **No real email service yet.** Production sends nothing until a provider is added. Rows wait up to 24 hours, then are skipped.
+- **Resend is untested against the real service** (no key or network access here). The unit tests check the request it sends (address, headers, body) with a fake network call. Do one real decline after setup and check Resend → Emails.
 - **Realtime in production:** check Supabase → Database → Publications shows `notifications` in `supabase_realtime` after running the migration.
 - Delivery has no scheduled job; it runs on decline and on page loads.
 
 ## Setup required (product owner)
 
 1. Run the migration `20261126000000_email_outbox.sql` in the Supabase SQL Editor.
-2. When ready for real emails: choose a service. A provider file is then added in a follow-up change, along with `EMAIL_PROVIDER`, the service's API key, and `EMAIL_FROM` (an address on a domain verified with that service) in Vercel.
+2. In Resend, verify your sending domain (Domains → Add domain, then add the DNS records it shows).
+3. In Vercel (Production), add `EMAIL_PROVIDER=resend`, `RESEND_API_KEY` (the `re_…` key) and `EMAIL_FROM` (e.g. `Lyra Pet <bookings@your-domain>`, on the verified domain), then redeploy.
 
 ## Next phase assumes
 

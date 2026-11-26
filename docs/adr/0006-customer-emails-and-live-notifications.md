@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-11-26
-- Decision owner: product owner (asked for a declined-request email and live notices on the customer home; chose to build the email behind an interface and pick the email service later)
+- Decision owner: product owner (asked for a declined-request email and live notices on the customer home; chose to build the email behind an interface, then Resend)
 
 ## Context
 

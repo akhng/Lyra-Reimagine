@@ -1,5 +1,7 @@
+import { after } from "next/server";
 import { logger } from "@lyra/platform/logger";
 import { createSupabaseAdminClient } from "@lyra/platform/supabase/admin";
+import { processEmailOutbox } from "@/features/email/service";
 import { paymentsProvider, syncAccount } from "@/features/payments/service";
 
 /**
@@ -25,6 +27,8 @@ export async function POST(req: Request) {
       const intent = typeof o.payment_intent === "string" ? o.payment_intent : (o.payment_intent?.id ?? "");
       const { error } = await admin.rpc("mark_payment_paid", { p_session: o.id, p_intent: intent });
       if (error && error.code !== "P0002") throw new Error(error.code);
+      // Paying may auto-confirm the request; send any queued confirmation email.
+      after(() => processEmailOutbox());
     } else if ((event.type === "checkout.session.expired" || event.type === "checkout.session.async_payment_failed") && o.id) {
       await admin.rpc("mark_payment_failed", { p_session: o.id });
     } else if (event.type === "account.updated" && o.id) {

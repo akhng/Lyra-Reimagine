@@ -38,8 +38,8 @@ export async function reviewRequestAction(slug: string, requestId: string, _prev
     if (!REVIEW_ERRORS[error.message]) logger.warn({ businessId: ctx.business.id, code: error.code }, "request review failed");
     return { error: REVIEW_ERRORS[error.message] ?? "We couldn't save that. Please try again." };
   }
-  // The decline email was queued in the same transaction; send it once the response is on its way.
-  if (v.action === "reject") after(() => processEmailOutbox());
+  // The decline or confirmation email was queued in the same transaction; send it once the response is on its way.
+  after(() => processEmailOutbox());
   revalidatePath(`/b/${slug}/requests`);
   revalidatePath(`/b/${slug}`);
   return { ok: true };

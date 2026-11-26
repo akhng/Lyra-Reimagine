@@ -11,7 +11,7 @@ When a salon declined a booking request, the customer was told only inside the a
 ## Decision
 
 1. **Email for declined requests**, queued in the database in the same transaction as the decline (a trigger on `notifications` writes `email_outbox`). An email can't be lost between "declined" and "send", and the queue retries failures.
-2. **A swappable email provider** (`EmailProvider`). Shipped with `none` (default, nothing sent) and `fake` (tests only, delivers to Mailpit). The real service (Resend, Postmark or similar) is chosen later; adding it is one provider file, its API key, and `EMAIL_FROM` on a verified domain.
+2. **A swappable email provider** (`EmailProvider`): `none` (default, nothing sent), `resend` (chosen by the product owner; called over its REST API with no new dependency) and `fake` (tests only, delivers to Mailpit). Changing service later is one provider file.
 3. **Emails are skipped when more than a day old**, so switching a provider on later doesn't send a backlog of stale news.
 4. **Live notifications via Supabase Realtime** on `notifications` (RLS applies), refreshing the server-rendered page. This is the pattern already used for private messages (ADR 0005).
 5. **Unread "declined" notices on the customer home** (`/me`) until opened or dismissed.

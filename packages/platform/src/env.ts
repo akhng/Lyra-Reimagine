@@ -50,9 +50,11 @@ export const serverSchema = clientSchema.extend({
   /**
    * Customer emails (declined requests). "none" ⇒ nothing is sent and emails wait in the outbox
    * for up to a day. "fake" delivers to the local Mailpit for automated tests and is refused in
-   * production. A real provider (Resend, Postmark…) is added as another value with its key.
+   * production. "resend" sends through Resend with RESEND_API_KEY and needs EMAIL_FROM on a
+   * domain verified in Resend.
    */
-  EMAIL_PROVIDER: z.enum(["none", "fake"]).default("none"),
+  EMAIL_PROVIDER: z.enum(["none", "fake", "resend"]).default("none"),
+  RESEND_API_KEY: optional,
   /** Must be an address on a domain verified with the real provider; the default is only for tests. */
   EMAIL_FROM: cleaned.default("Lyra Pet <noreply@lyrapet.test>"),
   /** Mailpit's API for the fake provider (local Supabase stack). */

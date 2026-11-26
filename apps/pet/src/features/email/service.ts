@@ -3,6 +3,7 @@ import { serverEnv } from "@lyra/platform/env";
 import { logger } from "@lyra/platform/logger";
 import { createSupabaseAdminClient } from "@lyra/platform/supabase/admin";
 import { fakeEmailProvider } from "./fake";
+import { resendProvider } from "./resend";
 import type { EmailProvider } from "./provider";
 import { renderEmail, type EmailData } from "./templates";
 
@@ -13,6 +14,14 @@ export function emailProvider(): EmailProvider | null {
     // Test-only stand-in; never in production.
     if (process.env.VERCEL_ENV === "production") return null;
     return fakeEmailProvider(env.EMAIL_FAKE_URL);
+  }
+  if (env.EMAIL_PROVIDER === "resend") {
+    // Misconfigured: send nothing (emails wait, then lapse after a day) rather than fail the decline.
+    if (!env.RESEND_API_KEY || env.EMAIL_FROM.includes(".test>")) {
+      logger.warn({ hasKey: !!env.RESEND_API_KEY }, "resend needs RESEND_API_KEY and EMAIL_FROM on a verified domain");
+      return null;
+    }
+    return resendProvider(env.RESEND_API_KEY);
   }
   return null;
 }
@@ -48,7 +57,7 @@ export async function processEmailOutbox(limit = 20): Promise<number> {
         await admin.from("email_outbox").update({ status: "skipped", last_error: "no template" }).eq("id", row.id);
         continue;
       }
-      await provider.send({ ...email, from: env.EMAIL_FROM, to: u.user.email });
+      await provider.send({ ...email, from: env.EMAIL_FROM, to: u.user.email, idempotencyKey: `email-outbox-${row.id}` });
       await admin.from("email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), last_error: null }).eq("id", row.id);
       sent++;
     } catch (e) {

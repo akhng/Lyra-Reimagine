@@ -25,7 +25,7 @@ export async function connectStripeAction(slug: string): Promise<{ ok: false; er
       account = await provider.createAccount({ businessName: ctx.business.name, email: user.email });
       await syncAccount(ctx.business.id, account);
     }
-    const base = `${serverEnv().APP_URL}/b/${slug}/settings/payments`;
+    const base = `${serverEnv().APP_URL}/b/${slug}/payments`;
     url = await provider.onboardingLink(account, `${base}?returned=1`, `${base}?refresh=1`);
   } catch (e) {
     logger.warn({ businessId: ctx.business.id, err: e instanceof Error ? e.message.slice(0, 80) : "unknown" }, "stripe connect failed");

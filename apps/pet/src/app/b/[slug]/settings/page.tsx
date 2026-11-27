@@ -44,13 +44,6 @@ export default async function SettingsPage({ params }: { params: Promise<{ slug:
           <Link href={`/b/${slug}/settings/loyalty`} className={buttonVariants({ variant: "secondary" })}>Loyalty &amp; rewards</Link>
         </div>
       </Card>
-      {role === "owner" || role === "manager" ? (
-        <Card aria-labelledby="payments-title">
-          <CardTitle id="payments-title">Payments</CardTitle>
-          <CardDescription>Take payment in full when customers book through Lyra Pet, with monthly statements and tax invoices.</CardDescription>
-          <Link href={`/b/${slug}/settings/payments`} className={`${buttonVariants({ variant: "secondary" })} mt-4`}>Manage payments</Link>
-        </Card>
-      ) : null}
       <Card id="locations" aria-labelledby="locations-title">
         <CardTitle id="locations-title">Locations</CardTitle>
         <CardDescription>Salons, shopfronts or a mobile van. Calendars and reports can be split by location.</CardDescription>

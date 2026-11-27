@@ -99,7 +99,7 @@ Salons connect their own Stripe account (Connect, direct charges). When a listed
   - `payments`: the front desk and the requester can read; no client writes.
   - At most one pending or paid payment per request.
 - State changes only through definer functions. The service role runs them after Stripe confirms; the requester runs `record_checkout`, which sets the amount and fee from the request.
-- Settings → Payments: connect, fee explanation, monthly statement, and a tax invoice for the fees (`PLATFORM_LEGAL_NAME`, `PLATFORM_ABN`).
+- Manage Payments (`/b/<slug>/payments`, in the main menu for owners and managers; the old `/settings/payments` redirects): connect, fee explanation, monthly statement, and a tax invoice for the fees (`PLATFORM_LEGAL_NAME`, `PLATFORM_ABN`).
 
 ## Private messages (ADR 0005)
 

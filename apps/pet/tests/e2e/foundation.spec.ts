@@ -92,6 +92,12 @@ test("a groomer sees settings read-only and anonymous visitors are sent to sign 
     await expect(main.getByLabel("Business name")).toBeDisabled();
     await expect(main.getByRole("button", { name: "Add location" })).toHaveCount(0);
     await expect(main.getByText("Gia Groomer")).toBeVisible();
+    // Payments are for owners and managers: groomers don't get the menu item.
+    const menu = page.getByRole("button", { name: "Open menu" });
+    if (await menu.isVisible()) await menu.click();
+    await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Settings", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Manage Payments" })).toHaveCount(0);
+    if (await page.getByRole("button", { name: "Close menu" }).isVisible()) await page.getByRole("button", { name: "Close menu" }).click();
     await noSeriousViolations(page);
   } finally {
     await admin().auth.admin.deleteUser(id);

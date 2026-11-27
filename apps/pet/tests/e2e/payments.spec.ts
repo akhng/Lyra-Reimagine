@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, noSeriousViolations, signIn, uniqueEmail, uniqueSlug } from "./helpers";
+import { admin, navigate, noSeriousViolations, signIn, uniqueEmail, uniqueSlug } from "./helpers";
 
 /**
  * Payments (ADR 0004) with the test-only payment provider: the owner connects
@@ -31,10 +31,15 @@ test("a pet owner pays at booking; declining refunds them", async ({ page }, inf
     await db.from("marketplace_profiles").upsert({ business_id: biz, listed: true, headline: "Paid at booking" });
     const pet = (await db.from("owner_pets").insert({ user_id: customer, name: "Biscuit", species: "dog", size: "small" }).select("id").single()).data?.id ?? "";
 
-    // The owner connects Stripe (the test provider returns straight from onboarding).
+    // The owner opens Manage Payments from the main menu (it's no longer under Settings)
+    // and connects Stripe (the test provider returns straight from onboarding).
     await signIn(page, ownerEmail, PASSWORD);
-    await page.goto(`/b/${slug}/settings/payments`);
+    await page.goto(`/b/${slug}/settings`);
     const main = page.getByRole("main");
+    await expect(main.getByRole("heading", { name: "Payments" })).toHaveCount(0);
+    await navigate(page, "Manage Payments");
+    await expect(page).toHaveURL(new RegExp(`/b/${slug}/payments$`));
+    await expect(main.getByRole("heading", { name: "Manage Payments", level: 1 })).toBeVisible();
     await expect(main.getByText("Not connected")).toBeVisible();
     await expect(main.getByText(/A service fee of 5% \(GST included\)/)).toBeVisible();
     await noSeriousViolations(page);
@@ -65,7 +70,7 @@ test("a pet owner pays at booking; declining refunds them", async ({ page }, inf
 
     // The salon sees it paid and the fee on this month's statement.
     await signIn(page, ownerEmail, PASSWORD);
-    await page.goto(`/b/${slug}/settings/payments`);
+    await page.goto(`/b/${slug}/payments`);
     await expect(main.getByText("$4.75").first()).toBeVisible();
     await expect(main.getByText("Includes GST of")).toBeVisible();
     await expect(main.getByText("$0.43")).toBeVisible();
@@ -96,8 +101,11 @@ test("a Stripe account that finished onboarding elsewhere shows as ready on the 
     expect(error).toBeNull();
 
     await signIn(page, ownerEmail, PASSWORD);
+    // The old Settings address (used by onboarding links issued before the move) redirects, keeping the query.
+    await page.goto(`/b/${slug}/settings/payments?returned=1`);
+    await expect(page).toHaveURL(new RegExp(`/b/${slug}/payments\\?returned=1$`));
     // A plain visit, without ?returned=1, asks the provider again.
-    await page.goto(`/b/${slug}/settings/payments`);
+    await page.goto(`/b/${slug}/payments`);
     const main = page.getByRole("main");
     await expect(main.getByText("Taking payments")).toBeVisible();
     await expect(main.getByRole("button", { name: /Finish setting up Stripe|Check your Stripe details/ })).toHaveCount(0);

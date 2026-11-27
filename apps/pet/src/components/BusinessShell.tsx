@@ -31,9 +31,23 @@ export function BusinessShell({ slug, businessName, role, bell, unreadMessages =
     { href: `/b/${slug}/waitlist`, label: "Waitlist", icon: ListTodo },
     { href: `/b/${slug}/reviews`, label: "Reviews", icon: Star },
     ...(role === "owner" || role === "manager" ? [{ href: `/b/${slug}/payments`, label: "Manage Payments", icon: CreditCard }] : []),
-    { href: `/b/${slug}/settings`, label: "Settings", icon: Settings },
   ];
   const active = (i: Item) => (i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(`${i.href}/`));
+  // Settings sits beside the bell (not in the menu list), so the menu stays short and Sign out is always in view.
+  const settingsHref = `/b/${slug}/settings`;
+  const onSettings = pathname === settingsHref || pathname.startsWith(`${settingsHref}/`);
+  const settings = (
+    <Link
+      href={settingsHref}
+      onClick={() => setOpen(false)}
+      aria-label="Settings"
+      title="Settings"
+      aria-current={onSettings ? "page" : undefined}
+      className={cn("grid size-11 shrink-0 place-items-center rounded-full text-white transition-colors", onSettings ? "bg-primary shadow-[0_8px_20px_-10px_var(--primary)]" : "hover:bg-white/10")}
+    >
+      <Settings className="size-5" aria-hidden />
+    </Link>
+  );
   const nav = (
     <nav aria-label="Main" className="flex flex-col gap-1">
       {items.map((i) => (
@@ -82,7 +96,10 @@ export function BusinessShell({ slug, businessName, role, bell, unreadMessages =
       <aside className="sticky top-0 hidden h-dvh w-68 shrink-0 flex-col gap-6 rounded-r-[32px] bg-ink p-5 lg:flex">
         <div className="flex items-center justify-between gap-2">
           <Brand href={`/b/${slug}`} inverted />
-          {bell}
+          <div className="flex items-center gap-1">
+            {bell}
+            {settings}
+          </div>
         </div>
         {/* The menu scrolls inside the sidebar if it can't fit, so the footer never spills onto the page. */}
         <div className="-mx-2 min-h-0 flex-1 overflow-y-auto px-2">{nav}</div>
@@ -96,6 +113,7 @@ export function BusinessShell({ slug, businessName, role, bell, unreadMessages =
         <Brand href={`/b/${slug}`} inverted />
         <div className="flex items-center gap-1">
           {bell}
+          {settings}
           <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-controls="mobile-nav" className="grid size-11 place-items-center text-white" aria-label={open ? "Close menu" : "Open menu"}>
             {open ? <X className="size-6" aria-hidden /> : <Menu className="size-6" aria-hidden />}
           </button>

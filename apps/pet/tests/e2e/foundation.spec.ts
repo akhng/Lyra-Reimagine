@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { admin, emailLink, navigate, noSeriousViolations, signIn, uniqueEmail, uniqueSlug } from "./helpers";
+import { admin, emailLink, noSeriousViolations, signIn, uniqueEmail, uniqueSlug } from "./helpers";
 
 /** Phase 1 (brief Tests 1, 2 partial, 15, 16 partial): register → confirm → create business → settings; isolation and roles. */
 
@@ -35,8 +35,13 @@ test("a new groomer signs up, confirms their email, creates a business and fills
     await expect(main.getByRole("link", { name: /Add your ABN/ })).toBeVisible();
     await noSeriousViolations(page);
 
-    await navigate(page, "Settings");
+    // Settings is the gear beside the bell, not a menu item.
+    await page.getByRole("link", { name: "Settings", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/b/${slug}/settings$`));
+    await expect(page.getByRole("link", { name: "Settings", exact: true })).toHaveAttribute("aria-current", "page");
+    await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Settings" })).toHaveCount(0);
+    // On desktop the whole sidebar fits: Sign out is on screen without scrolling.
+    if (info.project.name === "desktop") await expect(page.getByRole("button", { name: "Sign out" })).toBeInViewport();
     await main.getByLabel("ABN").fill("51 824 753 556");
     await main.getByLabel("Registered for GST").check();
     await main.getByRole("button", { name: "Save details" }).click();
@@ -95,7 +100,7 @@ test("a groomer sees settings read-only and anonymous visitors are sent to sign 
     // Payments are for owners and managers: groomers don't get the menu item.
     const menu = page.getByRole("button", { name: "Open menu" });
     if (await menu.isVisible()) await menu.click();
-    await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Settings", exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Dashboard", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "Manage Payments" })).toHaveCount(0);
     if (await page.getByRole("button", { name: "Close menu" }).isVisible()) await page.getByRole("button", { name: "Close menu" }).click();
     await noSeriousViolations(page);

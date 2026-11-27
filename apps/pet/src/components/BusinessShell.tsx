@@ -1,5 +1,5 @@
 "use client";
-import { CalendarDays, ClipboardList, Heart, Inbox, LayoutDashboard, MessageCircle, Star, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
+import { CalendarDays, ClipboardList, CreditCard, Heart, Inbox, LayoutDashboard, MessageCircle, Star, ListTodo, LogOut, Menu, PawPrint, Scissors, Settings, Tags, Users, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
@@ -10,7 +10,8 @@ import { Mascot } from "./mascots/Mascot";
 
 /**
  * Staff navigation for one business. Sections appear as each phase ships
- * (payments and team next); nothing links to an unfinished page.
+ * (team next); nothing links to an unfinished page. Manage Payments is for
+ * owners and managers only, matching who can see the page.
  */
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
 
@@ -29,6 +30,7 @@ export function BusinessShell({ slug, businessName, role, bell, unreadMessages =
     { href: `/b/${slug}/services`, label: "Services & pricing", icon: Tags },
     { href: `/b/${slug}/waitlist`, label: "Waitlist", icon: ListTodo },
     { href: `/b/${slug}/reviews`, label: "Reviews", icon: Star },
+    ...(role === "owner" || role === "manager" ? [{ href: `/b/${slug}/payments`, label: "Manage Payments", icon: CreditCard }] : []),
     { href: `/b/${slug}/settings`, label: "Settings", icon: Settings },
   ];
   const active = (i: Item) => (i.exact ? pathname === i.href : pathname === i.href || pathname.startsWith(`${i.href}/`));
@@ -82,8 +84,10 @@ export function BusinessShell({ slug, businessName, role, bell, unreadMessages =
           <Brand href={`/b/${slug}`} inverted />
           {bell}
         </div>
-        <div className="flex-1">{nav}</div>
-        <div aria-hidden className="relative -mb-2 flex justify-center">
+        {/* The menu scrolls inside the sidebar if it can't fit, so the footer never spills onto the page. */}
+        <div className="-mx-2 min-h-0 flex-1 overflow-y-auto px-2">{nav}</div>
+        {/* Decoration only: dropped on shorter screens (e.g. 900px laptops) to leave room for the menu. */}
+        <div aria-hidden className="relative -mb-2 flex justify-center [@media(max-height:959px)]:hidden">
           <Mascot name="mochi" mood="sleepy" pose="peek" className="w-24 animate-bob" />
         </div>
         {footer}

@@ -18,7 +18,7 @@ Lyra Pet is free for salons. The business earns money from bookings that custome
 6. **Only Stripe-confirmed facts change payment state.** Payment rows have no client write grants. Service-role functions (`mark_payment_paid`, `mark_payment_refunded`, `mark_payment_failed`, `sync_payment_account`) are called after a signature-verified webhook, or after the server itself asks Stripe about the session.
    - If a superseded checkout is also paid, the duplicate is refunded.
    - If payment arrives after the draft lapsed, it is refunded.
-7. **Statements and tax invoices.** Settings → Payments shows the month's paid bookings, the amount customers paid, fees and refunds. It also shows a tax invoice from the platform's legal entity (`PLATFORM_LEGAL_NAME`, `PLATFORM_ABN`) for the fees, with GST at one eleventh. The invoice is hidden until those details are configured.
+7. **Statements and tax invoices.** Manage Payments (originally Settings → Payments; moved to the main menu on 2026-11-27) shows the month's paid bookings, the amount customers paid, fees and refunds. It also shows a tax invoice from the platform's legal entity (`PLATFORM_LEGAL_NAME`, `PLATFORM_ABN`) for the fees, with GST at one eleventh. The invoice is hidden until those details are configured.
 8. **Test-only provider.** `PAYMENTS_PROVIDER=fake` swaps Stripe for an in-memory stand-in with a local checkout page (`/pay/test/<session>`), so e2e tests cover the flow. It is refused when `VERCEL_ENV=production`.
 
 ## Consequences

@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "@lyra/ui";
 import { signOutAction } from "@/features/auth/actions";
 import { Brand } from "../Brand";
+import { LegalLinks } from "../legal/LegalLinks";
 
 /** Pet owner portal shell (ADR 0003): a light top bar on larger screens, a thumb-friendly tab bar on phones. */
 type Item = { href: string; label: string; icon: LucideIcon; exact?: boolean };
@@ -57,6 +58,7 @@ export function CustomerShell({ children, staff, bell, unreadMessages = 0 }: { c
       </header>
       <main id="main" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none sm:py-8">
         {children}
+        <LegalLinks className="mt-12 border-t border-border pt-4" />
       </main>
       <nav aria-label="Main" className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-5 rounded-full border border-border bg-surface/95 p-1.5 shadow-[var(--shadow-lift)] backdrop-blur sm:hidden">
         {ITEMS.map((i) => (

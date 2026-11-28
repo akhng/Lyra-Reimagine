@@ -3,6 +3,7 @@ import Link from "next/link";
 import { buttonVariants } from "@lyra/ui";
 import { getSessionUser } from "@lyra/platform/auth/session";
 import { Brand } from "@/components/Brand";
+import { LegalLinks } from "@/components/legal/LegalLinks";
 import { Mascot, type MascotName } from "@/components/mascots/Mascot";
 
 const FEATURES: Array<{ icon: typeof CalendarHeart; title: string; body: string; tint: string; mascot: MascotName }> = [
@@ -101,7 +102,10 @@ export default async function Landing() {
           </div>
         </section>
       </main>
-      <footer className="mx-auto max-w-6xl px-6 py-8 text-sm text-muted">Lyra Pet is part of Lyra Reimagine. Coco, Mochi, Biscuit and Luna are original Lyra Pet characters.</footer>
+      <footer className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-muted">
+        <p>Lyra Pet is part of Lyra Reimagine. Coco, Mochi, Biscuit and Luna are original Lyra Pet characters.</p>
+        <LegalLinks />
+      </footer>
     </div>
   );
 }

@@ -59,9 +59,13 @@ export const serverSchema = clientSchema.extend({
   EMAIL_FROM: cleaned.default("Lyra Pet <noreply@lyrapet.test>"),
   /** Mailpit's API for the fake provider (local Supabase stack). */
   EMAIL_FAKE_URL: cleaned.pipe(z.url()).default("http://127.0.0.1:55324"),
-  /** Shown on service fee tax invoices. */
+  /** Shown on service fee tax invoices, and as the operator in the terms and privacy policy. */
   PLATFORM_LEGAL_NAME: optional,
   PLATFORM_ABN: optional,
+  /** Published in the privacy policy and terms for privacy requests, complaints and questions. */
+  PLATFORM_CONTACT_EMAIL: optional,
+  /** The Australian state or territory whose laws govern the terms. */
+  PLATFORM_GOVERNING_STATE: cleaned.default("Victoria"),
 });
 
 export type ClientEnv = z.infer<typeof clientSchema>;

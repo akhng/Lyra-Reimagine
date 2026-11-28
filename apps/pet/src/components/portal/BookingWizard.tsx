@@ -8,6 +8,7 @@ import type { Listing, OwnerPet } from "@/features/portal/queries";
 import { PART_LABEL, PARTS } from "@/features/portal/schemas";
 import { addDays, fromLocal, isoWeekday, localToday, minutesToHhmm } from "@/features/scheduling/time";
 import { formatAud } from "@/features/services/pricing";
+import { AgreeNotice } from "../legal/LegalLinks";
 
 /**
  * Steps 3–7 of the booking request (ADR 0003): services, a preferred time or
@@ -213,6 +214,7 @@ export function BookingWizard({ pet, listing, payOnline }: { pet: OwnerPet; list
         )}
         {chosen.length ? <span className="text-sm font-semibold text-ink tabular">{from ? "from " : ""}{formatAud(total)} · {minutes} min</span> : null}
       </div>
+      {step === 3 ? <AgreeNotice action={payOnline ? "paying and sending this request" : "sending this request"} /> : null}
     </div>
   );
 }

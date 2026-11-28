@@ -19,7 +19,7 @@ export default defineConfig({
     url: `http://localhost:${PORT}/login`,
     reuseExistingServer: !process.env.CI,
     // The test-only payment and email providers and platform details let e2e cover paying at booking without Stripe, and emails via Mailpit.
-    env: { APP_URL: `http://localhost:${PORT}`, PAYMENTS_PROVIDER: "fake", EMAIL_PROVIDER: "fake", PLATFORM_LEGAL_NAME: "Lyra Pet Test Pty Ltd", PLATFORM_ABN: "00 000 000 000" },
+    env: { APP_URL: `http://localhost:${PORT}`, PAYMENTS_PROVIDER: "fake", EMAIL_PROVIDER: "fake", PLATFORM_LEGAL_NAME: "Lyra Pet Test Pty Ltd", PLATFORM_ABN: "00 000 000 000", PLATFORM_CONTACT_EMAIL: "privacy@lyrapet.test" },
     timeout: 240_000,
   },
 });

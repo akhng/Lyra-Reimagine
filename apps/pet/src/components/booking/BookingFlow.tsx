@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button, FormField, Input, Select, Textarea, cn } from "@lyra/ui";
 import { bookOnlineAction } from "@/features/booking/actions";
@@ -108,7 +109,11 @@ export function BookingFlow({ ctx, nowMs }: { ctx: OnlineContext; nowMs: number 
         <p className="text-sm text-muted">You can cancel or change online up to {ctx.policy.cancellationHours} hours before your appointment.</p>
         <label className="flex min-h-11 items-start gap-3 text-sm">
           <input type="checkbox" className="mt-0.5 size-5 accent-[var(--primary)]" checked={d.agree} onChange={(e) => setD({ ...d, agree: e.target.checked })} aria-invalid={err("agree") ? true : undefined} />
-          <span>I agree to the booking policy and to {ctx.business.name} using my details to manage this booking.</span>
+          <span>
+            I agree to the booking policy, to {ctx.business.name} using my details to manage this booking, and to Lyra Pet&apos;s{" "}
+            <Link href="/terms" className="font-semibold text-primary-text underline underline-offset-2">Customer Terms</Link> and{" "}
+            <Link href="/privacy" className="font-semibold text-primary-text underline underline-offset-2">Privacy Policy</Link>.
+          </span>
         </label>
         {err("agree") ? <p className="text-xs font-medium text-danger">{err("agree")}</p> : null}
         <label className="flex min-h-11 items-start gap-3 text-sm">

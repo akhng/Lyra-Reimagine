@@ -4,6 +4,7 @@ import { Button, Card, FormField, Input, Select } from "@lyra/ui";
 import { slugify } from "@lyra/platform/tenancy/slug";
 import { createBusinessAction } from "@/features/business/actions";
 import { AU_TIMEZONES } from "@/features/business/schemas";
+import { AgreeNotice } from "./legal/LegalLinks";
 
 /** Business registration: name, booking link, time zone and first location. Creates the tenant atomically. */
 export function OnboardingForm() {
@@ -58,6 +59,7 @@ export function OnboardingForm() {
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Setting up…" : "Create business"}
         </Button>
+        <AgreeNotice action="creating a business" business />
       </form>
     </Card>
   );

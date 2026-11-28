@@ -1,4 +1,5 @@
 import { Brand } from "@/components/Brand";
+import { LegalLinks } from "@/components/legal/LegalLinks";
 import { Mascot } from "@/components/mascots/Mascot";
 
 /** Sign-in and sign-up: a welcoming illustrated panel with Coco waving hello (ADR 0003). */
@@ -21,6 +22,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <main id="main" className="flex flex-1 flex-col items-center justify-start px-4 pb-16 sm:justify-center">
           <Mascot name="coco" mood="excited" pose="wave" className="mb-2 w-28 lg:hidden" />
           <div className="w-full max-w-md">{children}</div>
+          <LegalLinks className="mt-8 justify-center" />
         </main>
       </div>
     </div>

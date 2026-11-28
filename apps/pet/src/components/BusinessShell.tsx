@@ -6,6 +6,7 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@lyra/ui";
 import { signOutAction } from "@/features/auth/actions";
 import { Brand } from "./Brand";
+import { LegalLinks } from "./legal/LegalLinks";
 import { Mascot } from "./mascots/Mascot";
 
 /**
@@ -86,6 +87,7 @@ export function BusinessShell({ slug, businessName, role, bell, unreadMessages =
           </button>
         </form>
       </div>
+      <LegalLinks inverted className="mt-3" />
     </div>
   );
   return (

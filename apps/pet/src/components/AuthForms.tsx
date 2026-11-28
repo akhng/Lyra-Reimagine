@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Button, Card, FormField, Input } from "@lyra/ui";
 import { signInAction, signUpAction, type AuthState } from "@/features/auth/actions";
+import { AgreeNotice } from "./legal/LegalLinks";
 
 function FormError({ state }: { state: AuthState }) {
   return state?.error ? (
@@ -45,6 +46,7 @@ export function SignUpForm() {
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
+        <AgreeNotice action="creating an account" />
       </form>
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
